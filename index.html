@@ -3,12 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小妖健管 - 亞健康自我檢測問卷 V1.0.1</title>
-    <!-- Tailwind CSS CDN -->
+    <title>小妖健管 - 亞健康自我檢測問卷 V1.0.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- FontAwesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f4f7f6; color: #2d3748; }
@@ -20,7 +17,7 @@
 
     <div class="w-full max-w-5xl bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200 mt-2">
         
-        <!-- 頁首 Header -->
+        <!-- 頁首 -->
         <header class="bg-gradient-to-r from-emerald-700 to-teal-800 text-white p-6 relative">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
@@ -31,48 +28,48 @@
                     <p class="text-emerald-100 text-sm mt-1">自我檢視 72 項身體徵兆，讓小妖為您找出缺乏的關鍵營養素</p>
                 </div>
                 <div class="bg-emerald-900/60 backdrop-blur-sm px-3 py-1 rounded text-xs text-emerald-200 font-mono">
-                    版本：V1.0.1 (完整72項版)
+                    版本：V1.0.3
                 </div>
             </div>
         </header>
 
-        <!-- 主要互動區塊 -->
+        <!-- 主要內容 -->
         <main class="p-4 sm:p-8 space-y-6">
 
-            <!-- 身份識別鎖定提示 -->
+            <!-- 帳號綁定顯示 -->
             <div id="userInfoBar" class="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2.5 rounded-xl text-xs flex items-center justify-between">
                 <span><i class="fa-solid fa-user-check mr-1.5 text-amber-600"></i> 檢測學員帳號綁定中：<strong id="displayLineId" class="font-mono text-emerald-700">載入中...</strong></span>
                 <span class="text-amber-600 font-bold">小妖專屬照護</span>
             </div>
 
-            <!-- 控制列：搜尋與統計 -->
+            <!-- 搜尋列 -->
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-100 p-4 rounded-xl border border-slate-200">
                 <div class="relative w-full sm:w-72">
                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="searchInput" placeholder="搜尋症狀（如：疲倦、胃酸）..." class="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <input type="text" id="searchInput" placeholder="搜尋症狀（如：疲倦、頭痛）..." class="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
-                <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                <div class="flex items-center gap-4">
                     <span class="text-sm font-medium text-slate-600">已選擇：<strong id="selectedCount" class="text-emerald-600 text-lg">0</strong> 項症狀</span>
                     <button id="resetBtn" class="px-3 py-1.5 text-xs text-slate-500 hover:text-red-600 border border-slate-300 hover:border-red-300 rounded-md transition-all">
-                        <i class="fa-solid fa-rotate-right mr-1"></i>重置清單
+                        <i class="fa-solid fa-rotate-right mr-1"></i>重置
                     </button>
                 </div>
             </div>
 
-            <!-- 頁籤 Tabs -->
+            <!-- 分類頁籤 -->
             <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-2" id="categoryTabs"></div>
 
-            <!-- 症狀勾選清單網格 -->
+            <!-- 症狀選擇網格 -->
             <div id="symptomsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-h-[300px]"></div>
 
-            <!-- 提交按鈕 -->
+            <!-- 儲存按鈕 -->
             <div class="pt-4 flex justify-center">
                 <button id="analyzeBtn" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all text-base flex items-center gap-2">
                     <i class="fa-solid fa-paper-plane"></i> 完成檢測並儲存至小妖健康檔案
                 </button>
             </div>
 
-            <!-- 📊 統計報表區塊 (預設隱藏) -->
+            <!-- 報表區塊 -->
             <section id="reportSection" class="hidden space-y-6 pt-6 border-t-2 border-slate-200 mt-8">
                 <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-center">
                     <i class="fa-solid fa-circle-check text-emerald-600 text-3xl mb-2"></i>
@@ -88,14 +85,12 @@
 
         </main>
         
-        <!-- 頁尾 Footer -->
         <footer class="bg-slate-100 border-t border-slate-200 p-4 text-center text-xs text-slate-500">
-            <p>小妖健管系統 V1.0.1 | 本結果僅供健康管理與膳食補充參考，如有嚴重不適請諮詢專業醫師。</p>
+            <p>小妖健管系統 V1.0.3 | 本結果僅供健康管理與膳食補充參考，如有嚴重不適請諮詢專業醫師。</p>
         </footer>
     </div>
 
     <script>
-        // 📊 完整 72 項亞健康情況與營養素對照資料庫 (正式版)
         const dbData = [
           {"id": 1, "category": "頭部", "symptom": "眼睛疲勞", "nutrients": ["A", "B", "E", "鈣/鎂", "晶"]},
           {"id": 2, "category": "頭部", "symptom": "眼睛乾澀", "nutrients": ["A", "魚", "晶"]},
@@ -171,7 +166,6 @@
           {"id": 72, "category": "精神感官", "symptom": "壓力大.熬夜", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "魚", "蒜", "靈", "茶"]}
         ];
 
-        // 營養素代號簡稱字典
         const nutrientNameMap = {
             "P": "優質蛋白質", "DX": "綜合營養片", "A": "維生素A", "B": "維生素B群", "C": "維生素C", 
             "E": "維生素E", "鈣/鎂": "鈣/鎂礦物質", "鐵": "鐵質", "鋅": "鋅", "魚": "深海魚油", 
@@ -181,7 +175,6 @@
             "CLA": "共軛亞麻油酸", "水": "多喝水", "鉻": "鉻"
         };
 
-        // 解析 URL 中的 LineID
         const urlParams = new URLSearchParams(window.location.search);
         const lineId = urlParams.get('prefill_LineID') || urlParams.get('LineID') || '未綁定LINE帳號';
         document.getElementById('displayLineId').innerText = lineId;
@@ -266,6 +259,15 @@
         async function submitAndAnalyze() {
             if (selectedSymptomIds.size === 0) { alert("請至少勾選一項症狀喔！"); return; }
 
+            // 🔥 關鍵防錯：檢查是否有人忘記替換 YOUR_GAS_DEPLOYMENT_ID
+            // 💡 請將下方的網址替換為您 GAS 部署獲得的正式 URL
+            const gasWebhookUrl = "https://script.google.com/macros/s/AKfycbxYOUR_ACTUAL_DEPLOYMENT_ID/exec";
+
+            if (gasWebhookUrl.includes("YOUR_GAS_DEPLOYMENT_ID") || gasWebhookUrl.includes("YOUR_ACTUAL_DEPLOYMENT_ID")) {
+                alert("⚠️ 系統提示：請開啟程式碼第 235 行，將 gasWebhookUrl 替換為您 GAS 部署的真實網址！");
+                return;
+            }
+
             const counts = {};
             const selectedSymptomsList = [];
             selectedSymptomIds.forEach(id => {
@@ -283,24 +285,23 @@
             document.getElementById("reportSection").classList.remove("hidden");
             document.getElementById("reportSection").scrollIntoView({ behavior: 'smooth' });
 
-            // 💡 填寫您的 GAS Web App API URL
-            const gasWebhookUrl = "https://script.google.com/macros/s/YOUR_GAS_DEPLOYMENT_ID/exec"; 
-            
+            const payloadData = {
+                action: "save_subhealth_survey",
+                LineID: lineId,
+                symptomCount: selectedSymptomIds.size,
+                symptomsDetail: selectedSymptomsList.join(", "),
+                top3Nutrients: top3Names
+            };
+
             try {
                 await fetch(gasWebhookUrl, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: "save_subhealth_survey",
-                        LineID: lineId,
-                        symptomCount: selectedSymptomIds.size,
-                        symptomsDetail: selectedSymptomsList.join(", "),
-                        top3Nutrients: top3Names
-                    })
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payloadData)
                 });
+                console.log("已成功送出問卷數據！");
             } catch (e) {
-                console.error("提交至 Lark 出錯:", e);
+                console.error("提交至 GAS 出錯:", e);
             }
         }
 
