@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小妖健管 - 亞健康自我檢測問卷 V1.0.1</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f4f7f6; color: #2d3748; }
+        .tab-btn.active { background-color: #2f855a; color: white; border-color: #2f855a; }
+        .checkbox-card.checked { border-color: #38a169; background-color: #f0fff4; box-shadow: 0 4px 6px -1px rgba(56, 161, 105, 0.2); }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col justify-start items-center p-2 sm:p-6">
+
+    <div class="w-full max-w-5xl bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200 mt-2">
+        
+        <!-- 頁首 Header -->
+        <header class="bg-gradient-to-r from-emerald-700 to-teal-800 text-white p-6 relative">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-leaf text-3xl text-emerald-300"></i>
+                        <h1 class="text-2xl sm:text-3xl font-bold">小妖健管 🌸 亞健康自我檢測</h1>
+                    </div>
+                    <p class="text-emerald-100 text-sm mt-1">自我檢視 72 項身體徵兆，讓小妖為您找出缺乏的關鍵營養素</p>
+                </div>
+                <div class="bg-emerald-900/60 backdrop-blur-sm px-3 py-1 rounded text-xs text-emerald-200 font-mono">
+                    版本：V1.0.1 (完整72項版)
+                </div>
+            </div>
+        </header>
+
+        <!-- 主要互動區塊 -->
+        <main class="p-4 sm:p-8 space-y-6">
+
+            <!-- 身份識別鎖定提示 -->
+            <div id="userInfoBar" class="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2.5 rounded-xl text-xs flex items-center justify-between">
+                <span><i class="fa-solid fa-user-check mr-1.5 text-amber-600"></i> 檢測學員帳號綁定中：<strong id="displayLineId" class="font-mono text-emerald-700">載入中...</strong></span>
+                <span class="text-amber-600 font-bold">小妖專屬照護</span>
+            </div>
+
+            <!-- 控制列：搜尋與統計 -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-100 p-4 rounded-xl border border-slate-200">
+                <div class="relative w-full sm:w-72">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="searchInput" placeholder="搜尋症狀（如：疲倦、胃酸）..." class="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                    <span class="text-sm font-medium text-slate-600">已選擇：<strong id="selectedCount" class="text-emerald-600 text-lg">0</strong> 項症狀</span>
+                    <button id="resetBtn" class="px-3 py-1.5 text-xs text-slate-500 hover:text-red-600 border border-slate-300 hover:border-red-300 rounded-md transition-all">
+                        <i class="fa-solid fa-rotate-right mr-1"></i>重置清單
+                    </button>
+                </div>
+            </div>
+
+            <!-- 頁籤 Tabs -->
+            <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-2" id="categoryTabs"></div>
+
+            <!-- 症狀勾選清單網格 -->
+            <div id="symptomsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-h-[300px]"></div>
+
+            <!-- 提交按鈕 -->
+            <div class="pt-4 flex justify-center">
+                <button id="analyzeBtn" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all text-base flex items-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> 完成檢測並儲存至小妖健康檔案
+                </button>
+            </div>
+
+            <!-- 📊 統計報表區塊 (預設隱藏) -->
+            <section id="reportSection" class="hidden space-y-6 pt-6 border-t-2 border-slate-200 mt-8">
+                <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-center">
+                    <i class="fa-solid fa-circle-check text-emerald-600 text-3xl mb-2"></i>
+                    <h3 class="text-lg font-bold text-emerald-900">檢測報告已成功儲存至您的健康檔案！</h3>
+                    <p class="text-xs text-emerald-700 mt-1">小妖已經收到您的檢測結果，請回到 LINE 聊天室查閱專屬護理建議喔 🌸</p>
+                </div>
+
+                <div>
+                    <h3 class="text-md font-bold text-slate-700 mb-3"><i class="fa-solid fa-triangle-exclamation text-amber-500"></i> 優先補充：缺乏營養素 Top 3</h3>
+                    <div id="top3Container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+                </div>
+            </section>
+
+        </main>
+        
+        <!-- 頁尾 Footer -->
+        <footer class="bg-slate-100 border-t border-slate-200 p-4 text-center text-xs text-slate-500">
+            <p>小妖健管系統 V1.0.1 | 本結果僅供健康管理與膳食補充參考，如有嚴重不適請諮詢專業醫師。</p>
+        </footer>
+    </div>
+
+    <script>
+        // 📊 完整 72 項亞健康情況與營養素對照資料庫 (正式版)
+        const dbData = [
+          {"id": 1, "category": "頭部", "symptom": "眼睛疲勞", "nutrients": ["A", "B", "E", "鈣/鎂", "晶"]},
+          {"id": 2, "category": "頭部", "symptom": "眼睛乾澀", "nutrients": ["A", "魚", "晶"]},
+          {"id": 3, "category": "頭部", "symptom": "眼睛癢", "nutrients": ["A", "B", "魚"]},
+          {"id": 4, "category": "頭部", "symptom": "眼睛充血", "nutrients": ["B", "魚", "晶"]},
+          {"id": 5, "category": "頭部", "symptom": "頭皮屑", "nutrients": ["A", "B", "鈣/鎂"]},
+          {"id": 6, "category": "頭部", "symptom": "眼睛易流淚.畏光", "nutrients": ["A", "魚", "晶"]},
+          {"id": 7, "category": "頭部", "symptom": "易掉髮", "nutrients": ["P", "A", "B", "E", "鈣/鎂", "鐵", "卵"]},
+          {"id": 8, "category": "頭部", "symptom": "白頭髮", "nutrients": ["P", "A", "B", "E", "卵"]},
+          {"id": 9, "category": "頭部", "symptom": "口乾舌燥", "nutrients": ["P", "DX", "A", "B", "C", "鈣/鎂"]},
+          {"id": 10, "category": "頭部", "symptom": "口臭", "nutrients": ["P", "DX", "B", "C", "纖", "蒜", "酵", "菌", "茶"]},
+          {"id": 11, "category": "頭部", "symptom": "口角炎", "nutrients": ["B", "C"]},
+          {"id": 12, "category": "頭部", "symptom": "偏頭痛", "nutrients": ["P", "DX", "B", "C", "E", "鈣/鎂", "魚", "卵", "靈"]},
+          {"id": 13, "category": "頭部", "symptom": "頸部僵硬", "nutrients": ["P", "DX", "C", "魚", "卵", "蒜"]},
+          {"id": 14, "category": "頭部", "symptom": "酒糟鼻", "nutrients": ["B", "C", "魚", "卵"]},
+          {"id": 15, "category": "頭部", "symptom": "過敏性鼻炎", "nutrients": ["P", "A", "B", "C", "E", "蒜", "菌", "魚"]},
+          {"id": 16, "category": "頭部", "symptom": "青春痘", "nutrients": ["P", "DX", "A", "B", "E", "卵", "月", "魚"]},
+          {"id": 17, "category": "頭部", "symptom": "黑斑", "nutrients": ["P", "C", "E", "卵"]},
+          {"id": 18, "category": "頭部", "symptom": "臉泛油光", "nutrients": ["P", "DX", "B", "魚", "卵"]},
+          {"id": 19, "category": "頭部", "symptom": "牙齦流血", "nutrients": ["P", "DX", "C", "鈣/鎂", "Q10"]},
+          {"id": 20, "category": "頭部", "symptom": "重口味", "nutrients": ["P", "DX", "A", "B", "C", "鋅", "魚"]},
+          {"id": 21, "category": "頭部", "symptom": "抽煙", "nutrients": ["P", "DX", "A", "B", "C", "E", "魚", "卵", "蒜", "茶"]},
+          {"id": 22, "category": "頭部", "symptom": "喝酒", "nutrients": ["P", "DX", "A", "B", "C", "鈣/鎂", "魚", "蒜", "酵", "菌", "卵"]},
+          {"id": 23, "category": "頭部", "symptom": "服藥", "nutrients": ["P", "DX", "B", "C", "纖", "卵", "蒜", "菌", "茶"]},
+          {"id": 24, "category": "身體", "symptom": "皮膚無光澤", "nutrients": ["P", "DX", "E", "卵", "Q10"]},
+          {"id": 25, "category": "身體", "symptom": "皮膚粗糙", "nutrients": ["P", "DX", "A", "魚", "卵", "橄"]},
+          {"id": 26, "category": "身體", "symptom": "溼疹", "nutrients": ["P", "DX", "B", "魚", "卵", "橄"]},
+          {"id": 27, "category": "身體", "symptom": "皮膚炎", "nutrients": ["P", "DX", "B", "魚", "卵", "橄"]},
+          {"id": 28, "category": "身體", "symptom": "打嗝", "nutrients": ["B", "鈣/鎂", "酵", "菌"]},
+          {"id": 29, "category": "身體", "symptom": "消化不良", "nutrients": ["P", "DX", "B", "鐵", "卵", "酵", "菌", "橄"]},
+          {"id": 30, "category": "身體", "symptom": "胃口不好", "nutrients": ["P", "DX", "B", "鐵", "酵", "菌", "卵", "橄"]},
+          {"id": 31, "category": "身體", "symptom": "胃酸逆流", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "酵", "纖"]},
+          {"id": 32, "category": "身體", "symptom": "易腹瀉", "nutrients": ["P", "DX", "A", "B", "纖", "魚", "蒜", "菌"]},
+          {"id": 33, "category": "身體", "symptom": "脹氣", "nutrients": ["P", "B", "鈣/鎂", "菌"]},
+          {"id": 34, "category": "身體", "symptom": "水腫", "nutrients": ["P", "DX", "B", "C", "鈣/鎂"]},
+          {"id": 35, "category": "身體", "symptom": "便秘", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "卵", "菌", "纖"]},
+          {"id": 36, "category": "身體", "symptom": "肝炎", "nutrients": ["P", "DX", "B", "C", "卵", "魚", "蒜"]},
+          {"id": 37, "category": "身體", "symptom": "脂肪肝", "nutrients": ["P", "DX", "B", "C", "卵", "魚", "蒜", "茶", "橄"]},
+          {"id": 38, "category": "身體", "symptom": "高膽固醇", "nutrients": ["P", "DX", "B", "C", "E", "魚", "卵", "蒜", "茶", "橄"]},
+          {"id": 39, "category": "身體", "symptom": "高血糖", "nutrients": ["P", "DX", "纖", "鉻", "魚", "茶", "靈", "纖體"]},
+          {"id": 40, "category": "身體", "symptom": "高血壓", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "鎂", "纖", "卵", "魚", "Q10", "茶"]},
+          {"id": 41, "category": "身體", "symptom": "高血脂", "nutrients": ["P", "DX", "B", "C", "纖", "魚", "卵", "蒜", "茶", "橄"]},
+          {"id": 42, "category": "身體", "symptom": "肥胖", "nutrients": ["P", "DX", "B", "卵", "纖", "保", "纖體", "CLA"]},
+          {"id": 43, "category": "身體", "symptom": "尿酸高.痛風", "nutrients": ["P", "DX", "B", "C", "E", "鈣/鎂", "魚", "水"]},
+          {"id": 44, "category": "身體", "symptom": "頻尿", "nutrients": ["P", "B", "C", "鈣/鎂", "蒜", "茶"]},
+          {"id": 45, "category": "身體", "symptom": "尿床", "nutrients": ["P", "B", "C", "鈣/鎂"]},
+          {"id": 46, "category": "身體", "symptom": "缺鐵型貧血", "nutrients": ["P", "B", "C", "葉酸鐵"]},
+          {"id": 47, "category": "身體", "symptom": "地中海型貧血", "nutrients": ["P", "B", "C", "E", "卵"]},
+          {"id": 48, "category": "身體", "symptom": "經痛", "nutrients": ["P", "B", "C", "E", "鈣/鎂", "卵", "月"]},
+          {"id": 49, "category": "身體", "symptom": "經期不順", "nutrients": ["P", "B", "E", "鈣/鎂", "卵", "月"]},
+          {"id": 50, "category": "身體", "symptom": "白帶", "nutrients": ["P", "A", "B", "C", "魚", "蒜", "卵", "菌"]},
+          {"id": 51, "category": "身體", "symptom": "懷孕", "nutrients": ["P", "DX", "A", "B", "C", "E", "鈣/鎂", "葉酸鐵", "魚", "卵"]},
+          {"id": 52, "category": "身體", "symptom": "孕吐", "nutrients": ["P", "DX", "B", "葉酸鐵", "卵", "菌"]},
+          {"id": 53, "category": "身體", "symptom": "不易受孕", "nutrients": ["P", "DX", "A", "E", "葉酸鐵", "魚", "卵"]},
+          {"id": 54, "category": "身體", "symptom": "傷口不易癒合", "nutrients": ["P", "DX", "A", "B", "C", "E", "鈣/鎂", "卵", "魚", "Q10"]},
+          {"id": 55, "category": "身體", "symptom": "胃潰瘍", "nutrients": ["P", "DX", "卵", "酵", "菌"]},
+          {"id": 56, "category": "身體", "symptom": "骨質疏鬆", "nutrients": ["P", "DX", "A", "B", "C", "鈣/鎂", "葡"]},
+          {"id": 57, "category": "身體", "symptom": "更年期", "nutrients": ["P", "DX", "E", "B", "月", "鈣/鎂", "卵", "魚"]},
+          {"id": 58, "category": "身體", "symptom": "感冒", "nutrients": ["P", "DX", "A", "B", "C", "魚", "蒜", "茶"]},
+          {"id": 59, "category": "四肢", "symptom": "手腳冰冷", "nutrients": ["P", "DX", "E", "葉酸鐵", "卵", "Q10", "月"]},
+          {"id": 60, "category": "四肢", "symptom": "指甲變型", "nutrients": ["P", "DX", "A", "C", "鈣/鎂", "鋅"]},
+          {"id": 61, "category": "四肢", "symptom": "退化性關節炎", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "葡", "魚"]},
+          {"id": 62, "category": "四肢", "symptom": "類風濕性關節炎", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "葡", "魚", "卵", "月"]},
+          {"id": 63, "category": "四肢", "symptom": "抽筋", "nutrients": ["B", "C", "鈣/鎂"]},
+          {"id": 64, "category": "四肢", "symptom": "靜脈曲張", "nutrients": ["P", "DX", "E", "魚", "卵"]},
+          {"id": 65, "category": "精神感官", "symptom": "疲倦", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "Q10", "靈"]},
+          {"id": 66, "category": "精神感官", "symptom": "淺眠.不易入睡", "nutrients": ["B", "C", "鈣/鎂", "卵", "魚"]},
+          {"id": 67, "category": "精神感官", "symptom": "夢", "nutrients": ["B", "鈣/鎂", "卵", "魚"]},
+          {"id": 68, "category": "精神感官", "symptom": "容易打瞌睡", "nutrients": ["P", "DX", "B", "魚", "卵", "靈"]},
+          {"id": 69, "category": "精神感官", "symptom": "記憶減退", "nutrients": ["P", "葉酸鐵", "魚", "卵"]},
+          {"id": 70, "category": "精神感官", "symptom": "易生氣.不耐煩", "nutrients": ["P", "B", "C", "鈣/鎂", "魚"]},
+          {"id": 71, "category": "精神感官", "symptom": "鬱悶", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "魚"]},
+          {"id": 72, "category": "精神感官", "symptom": "壓力大.熬夜", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "魚", "蒜", "靈", "茶"]}
+        ];
+
+        // 營養素代號簡稱字典
+        const nutrientNameMap = {
+            "P": "優質蛋白質", "DX": "綜合營養片", "A": "維生素A", "B": "維生素B群", "C": "維生素C", 
+            "E": "維生素E", "鈣/鎂": "鈣/鎂礦物質", "鐵": "鐵質", "鋅": "鋅", "魚": "深海魚油", 
+            "卵": "卵磷脂", "晶": "葉黃素/晶明配方", "纖": "膳食纖維", "蒜": "大蒜精", "酵": "消化酵素", 
+            "菌": "益生菌", "茶": "綠茶多酚", "Q10": "輔酵素Q10", "月": "月見草油", "葉酸鐵": "葉酸鐵", 
+            "靈": "靈芝/芝麻素", "葡": "葡萄糖胺", "橄": "橄欖油", "保": "保纖錠", "纖體": "纖體配方", 
+            "CLA": "共軛亞麻油酸", "水": "多喝水", "鉻": "鉻"
+        };
+
+        // 解析 URL 中的 LineID
+        const urlParams = new URLSearchParams(window.location.search);
+        const lineId = urlParams.get('prefill_LineID') || urlParams.get('LineID') || '未綁定LINE帳號';
+        document.getElementById('displayLineId').innerText = lineId;
+
+        let selectedSymptomIds = new Set();
+        let currentCategory = "全部分類";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initTabs();
+            renderSymptoms();
+            document.getElementById("searchInput").addEventListener("input", renderSymptoms);
+            document.getElementById("resetBtn").onclick = () => {
+                if (selectedSymptomIds.size > 0 && confirm("確定要清空所有已勾選的症狀嗎？")) {
+                    selectedSymptomIds.clear();
+                    document.getElementById("selectedCount").innerText = 0;
+                    renderSymptoms();
+                    document.getElementById("reportSection").classList.add("hidden");
+                }
+            };
+            document.getElementById("analyzeBtn").onclick = submitAndAnalyze;
+        });
+
+        function initTabs() {
+            const categories = ["全部分類", ...new Set(dbData.map(item => item.category))];
+            const tabsContainer = document.getElementById("categoryTabs");
+            tabsContainer.innerHTML = "";
+            categories.forEach(cat => {
+                const btn = document.createElement("button");
+                btn.className = `tab-btn border border-slate-300 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all hover:bg-slate-200 text-slate-700 ${cat === currentCategory ? 'active' : ''}`;
+                btn.innerText = cat;
+                btn.onclick = () => {
+                    currentCategory = cat;
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    renderSymptoms();
+                };
+                tabsContainer.appendChild(btn);
+            });
+        }
+
+        function renderSymptoms() {
+            const grid = document.getElementById("symptomsGrid");
+            const searchKeyword = document.getElementById("searchInput").value.trim().toLowerCase();
+            grid.innerHTML = "";
+
+            const filtered = dbData.filter(item => {
+                const matchCat = currentCategory === "全部分類" || item.category === currentCategory;
+                const matchKey = item.symptom.toLowerCase().includes(searchKeyword);
+                return matchCat && matchKey;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400"><p class="text-sm">查無符合條件的症狀</p></div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const isChecked = selectedSymptomIds.has(item.id);
+                const card = document.createElement("div");
+                card.className = `checkbox-card cursor-pointer border rounded-xl p-3 flex items-center justify-between bg-white hover:border-emerald-300 transition-all ${isChecked ? 'checked' : 'border-slate-200'}`;
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-4 h-4 rounded border ${isChecked ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-slate-50'} flex items-center justify-center text-[10px]">
+                            ${isChecked ? '✓' : ''}
+                        </div>
+                        <div>
+                            <span class="text-[10px] px-1 py-0.2 rounded bg-slate-100 text-slate-500 font-mono mr-1">${item.category}</span>
+                            <span class="text-xs font-medium text-slate-800">${item.symptom}</span>
+                        </div>
+                    </div>
+                `;
+                card.onclick = () => {
+                    if (selectedSymptomIds.has(item.id)) selectedSymptomIds.delete(item.id);
+                    else selectedSymptomIds.add(item.id);
+                    document.getElementById("selectedCount").innerText = selectedSymptomIds.size;
+                    renderSymptoms();
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        async function submitAndAnalyze() {
+            if (selectedSymptomIds.size === 0) { alert("請至少勾選一項症狀喔！"); return; }
+
+            const counts = {};
+            const selectedSymptomsList = [];
+            selectedSymptomIds.forEach(id => {
+                const item = dbData.find(d => d.id === id);
+                if (item) {
+                    selectedSymptomsList.push(item.symptom);
+                    item.nutrients.forEach(n => counts[n] = (counts[n] || 0) + 1);
+                }
+            });
+
+            const sortedNutrients = Object.keys(counts).map(k => ({ name: nutrientNameMap[k] || k, count: counts[k] })).sort((a,b) => b.count - a.count);
+            const top3Names = sortedNutrients.slice(0, 3).map(n => n.name).join(", ");
+
+            renderTop3UI(sortedNutrients.slice(0, 3));
+            document.getElementById("reportSection").classList.remove("hidden");
+            document.getElementById("reportSection").scrollIntoView({ behavior: 'smooth' });
+
+            // 💡 填寫您的 GAS Web App API URL
+            const gasWebhookUrl = "https://script.google.com/macros/s/YOUR_GAS_DEPLOYMENT_ID/exec"; 
+            
+            try {
+                await fetch(gasWebhookUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: "save_subhealth_survey",
+                        LineID: lineId,
+                        symptomCount: selectedSymptomIds.size,
+                        symptomsDetail: selectedSymptomsList.join(", "),
+                        top3Nutrients: top3Names
+                    })
+                });
+            } catch (e) {
+                console.error("提交至 Lark 出錯:", e);
+            }
+        }
+
+        function renderTop3UI(top3) {
+            const container = document.getElementById("top3Container");
+            container.innerHTML = "";
+            top3.forEach((item, idx) => {
+                const card = document.createElement("div");
+                card.className = "bg-amber-50 border border-amber-200 p-4 rounded-xl text-center";
+                card.innerHTML = `
+                    <span class="bg-amber-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">Top ${idx+1}</span>
+                    <h4 class="font-bold text-amber-900 mt-2">${item.name}</h4>
+                    <p class="text-xs text-slate-500 mt-1">關聯症狀：<strong class="text-emerald-700">${item.count}</strong> 項</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
