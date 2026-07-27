@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小妖健管 - 亞健康自我檢測問卷 V1.0.6</title>
+    <title>小妖健管 - 亞健康自我檢測問卷 V1.0.8</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome CDN -->
@@ -30,7 +30,7 @@
                     <p class="text-emerald-100 text-sm mt-1">自我檢視 72 項身體徵兆，讓小妖為您找出缺乏的關鍵營養素</p>
                 </div>
                 <div class="bg-emerald-900/60 backdrop-blur-sm px-3 py-1 rounded text-xs text-emerald-200 font-mono">
-                    版本：<span class="text-amber-300 font-bold">V1.0.6</span>
+                    版本：<span class="text-amber-300 font-bold">V1.0.8</span>
                 </div>
             </div>
         </header>
@@ -102,12 +102,13 @@
         
         <!-- 頁尾 Footer -->
         <footer class="bg-slate-100 border-t border-slate-200 p-4 text-center text-xs text-slate-500">
-            <p>小妖健管系統 V1.0.6 | 本結果僅供健康管理與膳食補充參考，如有嚴重不適請諮詢專業醫師。</p>
+            <p>小妖健管系統 V1.0.8 | 本結果僅供健康管理與膳食補充參考，如有嚴重不適請諮詢專業醫師。</p>
         </footer>
     </div>
 
     <!-- 腳本邏輯 -->
     <script>
+        // 📊 72 項亞健康情況與營養素對照資料庫 (第 42 項已修正："保" 替換為 "超")
         const dbData = [
           {"id": 1, "category": "頭部", "symptom": "眼睛疲勞", "nutrients": ["A", "B", "E", "鈣/鎂", "晶"]},
           {"id": 2, "category": "頭部", "symptom": "眼睛乾澀", "nutrients": ["A", "魚", "晶"]},
@@ -150,7 +151,7 @@
           {"id": 39, "category": "身體", "symptom": "高血糖", "nutrients": ["P", "DX", "纖", "鉻", "魚", "茶", "靈", "纖體"]},
           {"id": 40, "category": "身體", "symptom": "高血壓", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "鎂", "纖", "卵", "魚", "Q10", "茶"]},
           {"id": 41, "category": "身體", "symptom": "高血脂", "nutrients": ["P", "DX", "B", "C", "纖", "魚", "卵", "蒜", "茶", "橄"]},
-          {"id": 42, "category": "身體", "symptom": "肥胖", "nutrients": ["P", "DX", "B", "卵", "纖", "超", "纖體", "CLA"]},
+          {"id": 42, "category": "身體", "symptom": "肥胖", "nutrients": ["P", "DX", "B", "卵", "纖", "超", "纖體", "CLA"]}, // 💡 保 換成 超
           {"id": 43, "category": "身體", "symptom": "尿酸高.痛風", "nutrients": ["P", "DX", "B", "C", "E", "鈣/鎂", "魚", "水"]},
           {"id": 44, "category": "身體", "symptom": "頻尿", "nutrients": ["P", "B", "C", "鈣/鎂", "蒜", "茶"]},
           {"id": 45, "category": "身體", "symptom": "尿床", "nutrients": ["P", "B", "C", "鈣/鎂"]},
@@ -183,14 +184,35 @@
           {"id": 72, "category": "精神感官", "symptom": "壓力大.熬夜", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "魚", "蒜", "靈", "茶"]}
         ];
 
-        
+        // 💡 升級：更新品牌專屬全名對照表
         const nutrientNameMap = {
-            "P": "優質蛋白素", "DX": "DoubleX綜合營養片", "A": "倍欣營養片", "B": "雙效B群能量錠", "C": "強效C營養片", 
-            "E": "歐芹硒E營養片", "鈣/鎂": "加美D鈣錠", "鐵": "葉酸鐵營養片", "鋅": "倍欣營養片", "魚": "三倍強效魚油膠囊", 
-            "卵": "蜂蜜卵磷脂粉", "晶": "晶明+金盞花葉黃素膠囊粒", "纖": "纖維嚼片", "蒜": "薄荷大蒜片", "酵": "綜合消化酵素膠囊", 
-            "菌": "強效複合益生菌", "茶": "綠茶素膠囊", "Q10": "輔酵素Q10膠囊", "月": "月見草琉璃苣膠囊", "葉酸鐵": "葉酸鐵營養片", 
-            "靈": "有機靈芝破壁孢子粉", "葡": "葡萄糖胺膠囊", "橄": "特級冷壓初榨橄欖油", "超": "超纖飲bodykey", "纖體": "纖體配方", 
-            "CLA": "活力纖姿膠囊", "水": "益之源Pro"
+            "P": "優質蛋白素", 
+            "DX": "DoubleX綜合營養片", 
+            "A": "倍欣營養片", 
+            "B": "雙效B群能量錠", 
+            "C": "強效C營養片", 
+            "E": "歐芹硒E營養片", 
+            "鈣/鎂": "加美D鈣錠", 
+            "鐵": "葉酸鐵營養片", 
+            "鋅": "倍欣營養片", 
+            "魚": "三倍強效魚油膠囊", 
+            "卵": "蜂蜜卵磷脂粉", 
+            "晶": "晶明+金盞花葉黃素膠囊粒", 
+            "纖": "纖維嚼片", 
+            "蒜": "薄荷大蒜片", 
+            "酵": "綜合消化酵素膠囊", 
+            "菌": "強效複合益生菌", 
+            "茶": "綠茶素膠囊", 
+            "Q10": "輔酵素Q10膠囊", 
+            "月": "月見草琉璃苣膠囊", 
+            "葉酸鐵": "葉酸鐵營養片", 
+            "靈": "有機靈芝破壁孢子粉", 
+            "葡": "葡萄糖胺膠囊", 
+            "橄": "特級冷壓初榨橄欖油", 
+            "超": "超纖飲bodykey", // 💡 保 換成 超
+            "纖體": "纖體配方", 
+            "CLA": "活力纖姿膠囊", 
+            "水": "益之源Pro"
         };
 
         const gasWebhookUrl = "https://script.google.com/macros/s/AKfycbyZ5ByYzyzwgKp3I2kqbSUZeA-Z4ICsCLrrP9wfGQ1lzPzHFle2pq9iCRv-M9DLlywK/exec";
