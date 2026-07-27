@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小妖健管 - 亞健康自我檢測問卷 V1.0.8</title>
+    <title>小妖健管 - 亞健康自我檢測問卷 V1.0.9</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome CDN -->
@@ -30,7 +30,7 @@
                     <p class="text-emerald-100 text-sm mt-1">自我檢視 72 項身體徵兆，讓小妖為您找出缺乏的關鍵營養素</p>
                 </div>
                 <div class="bg-emerald-900/60 backdrop-blur-sm px-3 py-1 rounded text-xs text-emerald-200 font-mono">
-                    版本：<span class="text-amber-300 font-bold">V1.0.8</span>
+                    版本：<span class="text-amber-300 font-bold">V1.0.9</span>
                 </div>
             </div>
         </header>
@@ -82,18 +82,23 @@
             <section id="reportSection" class="hidden space-y-6 pt-6 border-t-2 border-slate-200 mt-8">
                 <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-center">
                     <i class="fa-solid fa-circle-check text-emerald-600 text-3xl mb-2"></i>
-                    <h3 class="text-lg font-bold text-emerald-900">檢測報告已成功儲存至您的健康檔案！</h3>
+                    <h3 class="text-lg font-bold text-emerald-900">檢測報告已成功同步至 Lark 資料庫與健康檔案！</h3>
                     <p class="text-xs text-emerald-700 mt-1">小妖已經收到您的檢測結果，請回到 LINE 聊天室查閱專屬護理建議喔 🌸</p>
                 </div>
 
-                <div>
-                    <h3 class="text-md font-bold text-slate-700 mb-3"><i class="fa-solid fa-triangle-exclamation text-amber-500"></i> 優先補充：缺乏營養素 Top 3</h3>
+                <!-- 🔥 單獨突出 Top 3 優先補充營養素 -->
+                <div class="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 p-5 rounded-2xl shadow-md">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600 text-xl"></i>
+                        <h3 class="text-base font-bold text-amber-900">🚨 身體警訊！優先補充：缺乏營養素 Top 3</h3>
+                    </div>
+                    <p class="text-xs text-amber-800 mb-4">以下前 3 名是根據您勾選的身體微小徵兆，計算出需求頻率最高的關鍵營養素，建議優先進行調整與補充：</p>
                     <div id="top3Container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
                 </div>
 
                 <!-- 完整需求次數統計 -->
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <h4 class="text-xs font-bold text-slate-600 mb-2">完整營養素需求頻率統計</h4>
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                    <h4 class="text-xs font-bold text-slate-700 mb-3"><i class="fa-solid fa-list-check text-emerald-600 mr-1"></i> 完整營養素需求頻率統計</h4>
                     <div id="fullStatContainer" class="flex flex-wrap gap-2"></div>
                 </div>
             </section>
@@ -102,13 +107,12 @@
         
         <!-- 頁尾 Footer -->
         <footer class="bg-slate-100 border-t border-slate-200 p-4 text-center text-xs text-slate-500">
-            <p>小妖健管系統 V1.0.8 | 本結果僅供健康管理與膳食補充參考，如有嚴重不適請諮詢專業醫師。</p>
+            <p>小妖健管系統 V1.0.9 | 本結果僅供健康管理與膳食補充參考，如有嚴重不適請諮詢專業醫師。</p>
         </footer>
     </div>
 
     <!-- 腳本邏輯 -->
     <script>
-        // 📊 72 項亞健康情況與營養素對照資料庫 (第 42 項已修正："保" 替換為 "超")
         const dbData = [
           {"id": 1, "category": "頭部", "symptom": "眼睛疲勞", "nutrients": ["A", "B", "E", "鈣/鎂", "晶"]},
           {"id": 2, "category": "頭部", "symptom": "眼睛乾澀", "nutrients": ["A", "魚", "晶"]},
@@ -151,7 +155,7 @@
           {"id": 39, "category": "身體", "symptom": "高血糖", "nutrients": ["P", "DX", "纖", "鉻", "魚", "茶", "靈", "纖體"]},
           {"id": 40, "category": "身體", "symptom": "高血壓", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "鎂", "纖", "卵", "魚", "Q10", "茶"]},
           {"id": 41, "category": "身體", "symptom": "高血脂", "nutrients": ["P", "DX", "B", "C", "纖", "魚", "卵", "蒜", "茶", "橄"]},
-          {"id": 42, "category": "身體", "symptom": "肥胖", "nutrients": ["P", "DX", "B", "卵", "纖", "超", "纖體", "CLA"]}, // 💡 保 換成 超
+          {"id": 42, "category": "身體", "symptom": "肥胖", "nutrients": ["P", "DX", "B", "卵", "纖", "超", "纖體", "CLA"]},
           {"id": 43, "category": "身體", "symptom": "尿酸高.痛風", "nutrients": ["P", "DX", "B", "C", "E", "鈣/鎂", "魚", "水"]},
           {"id": 44, "category": "身體", "symptom": "頻尿", "nutrients": ["P", "B", "C", "鈣/鎂", "蒜", "茶"]},
           {"id": 45, "category": "身體", "symptom": "尿床", "nutrients": ["P", "B", "C", "鈣/鎂"]},
@@ -184,35 +188,14 @@
           {"id": 72, "category": "精神感官", "symptom": "壓力大.熬夜", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "魚", "蒜", "靈", "茶"]}
         ];
 
-        // 💡 升級：更新品牌專屬全名對照表
         const nutrientNameMap = {
-            "P": "優質蛋白素", 
-            "DX": "DoubleX綜合營養片", 
-            "A": "倍欣營養片", 
-            "B": "雙效B群能量錠", 
-            "C": "強效C營養片", 
-            "E": "歐芹硒E營養片", 
-            "鈣/鎂": "加美D鈣錠", 
-            "鐵": "葉酸鐵營養片", 
-            "鋅": "倍欣營養片", 
-            "魚": "三倍強效魚油膠囊", 
-            "卵": "蜂蜜卵磷脂粉", 
-            "晶": "晶明+金盞花葉黃素膠囊粒", 
-            "纖": "纖維嚼片", 
-            "蒜": "薄荷大蒜片", 
-            "酵": "綜合消化酵素膠囊", 
-            "菌": "強效複合益生菌", 
-            "茶": "綠茶素膠囊", 
-            "Q10": "輔酵素Q10膠囊", 
-            "月": "月見草琉璃苣膠囊", 
-            "葉酸鐵": "葉酸鐵營養片", 
-            "靈": "有機靈芝破壁孢子粉", 
-            "葡": "葡萄糖胺膠囊", 
-            "橄": "特級冷壓初榨橄欖油", 
-            "超": "超纖飲bodykey", // 💡 保 換成 超
-            "纖體": "纖體配方", 
-            "CLA": "活力纖姿膠囊", 
-            "水": "益之源Pro"
+            "P": "優質蛋白素", "DX": "DoubleX綜合營養片", "A": "倍欣營養片", "B": "雙效B群能量錠", 
+            "C": "強效C營養片", "E": "歐芹硒E營養片", "鈣/鎂": "加美D鈣錠", "鐵": "葉酸鐵營養片", 
+            "鋅": "倍欣營養片", "魚": "三倍強效魚油膠囊", "卵": "蜂蜜卵磷脂粉", "晶": "晶明+金盞花葉黃素膠囊粒", 
+            "纖": "纖維嚼片", "蒜": "薄荷大蒜片", "酵": "綜合消化酵素膠囊", "菌": "強效複合益生菌", 
+            "茶": "綠茶素膠囊", "Q10": "輔酵素Q10膠囊", "月": "月見草琉璃苣膠囊", "葉酸鐵": "葉酸鐵營養片", 
+            "靈": "有機靈芝破壁孢子粉", "葡": "葡萄糖胺膠囊", "橄": "特級冷壓初榨橄欖油", "超": "超纖飲bodykey", 
+            "纖體": "纖體配方", "CLA": "活力纖姿膠囊", "水": "益之源Pro"
         };
 
         const gasWebhookUrl = "https://script.google.com/macros/s/AKfycbyZ5ByYzyzwgKp3I2kqbSUZeA-Z4ICsCLrrP9wfGQ1lzPzHFle2pq9iCRv-M9DLlywK/exec";
@@ -231,12 +214,10 @@
                 gain.connect(audioCtx.destination);
 
                 if (type === 'click') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(400, audioCtx.currentTime);
                     gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.05);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.05);
                 } else if (type === 'success') {
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
@@ -244,20 +225,14 @@
                     osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2);
                     gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.4);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.4);
                 }
             } catch (e) {}
         }
 
         function resolveLineId() {
             const urlParams = new URLSearchParams(window.location.search);
-            currentLineId = urlParams.get('prefill_LineID') || 
-                            urlParams.get('LineID') || 
-                            urlParams.get('lineid') || 
-                            urlParams.get('userId') || 
-                            urlParams.get('user_id') || "";
-
+            currentLineId = urlParams.get('prefill_LineID') || urlParams.get('LineID') || urlParams.get('userId') || "";
             const displayEl = document.getElementById('displayLineId');
             const manualBtn = document.getElementById('manualInputBtn');
 
@@ -404,7 +379,7 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(payloadData)
                 });
-                console.log("數據已成功發送至小妖後端！");
+                console.log("問卷數據已成功寫入 Lark Base！");
             } catch (e) {
                 console.error("提交至 GAS 出錯:", e);
             }
@@ -415,11 +390,16 @@
             container.innerHTML = "";
             top3.forEach((item, idx) => {
                 const card = document.createElement("div");
-                card.className = "bg-amber-50 border border-amber-200 p-4 rounded-xl text-center shadow-sm";
+                card.className = "bg-white border-2 border-amber-400 p-4 rounded-xl text-center shadow-md relative overflow-hidden";
                 card.innerHTML = `
-                    <span class="bg-amber-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">Top ${idx+1}</span>
-                    <h4 class="font-bold text-amber-900 mt-2">${item.name}</h4>
-                    <p class="text-xs text-slate-500 mt-1">關聯症狀：<strong class="text-emerald-700">${item.count}</strong> 項</p>
+                    <div class="absolute top-0 right-0 bg-gradient-to-l from-amber-500 to-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-sm">
+                        🚨 優先補充 No.${idx+1}
+                    </div>
+                    <h4 class="font-bold text-amber-950 text-base mt-3">${item.name}</h4>
+                    <p class="text-xs text-slate-600 mt-1">關聯症狀數：<strong class="text-amber-700 text-sm font-mono">${item.count}</strong> 項</p>
+                    <div class="mt-2 pt-2 border-t border-amber-100 text-[10px] text-amber-800 font-medium">
+                        建議每日優先著重補充
+                    </div>
                 `;
                 container.appendChild(card);
             });
@@ -430,8 +410,8 @@
             container.innerHTML = "";
             sortedNutrients.forEach(item => {
                 const tag = document.createElement("span");
-                tag.className = "text-[11px] bg-white border border-slate-200 px-2.5 py-1 rounded-md text-slate-600";
-                tag.innerHTML = `${item.name} <strong class="text-emerald-600">${item.count}</strong>`;
+                tag.className = "text-[11px] bg-white border border-slate-200 px-2.5 py-1 rounded-md text-slate-600 shadow-sm";
+                tag.innerHTML = `${item.name} <strong class="text-emerald-600">${item.count}次</strong>`;
                 container.appendChild(tag);
             });
         }
