@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- GSAP 動畫庫 CDN (專屬 No.1 營養素震撼動態特效) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <!-- LIFF SDK -->
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
@@ -191,7 +193,7 @@
                             </div>
 
                             <div class="relative w-48 sm:w-56 h-64 sm:h-72 flex items-center justify-center">
-                                <img src="images/xiaoyao-advice.png" alt="小妖" class="max-h-full object-contain drop-shadow-md rounded-2xl" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-full h-full bg-rose-100 border-2 border-dashed border-rose-300 rounded-2xl flex flex-col items-center justify-center text-rose-400 text-xs p-4 text-center\'><i class=\'fa-solid fa-image text-3xl mb-2\'></i>[預留小妖圖片區塊<br>xiaoyao-welcome.png]</div>';">
+                                <img src="xiaoyao-welcome.png" alt="小妖" class="max-h-full object-contain drop-shadow-md rounded-2xl" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-full h-full bg-rose-100 border-2 border-dashed border-rose-300 rounded-2xl flex flex-col items-center justify-center text-rose-400 text-xs p-4 text-center\'><i class=\'fa-solid fa-image text-3xl mb-2\'></i>[預留小妖圖片區塊<br>xiaoyao-welcome.png]</div>';">
                             </div>
                         </div>
                     </div>
@@ -617,12 +619,12 @@
             const top1 = top3[0];
             heroContainer.innerHTML = `
                 <div class="flex items-center justify-between mb-2">
-                    <span class="bg-gradient-to-r from-amber-600 to-rose-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+                    <span id="top1Badge" class="bg-gradient-to-r from-amber-600 to-rose-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm border border-amber-300">
                         👑 核心首選需求 No.1
                     </span>
                     <span class="text-xs text-rose-800 font-medium">關聯徵兆：<strong class="text-rose-700 font-bold text-lg">${top1.count}</strong> 項</span>
                 </div>
-                <h3 class="text-2xl sm:text-3xl font-bold font-serif-tc text-rose-950 my-2">${top1.name}</h3>
+                <h3 id="top1TitleText" class="text-2xl sm:text-3xl font-bold font-serif-tc text-rose-950 my-2">${top1.name}</h3>
                 <p class="text-xs text-rose-900/80 leading-relaxed">
                     這是您目前體內需求頻率最高的關鍵營養素！強烈建議作為第一優先每日重點補充。
                 </p>
@@ -644,6 +646,29 @@
                 `;
                 subContainer.appendChild(card);
             });
+
+            // 🌟 GSAP 動畫： No.1 營養素卡片彈跳登場與動態效果
+            if (typeof gsap !== 'undefined') {
+                gsap.killTweensOf("#heroTop1Card, #top1TitleText, #top1Badge");
+
+                // 1. 全卡片彈性跳出 (Pop-in)
+                gsap.fromTo("#heroTop1Card", 
+                    { scale: 0.6, opacity: 0, y: 40 }, 
+                    { scale: 1, opacity: 1, y: 0, duration: 1.2, ease: "elastic.out(1, 0.4)" }
+                );
+
+                // 2. 標籤縮放脈動 (Pulse)
+                gsap.fromTo("#top1Badge", 
+                    { scale: 0.8 }, 
+                    { scale: 1.1, duration: 0.6, repeat: -1, yoyo: true, ease: "power1.inOut" }
+                );
+
+                // 3. No.1 名稱文字呼吸放大
+                gsap.fromTo("#top1TitleText", 
+                    { scale: 0.95 }, 
+                    { scale: 1.05, duration: 1.4, repeat: -1, yoyo: true, ease: "sine.inOut" }
+                );
+            }
         }
 
         function populateSymptomDropdown() {
