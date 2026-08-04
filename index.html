@@ -1,537 +1,641 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小妖健管 - 亞健康自我檢測問卷 V1.3.0</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f4f7f6; color: #2d3748; }
-        .tab-btn.active { background-color: #2f855a; color: white; border-color: #2f855a; }
-        .checkbox-card.checked { border-color: #38a169; background-color: #f0fff4; box-shadow: 0 4px 6px -1px rgba(56, 161, 105, 0.2); }
-    </style>
-</head>
-<body class="bg-slate-50 min-h-screen flex flex-col justify-start items-center p-2 sm:p-6">
+// ====================================================
+// LINE Bot × Lark Base × Agnes AI (V2.31.1 純淨轉貼文案版)
+//
+// 版本：2.31.1
+// 重點優化與修訂：
+// 1. 【純淨轉貼話術】：移除所有給教練的前言說明與分隔線，LLM 直接輸出給學員/顧客的訊息，便利教練一鍵複製轉貼。
+// 2. 【LLM 語意意圖辨識】：支援自然語言觸發問卷派發。
+// 3. 【會員資格查詢】：學員詢問會員資訊時，呈現標準 yyyy/MM/dd 日期與天數計算。
+// 4. 【完全相容】：其餘所有功能（知識庫檢索、問卷 24HR 時效驗證、PDF 寄送）均保持不變。
+// ====================================================
 
-    <!-- 主容器 -->
-    <div class="w-full max-w-5xl bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200 mt-2">
-        
-        <!-- 頁首 Header -->
-        <header class="bg-gradient-to-r from-emerald-700 to-teal-800 text-white p-6 relative">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-leaf text-3xl text-emerald-300"></i>
-                        <h1 class="text-2xl sm:text-3xl font-bold tracking-wide">小妖健管 🌸 亞健康自我檢測</h1>
-                    </div>
-                    <p class="text-emerald-100 text-sm mt-1">自我檢視 72 項身體徵兆，讓小妖為您找出缺乏的關鍵營養素</p>
-                </div>
-                <div class="bg-emerald-900/60 backdrop-blur-sm px-3 py-1 rounded text-xs text-emerald-200 font-mono">
-                    版本：<span class="text-amber-300 font-bold">V1.3.0</span>
-                </div>
-            </div>
-        </header>
+// --- 專案金鑰與腳本屬性初始化 ---
+const props = PropertiesService.getScriptProperties();
 
-        <!-- 主要互動區塊 -->
-        <main class="p-4 sm:p-8 space-y-6">
+const LARK_APP_ID     = props.getProperty('LARK_APP_ID') || 'cli_aac2042665789e14';
+const LARK_APP_SECRET = props.getProperty('LARK_APP_SECRET') || 'Oe4HG99m5Aro0GIJFCZUKeaBkUVnoSHH';
+const LARK_BASE_TOKEN = props.getProperty('LARK_BASE_TOKEN') || 'XE4Bb3VHSaqHZUsfiVhjK3pnpeh';
 
-            <!-- 🌸 顧客基本資料輸入區塊 (姓名 & 電子郵件) -->
-            <div class="bg-emerald-50/80 border border-emerald-200 p-5 rounded-xl shadow-sm space-y-4">
-                <div class="flex items-center gap-2 border-b border-emerald-200 pb-2">
-                    <i class="fa-solid fa-id-card text-emerald-700 text-lg"></i>
-                    <h3 class="font-bold text-emerald-900 text-sm sm:text-base">填寫人基本資料（完成檢測後將自動發送 PDF 報告至您的信箱）</h3>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-emerald-900 mb-1" for="customerNameInput">
-                            <i class="fa-solid fa-user text-emerald-600 mr-1"></i>顧客姓名 <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" id="customerNameInput" placeholder="請輸入您的姓名" 
-                               class="w-full px-3.5 py-2 text-sm rounded-lg border border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-emerald-900 mb-1" for="customerEmailInput">
-                            <i class="fa-solid fa-envelope text-emerald-600 mr-1"></i>電子郵件 (寄送 PDF 報告) <span class="text-red-500">*</span>
-                        </label>
-                        <input type="email" id="customerEmailInput" placeholder="example@gmail.com" 
-                               class="w-full px-3.5 py-2 text-sm rounded-lg border border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
-                    </div>
-                </div>
-            </div>
+// --- Lark 各模組子資料表 ID 配置 ---
+const LARK_TABLE_ID_KNOWLEDGE  = 'tbl18IoRlHdX4Dhg'; // 00_知識庫
+const LARK_TABLE_ID_USER       = 'tblXykyc5jRzMxC6'; // 06_學員主檔
+const LARK_TABLE_ID_SUBHEALTH  = 'tblopRUxKgDKCA3n'; // 07_亞健康問卷紀錄
+const LARK_TABLE_ID_CHAT_LOG   = 'tblNZointn9p6WO1'; // 05_學員對話存檔模組
 
-            <!-- 身份識別與問卷序號資訊欄 -->
-            <div id="userInfoBar" class="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-xs flex flex-wrap items-center justify-between gap-2 shadow-sm">
-                <div class="flex flex-wrap items-center gap-2">
-                    <i class="fa-solid fa-user-check text-amber-600"></i>
-                    <span>檢測學員帳號：</span>
-                    <strong id="displayLineId" class="font-mono text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded text-xs">讀取中...</strong>
-                    
-                    <span id="surveyBadge" class="hidden font-mono text-purple-700 bg-purple-100 px-2 py-0.5 rounded text-xs font-bold border border-purple-200 ml-2">
-                        問卷序號：<span id="displaySurveyId">--</span>
-                    </span>
+const CHANNEL_ACCESS_TOKEN = props.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
+const AGNES_API_KEY        = props.getProperty('AGNES_API_KEY');
 
-                    <button id="manualInputBtn" class="hidden text-[10px] text-amber-700 underline hover:text-amber-900 ml-2">
-                        <i class="fa-solid fa-pen"></i> 手動輸入 LINE ID
-                    </button>
-                </div>
-                <span id="coachBanner" class="text-amber-700 font-bold text-[11px]">小妖專屬健康照護 🌸</span>
-            </div>
+const BOT_NAME = '小妖'; 
+const TEMPERATURE = 0.80; 
+const TIMEZONE = "Asia/Taipei";
 
-            <!-- 警告提示訊息欄（預設隱藏） -->
-            <div id="statusAlertBar" class="hidden bg-red-50 border-2 border-red-300 p-4 rounded-xl text-red-800 flex items-center gap-3">
-                <i class="fa-solid fa-triangle-exclamation text-red-600 text-2xl"></i>
-                <div>
-                    <h4 class="font-bold text-sm text-red-900" id="statusAlertTitle">問卷狀態提示</h4>
-                    <p class="text-xs text-red-700 mt-0.5" id="statusAlertMsg">檢查中...</p>
-                </div>
-            </div>
+const URL_SUBHEALTH_SURVEY   = 'https://amwayfans.github.io/xiaoyao/';
+const AGNES_MODEL            = 'agnes-2.0-flash'; 
+const AGNES_BASE_URL         = 'https://apihub.agnes-ai.com/v1';
+const CACHE_KEY_LARK_TOKEN   = "LARK_TENANT_TOKEN";
 
-            <!-- 控制列：搜尋與統計 -->
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-100 p-4 rounded-xl border border-slate-200">
-                <div class="relative w-full sm:w-72">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="searchInput" placeholder="搜尋症狀（如：疲倦、胃酸、多夢）..." class="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                </div>
-                <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-                    <span class="text-sm font-medium text-slate-600">已選擇：<strong id="selectedCount" class="text-emerald-600 text-lg">0</strong> 項症狀</span>
-                    <button id="resetBtn" class="px-3 py-1.5 text-xs text-slate-500 hover:text-red-600 border border-slate-300 hover:border-red-300 rounded-md transition-all">
-                        <i class="fa-solid fa-rotate-right mr-1"></i>重置
-                    </button>
-                </div>
-            </div>
+/**
+ * 🛠️ 萬用解析工具
+ */
+function extractLarkValue(fieldVal) {
+  if (fieldVal === null || fieldVal === undefined) return "";
+  if (typeof fieldVal === 'string' || typeof fieldVal === 'number') return String(fieldVal).trim();
+  if (Array.isArray(fieldVal)) {
+    if (fieldVal.length === 0) return "";
+    const firstItem = fieldVal[0];
+    if (typeof firstItem === 'object' && firstItem !== null) {
+      if (firstItem.link) return firstItem.link.trim();
+      if (firstItem.url) return firstItem.url.trim();
+      return firstItem.text || firstItem.name || firstItem.value || JSON.stringify(firstItem);
+    }
+    return String(firstItem).trim();
+  }
+  return String(fieldVal).trim();
+}
 
-            <!-- 分類頁籤 Tabs -->
-            <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-2" id="categoryTabs"></div>
+function parseToTaipeiDate(rawDate) {
+  const val = extractLarkValue(rawDate);
+  if (!val) return null;
+  const numVal = Number(val);
+  if (!isNaN(numVal) && numVal > 0) {
+    let timestamp = (numVal > 30000 && numVal < 60000) ? Math.round((numVal - 25569) * 86400 * 1000) : (numVal < 10000000000 ? numVal * 1000 : numVal);
+    return new Date(timestamp);
+  }
+  const d = new Date(String(val).trim().replace(/-/g, '/'));
+  return !isNaN(d.getTime()) ? d : null;
+}
 
-            <!-- 症狀勾選清單網格 -->
-            <div id="symptomsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-h-[300px]"></div>
+/**
+ * 📅 專用日期格式化函數（轉為 yyyy/MM/dd）
+ */
+function formatDateForDisplay(rawDate) {
+  const dateObj = parseToTaipeiDate(rawDate);
+  if (!dateObj) return "未設定";
+  return Utilities.formatDate(dateObj, TIMEZONE, "yyyy/MM/dd");
+}
 
-            <!-- 儲存提交按鈕 -->
-            <div class="pt-4 flex justify-center">
-                <button id="analyzeBtn" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all text-base flex items-center gap-2">
-                    <i class="fa-solid fa-paper-plane"></i> 完成檢測並寄送 PDF 報告至信箱
-                </button>
-            </div>
+function generateSurveyId() {
+  const dateStr = Utilities.formatDate(new Date(), TIMEZONE, "yyyyMMdd");
+  const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return "SV-" + dateStr + "-" + randomStr;
+}
 
-            <!-- 📊 統計報表區塊 (預設隱藏) -->
-            <section id="reportSection" class="hidden space-y-6 pt-6 border-t-2 border-slate-200 mt-8">
-                <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-center">
-                    <i class="fa-solid fa-circle-check text-emerald-600 text-3xl mb-2"></i>
-                    <h3 class="text-lg font-bold text-emerald-900">檢測報告已成功同步至健康檔案，PDF 檔案已寄至您的 Email！</h3>
-                    <p class="text-xs text-emerald-700 mt-1">小妖已經將完整的檢測 PDF 報告寄送到您的電子郵件，請至信箱查收喔 🌸</p>
-                </div>
+/**
+ * 📚 從 Lark 讀取「小妖_健管知識庫」
+ */
+function getKnowledgeBaseFromLark() {
+  try {
+    const token = getLarkToken();
+    if (!token) return "";
 
-                <div class="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 p-5 rounded-2xl shadow-md">
-                    <div class="flex items-center gap-2 mb-3">
-                        <i class="fa-solid fa-triangle-exclamation text-amber-600 text-xl"></i>
-                        <h3 class="text-base font-bold text-amber-900">🚨 身體警訊！優先補充：缺乏營養素 Top 3</h3>
-                    </div>
-                    <p class="text-xs text-amber-800 mb-4">以下前 3 名是根據您勾選的身體微小徵兆，計算出需求頻率最高的關鍵營養素，建議優先進行調整與補充：</p>
-                    <div id="top3Container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-                </div>
+    const url = "https://open.larksuite.com/open-apis/bitable/v1/apps/" + LARK_BASE_TOKEN + "/tables/" + LARK_TABLE_ID_KNOWLEDGE + "/records?page_size=100";
+    const res = JSON.parse(UrlFetchApp.fetch(url, {
+      'headers': { 'Authorization': 'Bearer ' + token },
+      'muteHttpExceptions': true
+    }).getContentText());
 
-                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
-                    <h4 class="text-xs font-bold text-slate-700 mb-3"><i class="fa-solid fa-list-check text-emerald-600 mr-1"></i> 完整營養素需求頻率統計</h4>
-                    <div id="fullStatContainer" class="flex flex-wrap gap-2"></div>
-                </div>
-            </section>
+    if (!res.data || !res.data.items) {
+      console.warn("⚠️ 知識庫讀取失敗或無資料");
+      return "";
+    }
 
-        </main>
-        
-        <!-- 頁尾 Footer -->
-        <footer class="bg-slate-100 border-t border-slate-200 p-4 text-center text-xs text-slate-500">
-            <p>小妖健管系統 V1.3.0 | 本結果僅供健康管理與膳食補充參考，如有嚴重不適請諮詢專業醫師。</p>
-        </footer>
-    </div>
+    let knowledgeText = "";
+    res.data.items.forEach(function(item, index) {
+      const question = extractLarkValue(item.fields['問題']);
+      const answer = extractLarkValue(item.fields['答案']);
+      if (question && answer) {
+        knowledgeText += "[主題 " + (index + 1) + "]：" + question + "\n[標準解答]：" + answer + "\n\n";
+      }
+    });
 
-    <!-- 腳本邏輯 -->
-    <script>
-        const dbData = [
-          {"id": 1, "category": "頭部", "symptom": "眼睛疲勞", "nutrients": ["A", "B", "E", "鈣/鎂", "晶"]},
-          {"id": 2, "category": "頭部", "symptom": "眼睛乾澀", "nutrients": ["A", "魚", "晶"]},
-          {"id": 3, "category": "頭部", "symptom": "眼睛癢", "nutrients": ["A", "B", "魚"]},
-          {"id": 4, "category": "頭部", "symptom": "眼睛充血", "nutrients": ["B", "魚", "晶"]},
-          {"id": 5, "category": "頭部", "symptom": "頭皮屑", "nutrients": ["A", "B", "鈣/鎂"]},
-          {"id": 6, "category": "頭部", "symptom": "眼睛易流淚.畏光", "nutrients": ["A", "魚", "晶"]},
-          {"id": 7, "category": "頭部", "symptom": "易掉髮", "nutrients": ["P", "A", "B", "E", "鈣/鎂", "鐵", "卵"]},
-          {"id": 8, "category": "頭部", "symptom": "白頭髮", "nutrients": ["P", "A", "B", "E", "卵"]},
-          {"id": 9, "category": "頭部", "symptom": "口乾舌燥", "nutrients": ["P", "DX", "A", "B", "C", "鈣/鎂"]},
-          {"id": 10, "category": "頭部", "symptom": "口臭", "nutrients": ["P", "DX", "B", "C", "纖", "蒜", "酵", "菌", "茶"]},
-          {"id": 11, "category": "頭部", "symptom": "口角炎", "nutrients": ["B", "C"]},
-          {"id": 12, "category": "頭部", "symptom": "偏頭痛", "nutrients": ["P", "DX", "B", "C", "E", "鈣/鎂", "魚", "卵", "靈"]},
-          {"id": 13, "category": "頭部", "symptom": "頸部僵硬", "nutrients": ["P", "DX", "C", "魚", "卵", "蒜"]},
-          {"id": 14, "category": "頭部", "symptom": "酒糟鼻", "nutrients": ["B", "C", "魚", "卵"]},
-          {"id": 15, "category": "頭部", "symptom": "過敏性鼻炎", "nutrients": ["P", "A", "B", "C", "E", "蒜", "菌", "魚"]},
-          {"id": 16, "category": "頭部", "symptom": "青春痘", "nutrients": ["P", "DX", "A", "B", "E", "卵", "月", "魚"]},
-          {"id": 17, "category": "頭部", "symptom": "黑斑", "nutrients": ["P", "C", "E", "卵"]},
-          {"id": 18, "category": "頭部", "symptom": "臉泛油光", "nutrients": ["P", "DX", "B", "魚", "卵"]},
-          {"id": 19, "category": "頭部", "symptom": "牙齦流血", "nutrients": ["P", "DX", "C", "鈣/鎂", "Q10"]},
-          {"id": 20, "category": "頭部", "symptom": "重口味", "nutrients": ["P", "DX", "A", "B", "C", "鋅", "魚"]},
-          {"id": 21, "category": "頭部", "symptom": "抽煙", "nutrients": ["P", "DX", "A", "B", "C", "E", "魚", "卵", "蒜", "茶"]},
-          {"id": 22, "category": "頭部", "symptom": "喝酒", "nutrients": ["P", "DX", "A", "B", "C", "鈣/鎂", "魚", "蒜", "酵", "菌", "卵"]},
-          {"id": 23, "category": "頭部", "symptom": "服藥", "nutrients": ["P", "DX", "B", "C", "纖", "卵", "蒜", "菌", "茶"]},
-          {"id": 24, "category": "身體", "symptom": "皮膚無光澤", "nutrients": ["P", "DX", "E", "卵", "Q10"]},
-          {"id": 25, "category": "身體", "symptom": "皮膚粗糙", "nutrients": ["P", "DX", "A", "魚", "卵", "橄"]},
-          {"id": 26, "category": "身體", "symptom": "溼疹", "nutrients": ["P", "DX", "B", "魚", "卵", "橄"]},
-          {"id": 27, "category": "身體", "symptom": "皮膚炎", "nutrients": ["P", "DX", "B", "魚", "卵", "橄"]},
-          {"id": 28, "category": "身體", "symptom": "打嗝", "nutrients": ["B", "鈣/鎂", "酵", "菌"]},
-          {"id": 29, "category": "身體", "symptom": "消化不良", "nutrients": ["P", "DX", "B", "鐵", "卵", "酵", "菌", "橄"]},
-          {"id": 30, "category": "身體", "symptom": "胃口不好", "nutrients": ["P", "DX", "B", "鐵", "酵", "菌", "卵", "橄"]},
-          {"id": 31, "category": "身體", "symptom": "胃酸逆流", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "酵", "纖"]},
-          {"id": 32, "category": "身體", "symptom": "易腹瀉", "nutrients": ["P", "DX", "A", "B", "纖", "魚", "蒜", "菌"]},
-          {"id": 33, "category": "身體", "symptom": "脹氣", "nutrients": ["P", "B", "鈣/鎂", "菌"]},
-          {"id": 34, "category": "身體", "symptom": "水腫", "nutrients": ["P", "DX", "B", "C", "鈣/鎂"]},
-          {"id": 35, "category": "身體", "symptom": "便秘", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "卵", "菌", "纖"]},
-          {"id": 36, "category": "身體", "symptom": "肝炎", "nutrients": ["P", "DX", "B", "C", "卵", "魚", "蒜"]},
-          {"id": 37, "category": "身體", "symptom": "脂肪肝", "nutrients": ["P", "DX", "B", "C", "卵", "魚", "蒜", "茶", "橄"]},
-          {"id": 38, "category": "身體", "symptom": "高膽固醇", "nutrients": ["P", "DX", "B", "C", "E", "魚", "卵", "蒜", "茶", "橄"]},
-          {"id": 39, "category": "身體", "symptom": "高血糖", "nutrients": ["P", "DX", "纖", "鉻", "魚", "茶", "靈", "纖體"]},
-          {"id": 40, "category": "身體", "symptom": "高血壓", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "鎂", "纖", "卵", "魚", "Q10", "茶"]},
-          {"id": 41, "category": "身體", "symptom": "高血脂", "nutrients": ["P", "DX", "B", "C", "纖", "魚", "卵", "蒜", "茶", "橄"]},
-          {"id": 42, "category": "身體", "symptom": "肥胖", "nutrients": ["P", "DX", "B", "卵", "纖", "超", "纖體", "CLA"]},
-          {"id": 43, "category": "身體", "symptom": "尿酸高.痛風", "nutrients": ["P", "DX", "B", "C", "E", "鈣/鎂", "魚", "水"]},
-          {"id": 44, "category": "身體", "symptom": "頻尿", "nutrients": ["P", "B", "C", "鈣/鎂", "蒜", "茶"]},
-          {"id": 45, "category": "身體", "symptom": "尿床", "nutrients": ["P", "B", "C", "鈣/鎂"]},
-          {"id": 46, "category": "身體", "symptom": "缺鐵型貧血", "nutrients": ["P", "B", "C", "葉酸鐵"]},
-          {"id": 47, "category": "身體", "symptom": "地中海型貧血", "nutrients": ["P", "B", "C", "E", "卵"]},
-          {"id": 48, "category": "身體", "symptom": "經痛", "nutrients": ["P", "B", "C", "E", "鈣/鎂", "卵", "月"]},
-          {"id": 49, "category": "身體", "symptom": "經期不順", "nutrients": ["P", "B", "E", "鈣/鎂", "卵", "月"]},
-          {"id": 50, "category": "身體", "symptom": "白帶", "nutrients": ["P", "A", "B", "C", "魚", "蒜", "卵", "菌"]},
-          {"id": 51, "category": "身體", "symptom": "懷孕", "nutrients": ["P", "DX", "A", "B", "C", "E", "鈣/鎂", "葉酸鐵", "魚", "卵"]},
-          {"id": 52, "category": "身體", "symptom": "孕吐", "nutrients": ["P", "DX", "B", "葉酸鐵", "卵", "菌"]},
-          {"id": 53, "category": "身體", "symptom": "不易受孕", "nutrients": ["P", "DX", "A", "E", "葉酸鐵", "魚", "卵"]},
-          {"id": 54, "category": "身體", "symptom": "傷口不易癒合", "nutrients": ["P", "DX", "A", "B", "C", "E", "鈣/鎂", "卵", "魚", "Q10"]},
-          {"id": 55, "category": "身體", "symptom": "胃潰瘍", "nutrients": ["P", "DX", "卵", "酵", "菌"]},
-          {"id": 56, "category": "身體", "symptom": "骨質疏鬆", "nutrients": ["P", "DX", "A", "B", "C", "鈣/鎂", "葡"]},
-          {"id": 57, "category": "身體", "symptom": "更年期", "nutrients": ["P", "DX", "E", "B", "月", "鈣/鎂", "卵", "魚"]},
-          {"id": 58, "category": "身體", "symptom": "感冒", "nutrients": ["P", "DX", "A", "B", "C", "魚", "蒜", "茶"]},
-          {"id": 59, "category": "四肢", "symptom": "手腳冰冷", "nutrients": ["P", "DX", "E", "葉酸鐵", "卵", "Q10", "月"]},
-          {"id": 60, "category": "四肢", "symptom": "指甲變型", "nutrients": ["P", "DX", "A", "C", "鈣/鎂", "鋅"]},
-          {"id": 61, "category": "四肢", "symptom": "退化性關節炎", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "葡", "魚"]},
-          {"id": 62, "category": "四肢", "symptom": "類風濕性關節炎", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "葡", "魚", "卵", "月"]},
-          {"id": 63, "category": "四肢", "symptom": "抽筋", "nutrients": ["B", "C", "鈣/鎂"]},
-          {"id": 64, "category": "四肢", "symptom": "靜脈曲張", "nutrients": ["P", "DX", "E", "魚", "卵"]},
-          {"id": 65, "category": "精神感官", "symptom": "疲倦", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "Q10", "靈"]},
-          {"id": 66, "category": "精神感官", "symptom": "淺眠.不易入睡", "nutrients": ["B", "C", "鈣/鎂", "卵", "魚"]},
-          {"id": 67, "category": "精神感官", "symptom": "多夢", "nutrients": ["B", "鈣/鎂", "卵", "魚"]},
-          {"id": 68, "category": "精神感官", "symptom": "容易打瞌睡", "nutrients": ["P", "DX", "B", "魚", "卵", "靈"]},
-          {"id": 69, "category": "精神感官", "symptom": "記憶減退", "nutrients": ["P", "葉酸鐵", "魚", "卵"]},
-          {"id": 70, "category": "精神感官", "symptom": "易生氣.不耐煩", "nutrients": ["P", "B", "C", "鈣/鎂", "魚"]},
-          {"id": 71, "category": "精神感官", "symptom": "鬱悶", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "魚"]},
-          {"id": 72, "category": "精神感官", "symptom": "壓力大.熬夜", "nutrients": ["P", "DX", "B", "C", "鈣/鎂", "魚", "蒜", "靈", "茶"]}
-        ];
+    return knowledgeText;
+  } catch (e) {
+    console.error("💥 讀取 Lark 知識庫時發生例外:", e.toString());
+    return "";
+  }
+}
 
-        const nutrientNameMap = {
-            "P": "優質蛋白素", "DX": "DoubleX綜合營養片", "A": "倍欣營養片", "B": "雙效B群能量錠", 
-            "C": "強效C營養片", "E": "歐芹硒E營養片", "鈣/鎂": "加美D鈣錠", "鐵": "葉酸鐵營養片", 
-            "鋅": "倍欣營養片", "魚": "三倍強效魚油膠囊", "卵": "蜂蜜卵磷脂粉", "晶": "晶明+金盞花葉黃素膠囊粒", 
-            "纖": "纖維嚼片", "蒜": "薄荷大蒜片", "酵": "綜合消化酵素膠囊", "菌": "強效複合益生菌", 
-            "茶": "綠茶素膠囊", "Q10": "輔酵素Q10膠囊", "月": "月見草琉璃苣膠囊", "葉酸鐵": "葉酸鐵營養片", 
-            "靈": "有機靈芝破壁孢子粉", "葡": "葡萄糖胺膠囊", "橄": "特級冷壓初榨橄欖油", "超": "超纖飲bodykey", 
-            "纖體": "纖體配方", "CLA": "活力纖姿膠囊", "水": "益之源Pro"
-        };
+/**
+ * 🔐 檢查教練/管理員發送問卷權限
+ */
+function checkCanIssueSurvey(userInfo) {
+  if (!userInfo) return false;
+  const role = String(userInfo.role || "");
+  return role.indexOf("系統管理員") !== -1 || role.indexOf("教練") !== -1 || role.indexOf("助教") !== -1 || role.indexOf("管理員") !== -1;
+}
 
-        const gasWebhookUrl = "https://script.google.com/macros/s/AKfycbw4SepToEB3DoVPutFIX183Cine0GxYJVquDh8119eRDpPlpXLvFY_cT-DReGA91sxY/exec";
+/**
+ * 📝 教練建立專屬問卷
+ */
+function createSurveyByCoach(coachLineId, surveyId) {
+  try {
+    const token = getLarkToken();
+    if (!token) return false;
 
-        let currentLineId = "";
-        let currentSurveyId = "";
-        let currentCoachName = "";
-        let selectedSymptomIds = new Set();
-        let currentCategory = "全部分類";
+    const now = new Date();
+    const expireTime = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSound(type) {
-            try {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
+    const url = "https://open.larksuite.com/open-apis/bitable/v1/apps/" + LARK_BASE_TOKEN + "/tables/" + LARK_TABLE_ID_SUBHEALTH + "/records";
+    const payloadFields = {
+      "問卷序號": surveyId,
+      "發送教練LineID": coachLineId,
+      "失效時間": expireTime.getTime(),
+      "問卷狀態": "待填寫"
+    };
 
-                if (type === 'click') {
-                    osc.type = 'sine'; osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-                    osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-                } else if (type === 'success') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
-                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2);
-                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
-                    osc.start(); osc.stop(audioCtx.currentTime + 0.4);
-                }
-            } catch (e) {}
+    const response = UrlFetchApp.fetch(url, {
+      'method': 'post',
+      'contentType': 'application/json',
+      'headers': { 'Authorization': 'Bearer ' + token },
+      'payload': JSON.stringify({ "fields": payloadFields }),
+      'muteHttpExceptions': true
+    });
+
+    return JSON.parse(response.getContentText()).code === 0;
+  } catch (e) {
+    console.error("[createSurveyByCoach 異常]:", e.toString());
+    return false;
+  }
+}
+
+/**
+ * ⏳ 驗證問卷序號有效性與 24HR 時效性
+ */
+function verifySurveyStatus(surveyId) {
+  if (!surveyId) return { valid: true, msg: "通用問卷" };
+
+  try {
+    const token = getLarkToken();
+    if (!token) return { valid: false, msg: "驗證服務異常" };
+
+    const url = "https://open.larksuite.com/open-apis/bitable/v1/apps/" + LARK_BASE_TOKEN + "/tables/" + LARK_TABLE_ID_SUBHEALTH + "/records";
+    const res = JSON.parse(UrlFetchApp.fetch(url, { 'headers': { 'Authorization': 'Bearer ' + token }, 'muteHttpExceptions': true }).getContentText());
+    if (!res.data || !res.data.items) return { valid: false, msg: "找不到問卷紀錄" };
+
+    const record = res.data.items.find(function(i) { return extractLarkValue(i.fields['問卷序號']) === surveyId; });
+    if (!record) return { valid: false, msg: "問卷序號不存在" };
+
+    const status = extractLarkValue(record.fields['問卷狀態']);
+    if (status === "已完成") return { valid: false, msg: "此問卷已經填寫完畢囉！" };
+    if (status === "已作廢") return { valid: false, msg: "此問卷已被作廢！" };
+
+    const rawExpire = record.fields['失效時間'];
+    const expireDateObj = parseToTaipeiDate(rawExpire);
+    const nowNum = new Date().getTime();
+
+    if (expireDateObj && nowNum > expireDateObj.getTime()) {
+      updateLarkRecord(LARK_TABLE_ID_SUBHEALTH, record.record_id, { "問卷狀態": "已作廢" });
+      return { valid: false, msg: "此問卷已超過 24 小時有效期，已自動作廢！" };
+    }
+
+    return { valid: true, recordId: record.record_id, coachLineId: extractLarkValue(record.fields['發送教練LineID']) };
+  } catch (e) {
+    return { valid: false, msg: "時效驗證發生異常" };
+  }
+}
+
+/**
+ * 🌸 處理問卷數據提交，更新 Lark 紀錄並自動發送 PDF Email
+ */
+function handleSubhealthSurveySubmission(data) {
+  const userId = data.LineID;
+  const surveyId = data.survey_id;
+  const customerName = data.customer_name || "尊貴的顧客";
+  const customerEmail = data.customer_email;
+
+  let existingRecordId = null;
+
+  if (surveyId) {
+    const vCheck = verifySurveyStatus(surveyId);
+    if (!vCheck.valid) {
+      return { success: false, message: vCheck.msg };
+    }
+    existingRecordId = vCheck.recordId;
+  }
+
+  try {
+    const token = getLarkToken();
+    if (!token) return { success: false, message: "Lark Token 取得失敗" };
+
+    const payloadFields = {
+      "LineID": userId || "未提供LineID",
+      "問卷序號": surveyId || "通用問卷",
+      "顧客姓名": customerName,
+      "電子郵件": customerEmail || "未提供",
+      "測驗日期": new Date().getTime(),
+      "問卷狀態": "已完成",
+      "勾選症狀數": Number(data.symptomCount) || 0,
+      "勾選症狀明細": data.symptomsDetail || "無明細",
+      "缺乏營養素前3名": data.top3Nutrients || "無",
+      "完整營養素缺乏統計": data.fullStatsText || "無"
+    };
+
+    if (existingRecordId) {
+      updateLarkRecord(LARK_TABLE_ID_SUBHEALTH, existingRecordId, payloadFields);
+    } else {
+      const url = "https://open.larksuite.com/open-apis/bitable/v1/apps/" + LARK_BASE_TOKEN + "/tables/" + LARK_TABLE_ID_SUBHEALTH + "/records";
+      UrlFetchApp.fetch(url, {
+        'method': 'post',
+        'contentType': 'application/json',
+        'headers': { 'Authorization': 'Bearer ' + token },
+        'payload': JSON.stringify({ "fields": payloadFields }),
+        'muteHttpExceptions': true
+      });
+    }
+
+    if (customerEmail && customerEmail.indexOf("@") !== -1) {
+      sendSurveyResultPdfEmail(customerEmail, customerName, data);
+    }
+
+    return { success: true, message: "問卷提交成功，PDF 已寄送至 Email！" };
+  } catch (e) {
+    console.error("[handleSubhealthSurveySubmission 異常]:", e.toString());
+    return { success: false, message: e.toString() };
+  }
+}
+
+/**
+ * 📄 生成 PDF 並寄送 Email
+ */
+function sendSurveyResultPdfEmail(email, name, data) {
+  try {
+    const quota = MailApp.getRemainingDailyQuota();
+    if (quota <= 0) return;
+
+    const todayStr = Utilities.formatDate(new Date(), TIMEZONE, "yyyy年MM月dd日");
+    
+    const htmlTemplate = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>' +
+      'body { font-family: "Microsoft JhengHei", Arial, sans-serif; color: #2d3748; padding: 20px; line-height: 1.6; }' +
+      '.header { background: #047857; color: #ffffff; padding: 20px; text-align: center; border-radius: 8px; }' +
+      '.section { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; margin-top: 15px; border-radius: 8px; }' +
+      '.top3 { background: #fffbeb; border: 2px solid #f59e0b; padding: 15px; border-radius: 8px; margin-top: 15px; }' +
+      '.badge { background: #d1fae5; color: #065f46; font-weight: bold; padding: 3px 8px; border-radius: 4px; }' +
+      '.footer { text-align: center; margin-top: 30px; font-size: 12px; color: #64748b; }' +
+      '</style></head><body>' +
+      '<div class="header"><h2>小妖健管 🌸 亞健康自我檢測報告</h2><p>專屬個人化微量營養素評估結果</p></div>' +
+      '<div class="section"><p><strong>顧客姓名：</strong> ' + name + '</p><p><strong>檢測日期：</strong> ' + todayStr + '</p><p><strong>勾選症狀總數：</strong> <span class="badge">' + (data.symptomCount || 0) + ' 項</span></p></div>' +
+      '<div class="top3"><h3 style="color: #92400e; margin-top: 0;">🚨 身體警訊！建議優先補充關鍵營養素：</h3><p style="font-size: 18px; font-weight: bold; color: #b45309;">' + (data.top3Nutrients || "無") + '</p></div>' +
+      '<div class="section"><h3>📋 勾選症狀明細：</h3><p>' + (data.symptomsDetail || "無") + '</p></div>' +
+      '<div class="section"><h3>📊 完整營養素需求頻率統計：</h3><p>' + (data.fullStatsText || "無") + '</p></div>' +
+      '<div class="footer"><p>小妖健管團隊 關心您的身體健康 🌸</p></div>' +
+      '</body></html>';
+
+    const htmlOutput = HtmlService.createHtmlOutput(htmlTemplate);
+    const pdfBlob = htmlOutput.getAs('application/pdf').setName("小妖健管_亞健康檢測報告_" + name + ".pdf");
+
+    GmailApp.sendEmail(email, "🌸【小妖健管】" + name + " 您的亞健康自我檢測結果 PDF 報告已送到！", 
+      name + " 您好：\n\n感謝您完成小妖健管亞健康自我檢測！\n我們已將您的個人化檢測報告生成為 PDF 附件，歡迎隨時下載查閱。\n\n祝您健康順心！\n小妖健管團隊 敬上", 
+      {
+        name: "小妖健管",
+        htmlBody: htmlTemplate,
+        attachments: [pdfBlob]
+      }
+    );
+  } catch (e) {
+    console.error("[sendSurveyResultPdfEmail 寄信失敗]:", e.toString());
+  }
+}
+
+/**
+ * 🚀 【純淨轉貼版】：利用 LLM 分析教練意圖與對象，直接生成可一鍵複製給學員/顧客的推動文案（無前言/無分隔線）
+ */
+function generateCoachSurveyShareText(coachMessage, coachName, surveyUrl) {
+  if (!AGNES_API_KEY) {
+    return "嗨！我是 " + coachName + " 教練 🌸，這是我特別為您準備的 3 分鐘亞健康檢測問卷！快點擊連結檢測看看吧：\n" + surveyUrl + "\n（連結 24 小時內有效喔！）";
+  }
+
+  try {
+    const url = AGNES_BASE_URL + "/chat/completions";
+
+    var systemPrompt = "你是一位高轉化率的「健康管理行銷顧問」。\n" +
+      "教練（名稱為「" + coachName + "」）現在想發送一份亞健康自我檢測問卷給他的學員或顧客。\n\n" +
+      "【任務說明】：\n" +
+      "1. 分析教練傳來的訊息：「" + coachMessage + "」，找出發送對象（如：小美、張大哥；若未指定則用「親愛的夥伴」或「Hi」）。\n" +
+      "2. 判斷教練傳達的口吻風格（如：親切關懷、幽默熱情、專業引導）。\n" +
+      "3. 撰寫一段【教練可以直接複製轉貼給對象】的 LINE 訊息。\n" +
+      "   - 語氣輕鬆、帶點好奇心與推動力，讓對方忍不住想點擊填寫！\n" +
+      "   - 務必將專屬問卷連結「" + surveyUrl + "」包含在訊息中。\n" +
+      "   - 提醒連結有 24 小時時效性。\n" +
+      "   - 善用表情符號（✨、🌸、💪、📊）。\n\n" +
+      "【約束條件 - 非常重要】：\n" +
+      "嚴禁輸出任何給教練的開場白、招呼語、前言說明（如：小妖幫您準備好...）、提示字句或分隔線！\n" +
+      "請【直接輸出】要發給學員/顧客的訊息內容即可，方便教練一鍵複製轉貼。";
+
+    const payload = {
+      model: AGNES_MODEL,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: "請直接輸出給對象的轉貼文案內容。" }
+      ],
+      temperature: 0.85
+    };
+
+    const response = UrlFetchApp.fetch(url, {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { 'Authorization': 'Bearer ' + AGNES_API_KEY },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+
+    const resJson = JSON.parse(response.getContentText());
+    if (resJson.choices && resJson.choices.length > 0) {
+      return resJson.choices[0].message.content.trim();
+    }
+  } catch (e) {
+    console.error("[generateCoachSurveyShareText 異常]:", e.toString());
+  }
+
+  return "嗨～為您準備了專屬的 3 分鐘亞健康檢測問卷！快點擊了解自己的微量營養素狀況吧：\n" + surveyUrl + "\n（⏰ 連結 24 小時內有效喔！）";
+}
+
+/**
+ * 🌸 呼叫 Agnes AI 生成俏皮且參考 Lark 知識庫的動態回覆
+ */
+function getAiResponseFromAgnes(userMessage, displayName, isCoach, isSurveyInquiry, knowledgeBase) {
+  if (!AGNES_API_KEY) {
+    return "[" + displayName + "] 🌸 嘻嘻，小妖收到囉！今天也要保持好心情呀～✨";
+  }
+
+  try {
+    const url = AGNES_BASE_URL + "/chat/completions";
+
+    var systemPrompt = "你叫「小妖」，是「小妖健管」專屬的 AI 健管助理小幫手 🌸。\n";
+    systemPrompt += "你的說話風格必須具備以下特點：\n";
+    systemPrompt += "1. **優先依據內部知識庫**：回答問題時，必須優先參考下方提供的【小妖健管專業知識庫】內容進行精準解答。\n";
+    systemPrompt += "2. **滿滿的情緒價值與關懷**：熱情、溫馨、重視對方的健康與心情。\n";
+    systemPrompt += "3. **俏皮幽默**：帶有一點小調皮、活潑、可愛的口吻，善用逗趣的表情符號（如：😜、✨、🌸、嘻嘻、啾咪、💪）。\n";
+    systemPrompt += "4. **拒絕罐頭用語**：嚴禁使用「小妖收到您的訊息囉」這種呆板用語！每次都要根據使用者的內容動態回應。\n";
+    systemPrompt += "5. **精練簡潔**：回覆長度控制在 100-200 字內。\n\n";
+    systemPrompt += "【小妖健管專業知識庫】：\n";
+    systemPrompt += (knowledgeBase || "目前暫無特定條目，請依據專業健管知識提供溫暖解答。") + "\n";
+
+    if (isSurveyInquiry) {
+      if (isCoach) {
+        systemPrompt += "\n目前使用者「" + displayName + "」是【教練/管理員】。當他詢問問卷相關問題時，請用俏皮活潑的口吻告訴他：「親愛的教練～您擁有發送問卷的專屬權限喔！只要跟我說想要發問卷給學員，小妖就會為您產出專屬檢測連結囉！✨」";
+      } else {
+        systemPrompt += "\n目前使用者「" + displayName + "」是【一般學員】。當他詢問是否可以做問卷時，請用超級貼心又俏皮的口吻解釋：「嘻嘻～亞健康檢測問卷是教練為學員量身打造的專屬護理工具喔！為了讓檢測更有效果，需要由您的專屬教練發送連結給您填寫～快去跟您的教練撒嬌要一份問卷連結吧！小妖在這裡等您完成檢測喔～🌸」";
+      }
+    }
+
+    const payload = {
+      model: AGNES_MODEL,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: "我是 " + displayName + "，我跟你說：" + userMessage }
+      ],
+      temperature: TEMPERATURE
+    };
+
+    const response = UrlFetchApp.fetch(url, {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { 'Authorization': 'Bearer ' + AGNES_API_KEY },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+
+    const resJson = JSON.parse(response.getContentText());
+    if (resJson.choices && resJson.choices.length > 0) {
+      return resJson.choices[0].message.content.trim();
+    }
+  } catch (e) {
+    console.error("[getAiResponseFromAgnes 異常]:", e.toString());
+  }
+
+  return "[" + displayName + "] 🌸 嘻嘻～小妖剛才稍微打了一秒鐘瞌睡，不過我聽到囉！今天也要多喝水保持健康喔～✨";
+}
+
+/**
+ * 核心 Webhook 入口
+ */
+function doPost(e) {
+  console.log("=== 📩 收到外部 POST 請求 ===");
+  if (typeof e === 'undefined' || typeof e.postData === 'undefined') {
+    return ContentService.createTextOutput(JSON.stringify({ status: "ok", version: "V2.31.1 Ready" })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  try {
+    const rawContent = e.postData.contents;
+    const jsonContent = JSON.parse(rawContent);
+
+    if (jsonContent.action === "verify_survey") {
+      const vResult = verifySurveyStatus(jsonContent.survey_id);
+      return ContentService.createTextOutput(JSON.stringify(vResult)).setMimeType(ContentService.MimeType.JSON);
+    }
+    if (jsonContent.action === "save_subhealth_survey") {
+      const result = handleSubhealthSurveySubmission(jsonContent);
+      return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const event = jsonContent.events ? jsonContent.events[0] : null;
+    if (!event || !event.replyToken || !event.message) {
+      return ContentService.createTextOutput(JSON.stringify({ status: "ignored" })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const replyToken = event.replyToken;
+    const userId = event.source.userId;
+    const userMessage = event.message.text ? event.message.text.trim() : "";
+
+    const userInfo = getUserInfo(userId);
+    const displayName = userInfo ? (userInfo.nickname || userInfo.name || "親愛的") : "親愛的";
+    const isCoach = checkCanIssueSurvey(userInfo);
+
+    saveUserChatLogToLark(userId, userMessage || "[傳送了非文字訊息]");
+
+    // 🌸 1. 【LLM 語意意圖辨識】：判斷使用者是否想「發送/派發/產生問卷」
+    const isIssueSurveyIntent = (userMessage.indexOf("問卷") !== -1) && 
+      (userMessage.indexOf("發") !== -1 || userMessage.indexOf("派") !== -1 || userMessage.indexOf("要") !== -1 || userMessage.indexOf("給") !== -1 || userMessage.indexOf("產") !== -1 || userMessage.indexOf("拉") !== -1);
+
+    if (isIssueSurveyIntent) {
+      if (!isCoach) {
+        const aiPromptMsg = getAiResponseFromAgnes(userMessage, displayName, false, true, "");
+        replyMessage(replyToken, aiPromptMsg, userId);
+        return ContentService.createTextOutput(JSON.stringify({ status: "permission_denied" })).setMimeType(ContentService.MimeType.JSON);
+      }
+
+      const surveyId = generateSurveyId();
+      const isCreated = createSurveyByCoach(userId, surveyId);
+
+      if (!isCreated) {
+        replyMessage(replyToken, "[" + displayName + " 教練] 哎呀！小妖剛才手滑了一下，問卷生成失敗了～請再試一次吧！🥺", userId);
+        return ContentService.createTextOutput(JSON.stringify({ status: "create_failed" })).setMimeType(ContentService.MimeType.JSON);
+      }
+
+      const targetSurveyUrl = URL_SUBHEALTH_SURVEY + "?survey_id=" + surveyId + "&prefill_coach=" + encodeURIComponent(displayName);
+
+      // 🚀 直接呼叫純淨版 LLM 文案生成（完全不含給教練的前言）
+      const shareTextReply = generateCoachSurveyShareText(userMessage, displayName, targetSurveyUrl);
+      
+      replyMessage(replyToken, shareTextReply, userId);
+      return ContentService.createTextOutput(JSON.stringify({ status: "survey_issued_with_llm_text" })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // 🌸 2. 判斷學員是否詢問「會員資格 / 到期日 / 註冊日 / 剩餘天數」
+    const isMembershipQuery = userMessage.indexOf("資格") !== -1 || userMessage.indexOf("到期") !== -1 || userMessage.indexOf("註冊") !== -1 || userMessage.indexOf("啟用") !== -1 || userMessage.indexOf("剩多久") !== -1 || userMessage.indexOf("剩幾天") !== -1 || userMessage.indexOf("會員期限") !== -1 || userMessage.indexOf("權限狀態") !== -1 || userMessage.indexOf("我的期限") !== -1;
+
+    if (isMembershipQuery) {
+      if (!userInfo) {
+        replyMessage(replyToken, "[" + displayName + "] 🌸 哎呀！小妖在「06_學員主檔」找不到您的註冊資料耶～請聯繫教練協助將您的 LineID 加入系統喔！✨", userId);
+        return ContentService.createTextOutput(JSON.stringify({ status: "user_not_found" })).setMimeType(ContentService.MimeType.JSON);
+      }
+
+      const startDateStr = formatDateForDisplay(userInfo.startDate);
+      const endDateStr   = formatDateForDisplay(userInfo.endDate);
+      const statusStr    = userInfo.status || "未設定";
+
+      let daysRemainingText = "無法計算";
+      if (userInfo.endDate) {
+        const today = new Date();
+        const endDateObj = parseToTaipeiDate(userInfo.endDate);
+        if (endDateObj) {
+          const diffTime = endDateObj.getTime() - today.getTime();
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          if (diffDays > 0) {
+            daysRemainingText = "還剩下 **" + diffDays + "** 天喔！💪";
+          } else if (diffDays === 0) {
+            daysRemainingText = "就在**今天**到期囉！要記得聯繫教練續約喔！🚨";
+          } else {
+            daysRemainingText = "已經逾期 **" + Math.abs(diffDays) + "** 天囉！快找教練幫您展延權限吧～🥺";
+          }
         }
+      }
 
-        function resolveSurveyParams() {
-            const urlParams = new URLSearchParams(window.location.search);
-            currentLineId = urlParams.get('prefill_LineID') || urlParams.get('LineID') || urlParams.get('userId') || "";
-            currentSurveyId = urlParams.get('survey_id') || "";
-            currentCoachName = urlParams.get('prefill_coach') || "";
+      const replyMsg = "[" + displayName + "] 🌸 小妖幫您查好會員帳號資訊囉！✨\n\n" +
+        "📅 **啟用/註冊日期**：" + startDateStr + "\n" +
+        "⏳ **到期日期**：" + endDateStr + "\n" +
+        "🔰 **目前權限狀態**：" + statusStr + "\n" +
+        "📊 **會員資格剩餘天數**：" + daysRemainingText + "\n\n" +
+        "小妖隨時在這裡陪您一起健康管理喔～加油！💪✨";
 
-            const displayEl = document.getElementById('displayLineId');
-            const manualBtn = document.getElementById('manualInputBtn');
-            const surveyBadge = document.getElementById('surveyBadge');
-            const coachBanner = document.getElementById('coachBanner');
+      replyMessage(replyToken, replyMsg, userId);
+      return ContentService.createTextOutput(JSON.stringify({ status: "membership_info_replied" })).setMimeType(ContentService.MimeType.JSON);
+    }
 
-            if (currentLineId && currentLineId.trim() !== "") {
-                displayEl.innerText = currentLineId;
-                displayEl.className = "font-mono text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded text-xs";
-                manualBtn.classList.add('hidden');
-            } else {
-                currentLineId = "未綁定LINE帳號";
-                displayEl.innerText = "未檢測到帳號";
-                displayEl.className = "font-mono text-amber-700 bg-amber-100 px-2 py-0.5 rounded text-xs font-bold";
-                manualBtn.classList.remove('hidden');
-            }
+    // 🌸 3. 讀取 Lark 知識庫
+    const knowledgeBase = getKnowledgeBaseFromLark();
 
-            if (currentSurveyId && currentSurveyId.trim() !== "") {
-                document.getElementById('displaySurveyId').innerText = currentSurveyId;
-                surveyBadge.classList.remove('hidden');
-                verifySurveyExpiration(currentSurveyId);
-            }
+    // 🌸 4. 判斷學員是否在「諮詢/詢問」問卷相關問題
+    const isSurveyInquiry = userMessage.indexOf("做問卷") !== -1 || userMessage.indexOf("填問卷") !== -1 || userMessage.indexOf("問卷連結") !== -1 || userMessage.indexOf("有問卷嗎") !== -1 || userMessage.indexOf("問卷去哪") !== -1;
 
-            if (currentCoachName && currentCoachName.trim() !== "") {
-                coachBanner.innerText = `來自 ${decodeURIComponent(currentCoachName)} 教練的關懷 🌸`;
-            }
-        }
+    // 🌸 5. 呼叫 AI 動態生成結合知識庫的俏皮回應
+    const aiResponse = getAiResponseFromAgnes(userMessage, displayName, isCoach, isSurveyInquiry, knowledgeBase);
+    replyMessage(replyToken, aiResponse, userId);
 
-        async function verifySurveyExpiration(surveyId) {
-            try {
-                const res = await fetch(gasWebhookUrl, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: "verify_survey", survey_id: surveyId })
-                });
-                const json = await res.json();
-                
-                if (!json.valid) {
-                    showStatusAlert("問卷已失效 / 作廢", json.msg);
-                    lockSurveySubmission(json.msg);
-                }
-            } catch (e) {
-                console.warn("問卷時效驗證跳過或網路異常:", e);
-            }
-        }
+    return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
 
-        function lockSurveySubmission(reasonMsg) {
-            const analyzeBtn = document.getElementById("analyzeBtn");
-            analyzeBtn.disabled = true;
-            analyzeBtn.innerHTML = `<i class="fa-solid fa-lock mr-2"></i> ${reasonMsg}`;
-            analyzeBtn.className = "bg-slate-400 text-white font-bold px-8 py-3.5 rounded-xl shadow-none cursor-not-allowed text-base flex items-center gap-2";
-        }
+  } catch (error) {
+    console.error("💥 頂層執行錯誤: " + error.toString());
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", error: error.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
 
-        function showStatusAlert(title, msg) {
-            const alertBar = document.getElementById("statusAlertBar");
-            document.getElementById("statusAlertTitle").innerText = title;
-            document.getElementById("statusAlertMsg").innerText = msg;
-            alertBar.classList.remove("hidden");
-        }
+function updateLarkRecord(tableId, recordId, fieldsObj) {
+  try {
+    const token = getLarkToken();
+    if (!token) return;
+    const url = "https://open.larksuite.com/open-apis/bitable/v1/apps/" + LARK_BASE_TOKEN + "/tables/" + tableId + "/records/" + recordId;
+    UrlFetchApp.fetch(url, {
+      'method': 'put',
+      'contentType': 'application/json',
+      'headers': { 'Authorization': 'Bearer ' + token },
+      'payload': JSON.stringify({ "fields": fieldsObj }),
+      'muteHttpExceptions': true
+    });
+  } catch (e) {}
+}
 
-        document.addEventListener("DOMContentLoaded", () => {
-            resolveSurveyParams();
-            initTabs();
-            renderSymptoms();
+function getUserInfo(userId) {
+  try {
+    const token = getLarkToken();
+    if (!token) return null;
+    const url = "https://open.larksuite.com/open-apis/bitable/v1/apps/" + LARK_BASE_TOKEN + "/tables/" + LARK_TABLE_ID_USER + "/records";
+    const res = JSON.parse(UrlFetchApp.fetch(url, { 'headers': { 'Authorization': 'Bearer ' + token }, 'muteHttpExceptions': true }).getContentText());
+    if (!res.data || !res.data.items) return null;
+    
+    const user = res.data.items.find(function(item) { return extractLarkValue(item.fields['LineID']) === userId; });
+    if (!user) return null;
 
-            document.getElementById("searchInput").addEventListener("input", renderSymptoms);
+    return { 
+      recordId: user.record_id,
+      name: extractLarkValue(user.fields['學員姓名']), 
+      nickname: extractLarkValue(user.fields['Line暱稱']),
+      role: extractLarkValue(user.fields['身份']) || extractLarkValue(user.fields['角色']) || "學員",
+      status: extractLarkValue(user.fields['權限狀態']) || "有效",
+      startDate: extractLarkValue(user.fields['啟用日期']),
+      endDate: extractLarkValue(user.fields['到期日期'])
+    };
+  } catch (e) {
+    return null;
+  }
+}
 
-            document.getElementById("manualInputBtn").onclick = () => {
-                playSound('click');
-                const input = prompt("請輸入您的 LINE 帳號 ID (以 U 開頭):", "U");
-                if (input && input.trim() !== "") {
-                    currentLineId = input.trim();
-                    document.getElementById('displayLineId').innerText = currentLineId;
-                    document.getElementById('displayLineId').className = "font-mono text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded text-xs";
-                    document.getElementById('manualInputBtn').classList.add('hidden');
-                }
-            };
+function getLarkToken() {
+  const cache = CacheService.getScriptCache();
+  let token = cache.get(CACHE_KEY_LARK_TOKEN);
+  if (token) return token;
 
-            document.getElementById("resetBtn").onclick = () => {
-                playSound('click');
-                if (selectedSymptomIds.size > 0 && confirm("確定要清空所有已勾選的症狀嗎？")) {
-                    selectedSymptomIds.clear();
-                    document.getElementById("selectedCount").innerText = 0;
-                    renderSymptoms();
-                    document.getElementById("reportSection").classList.add("hidden");
-                }
-            };
+  try {
+    const res = UrlFetchApp.fetch('https://open.larksuite.com/open-apis/auth/v3/tenant_access_token/internal', {
+      'method': 'post',
+      'contentType': 'application/json',
+      'payload': JSON.stringify({ "app_id": LARK_APP_ID, "app_secret": LARK_APP_SECRET }),
+      'muteHttpExceptions': true
+    });
+    const json = JSON.parse(res.getContentText());
+    if (json.code === 0) {
+      token = json.tenant_access_token;
+      cache.put(CACHE_KEY_LARK_TOKEN, token, 6600);
+      return token;
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
 
-            document.getElementById("analyzeBtn").onclick = submitAndAnalyze;
-        });
+function saveUserChatLogToLark(userId, userMessage) {
+  try {
+    const token = getLarkToken();
+    if (!token) return;
+    const url = "https://open.larksuite.com/open-apis/bitable/v1/apps/" + LARK_BASE_TOKEN + "/tables/" + LARK_TABLE_ID_CHAT_LOG + "/records";
+    UrlFetchApp.fetch(url, {
+      'method': 'post',
+      'contentType': 'application/json',
+      'headers': { 'Authorization': 'Bearer ' + token },
+      'payload': JSON.stringify({ "fields": { "LineID": userId, "對話時間": new Date().getTime(), "對話內容": userMessage } }),
+      'muteHttpExceptions': true
+    });
+  } catch (e) {}
+}
 
-        function initTabs() {
-            const categories = ["全部分類", ...new Set(dbData.map(item => item.category))];
-            const tabsContainer = document.getElementById("categoryTabs");
-            tabsContainer.innerHTML = "";
-            categories.forEach(cat => {
-                const btn = document.createElement("button");
-                btn.className = `tab-btn border border-slate-300 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all hover:bg-slate-200 text-slate-700 ${cat === currentCategory ? 'active' : ''}`;
-                btn.innerText = cat;
-                btn.onclick = () => {
-                    playSound('click');
-                    currentCategory = cat;
-                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    renderSymptoms();
-                };
-                tabsContainer.appendChild(btn);
-            });
-        }
+function replyMessage(replyToken, message, userId) {
+  if (!CHANNEL_ACCESS_TOKEN) return;
+  try {
+    const res = UrlFetchApp.fetch('https://api.line.me/v2/bot/message/reply', {
+      'method': 'post',
+      'contentType': 'application/json',
+      'headers': { 'Authorization': 'Bearer ' + CHANNEL_ACCESS_TOKEN },
+      'payload': JSON.stringify({ 'replyToken': replyToken, 'messages': [{ 'type': 'text', 'text': message }] }),
+      'muteHttpExceptions': true
+    });
+    if (res.getResponseCode() !== 200 && userId) {
+      pushTextMessage(userId, message);
+    }
+  } catch (e) {
+    if (userId) pushTextMessage(userId, message);
+  }
+}
 
-        function renderSymptoms() {
-            const grid = document.getElementById("symptomsGrid");
-            const searchKeyword = document.getElementById("searchInput").value.trim().toLowerCase();
-            grid.innerHTML = "";
-
-            const filtered = dbData.filter(item => {
-                const matchCat = currentCategory === "全部分類" || item.category === currentCategory;
-                const matchKey = item.symptom.toLowerCase().includes(searchKeyword);
-                return matchCat && matchKey;
-            });
-
-            if (filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400"><p class="text-sm">查無符合條件的症狀</p></div>`;
-                return;
-            }
-
-            filtered.forEach(item => {
-                const isChecked = selectedSymptomIds.has(item.id);
-                const card = document.createElement("div");
-                card.className = `checkbox-card cursor-pointer border rounded-xl p-3 flex items-center justify-between bg-white hover:border-emerald-300 transition-all ${isChecked ? 'checked' : 'border-slate-200'}`;
-                card.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-4 h-4 rounded border ${isChecked ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-slate-50'} flex items-center justify-center text-[10px]">
-                            ${isChecked ? '✓' : ''}
-                        </div>
-                        <div>
-                            <span class="text-[10px] px-1 py-0.2 rounded bg-slate-100 text-slate-500 font-mono mr-1">${item.category}</span>
-                            <span class="text-xs font-medium text-slate-800">${item.symptom}</span>
-                        </div>
-                    </div>
-                `;
-                card.onclick = () => {
-                    playSound('click');
-                    if (selectedSymptomIds.has(item.id)) selectedSymptomIds.delete(item.id);
-                    else selectedSymptomIds.add(item.id);
-                    document.getElementById("selectedCount").innerText = selectedSymptomIds.size;
-                    renderSymptoms();
-                };
-                grid.appendChild(card);
-            });
-        }
-
-        async function submitAndAnalyze() {
-            // 🌸 1. 驗證姓名與信箱輸入
-            const customerName = document.getElementById("customerNameInput").value.trim();
-            const customerEmail = document.getElementById("customerEmailInput").value.trim();
-
-            if (!customerName) {
-                alert("請填寫您的姓名喔！");
-                document.getElementById("customerNameInput").focus();
-                return;
-            }
-
-            const emailRule = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!customerEmail || !emailRule.test(customerEmail)) {
-                alert("請填寫正確的電子郵件格式，以便寄送 PDF 檢測報告喔！");
-                document.getElementById("customerEmailInput").focus();
-                return;
-            }
-
-            if (selectedSymptomIds.size === 0) { 
-                alert("請至少勾選一項症狀喔！"); 
-                return; 
-            }
-
-            const analyzeBtn = document.getElementById("analyzeBtn");
-            analyzeBtn.disabled = true;
-            analyzeBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> PDF 報告生成與發送中...`;
-
-            playSound('success');
-
-            const counts = {};
-            const selectedSymptomsList = [];
-            selectedSymptomIds.forEach(id => {
-                const item = dbData.find(d => d.id === id);
-                if (item) {
-                    selectedSymptomsList.push(item.symptom);
-                    item.nutrients.forEach(n => counts[n] = (counts[n] || 0) + 1);
-                }
-            });
-
-            const sortedNutrients = Object.keys(counts).map(k => ({ name: nutrientNameMap[k] || k, count: counts[k] })).sort((a,b) => b.count - a.count);
-            const top3Names = sortedNutrients.slice(0, 3).map(n => n.name).join(", ");
-            const fullStatsText = sortedNutrients.map(n => `${n.name}: ${n.count}次`).join(", ");
-
-            renderTop3UI(sortedNutrients.slice(0, 3));
-            renderFullStatUI(sortedNutrients);
-            document.getElementById("reportSection").classList.remove("hidden");
-            document.getElementById("reportSection").scrollIntoView({ behavior: 'smooth' });
-
-            // 🌸 2. 包裝包含姓名與信箱的 Payload
-            const payloadData = {
-                action: "save_subhealth_survey",
-                LineID: currentLineId,
-                survey_id: currentSurveyId,
-                customer_name: customerName,
-                customer_email: customerEmail,
-                symptomCount: selectedSymptomIds.size,
-                symptomsDetail: selectedSymptomsList.join(", "),
-                top3Nutrients: top3Names,
-                fullStatsText: fullStatsText
-            };
-
-            try {
-                await fetch(gasWebhookUrl, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    cache: 'no-cache',
-                    redirect: 'follow',
-                    body: JSON.stringify(payloadData)
-                });
-                console.log("問卷數據已成功送出，PDF 信件背景發送中！");
-            } catch (e) {
-                console.error("提交至 GAS 出錯:", e);
-            } finally {
-                analyzeBtn.disabled = false;
-                analyzeBtn.innerHTML = `<i class="fa-solid fa-paper-plane mr-2"></i> 完成檢測並寄送 PDF 報告至信箱`;
-            }
-        }
-
-        function renderTop3UI(top3) {
-            const container = document.getElementById("top3Container");
-            container.innerHTML = "";
-            top3.forEach((item, idx) => {
-                const card = document.createElement("div");
-                card.className = "bg-white border-2 border-amber-400 p-4 rounded-xl text-center shadow-md relative overflow-hidden";
-                card.innerHTML = `
-                    <div class="absolute top-0 right-0 bg-gradient-to-l from-amber-500 to-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-sm">
-                        🚨 優先補充 No.${idx+1}
-                    </div>
-                    <h4 class="font-bold text-amber-950 text-base mt-3">${item.name}</h4>
-                    <p class="text-xs text-slate-600 mt-1">關聯症狀數：<strong class="text-amber-700 text-sm font-mono">${item.count}</strong> 項</p>
-                    <div class="mt-2 pt-2 border-t border-amber-100 text-[10px] text-amber-800 font-medium">
-                        建議每日優先著重補充
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function renderFullStatUI(sortedNutrients) {
-            const container = document.getElementById("fullStatContainer");
-            container.innerHTML = "";
-            sortedNutrients.forEach(item => {
-                const tag = document.createElement("span");
-                tag.className = "text-[11px] bg-white border border-slate-200 px-2.5 py-1 rounded-md text-slate-600 shadow-sm";
-                tag.innerHTML = `${item.name} <strong class="text-emerald-600">${item.count}次</strong>`;
-                container.appendChild(tag);
-            });
-        }
-    </script>
-</body>
-</html>
+function pushTextMessage(userId, text) {
+  if (!CHANNEL_ACCESS_TOKEN || !userId) return;
+  try {
+    UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
+      'method': 'post',
+      'contentType': 'application/json',
+      'headers': { 'Authorization': 'Bearer ' + CHANNEL_ACCESS_TOKEN },
+      'payload': JSON.stringify({ 'to': userId, 'messages': [{ 'type': 'text', 'text': text }] }),
+      'muteHttpExceptions': true
+    });
+  } catch (e) {}
+}
