@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小妖健管 - 亞健康自我檢測問卷 V1.3.1</title>
+    <title>小妖健管 - 亞健康自我檢測問卷</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome CDN -->
@@ -17,8 +17,9 @@
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #fcf8f6; color: #2d3748; }
         .font-serif-tc { font-family: 'Noto Serif TC', serif; }
+        
         .tab-btn.active { background-color: #e5989b; color: white; border-color: #e5989b; }
-        .checkbox-card.checked { border-color: #b5838d; background-color: #fff0f3; box-shadow: 0 4px 6px -1px rgba(181, 131, 141, 0.2); }
+        .checkbox-card.checked { border-color: #b5838d; background-color: #fff0f3; box-shadow: 0 4px 8px -1px rgba(181, 131, 141, 0.25); }
         
         .pink-gold-card {
             background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
@@ -30,6 +31,15 @@
             border: 2px solid #e8b4b8;
             box-shadow: 0 15px 30px -5px rgba(213, 114, 129, 0.25);
         }
+        
+        /* 🌸 分類不同粉色系標籤樣式 */
+        .cat-tag-頭部 { background-color: #fce7f3; color: #9d174d; border: 1px solid #fbcfe8; }
+        .cat-tag-身體 { background-color: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+        .cat-tag-四肢 { background-color: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+        .cat-tag-精神感官 { background-color: #fae8ff; color: #86198f; border: 1px solid #f5d0fe; }
+        .cat-tag-default { background-color: #ffe4e6; color: #9f1239; border: 1px solid #fecdd3; }
+
+        /* 🌸 小妖對話泡泡框 */
         .speech-bubble {
             position: relative;
             background: #ffffff;
@@ -40,7 +50,7 @@
             content: '';
             position: absolute;
             bottom: -12px;
-            right: 40px;
+            left: 30px;
             border-width: 12px 12px 0;
             border-style: solid;
             border-color: #f2b8c6 transparent;
@@ -51,7 +61,7 @@
             content: '';
             position: absolute;
             bottom: -9px;
-            right: 42px;
+            left: 32px;
             border-width: 10px 10px 0;
             border-style: solid;
             border-color: #ffffff transparent;
@@ -73,10 +83,10 @@
                         <i class="fa-solid fa-wand-magic-sparkles text-3xl text-rose-200"></i>
                         <h1 class="text-2xl sm:text-3xl font-bold tracking-wide font-serif-tc">小妖健管 🌸 亞健康自我檢測</h1>
                     </div>
-                    <p class="text-rose-100 text-sm mt-1">自我檢視 72 項身體徵兆，讓小妖為您找出缺乏的關鍵營養素</p>
+                    <p class="text-rose-100 text-sm sm:text-base mt-1">自我檢視 72 項身體徵兆，讓小妖為您找出缺乏的關鍵營養素</p>
                 </div>
-                <div class="bg-rose-950/40 backdrop-blur-sm px-3 py-1 rounded-full border border-rose-300/30 text-xs text-rose-100 font-mono">
-                    版本：<span class="text-amber-300 font-bold">V1.3.1</span>
+                <div class="bg-rose-950/40 backdrop-blur-sm px-3.5 py-1.5 rounded-full border border-rose-300/30 text-xs sm:text-sm text-rose-100 font-mono">
+                    專屬健管版本
                 </div>
             </div>
         </header>
@@ -87,69 +97,65 @@
             <!-- 🌸 顧客基本資料輸入區塊 -->
             <div class="bg-rose-50/50 border border-rose-200 p-5 rounded-2xl shadow-sm space-y-4">
                 <div class="flex items-center gap-2 border-b border-rose-200 pb-2">
-                    <i class="fa-solid fa-id-card text-rose-700 text-lg"></i>
-                    <h3 class="font-bold text-rose-900 text-sm sm:text-base">填寫人基本資料（完成檢測後將自動寄送 HTML 健康分析報告至您的信箱）</h3>
+                    <i class="fa-solid fa-id-card text-rose-700 text-xl"></i>
+                    <h3 class="font-bold text-rose-900 text-base sm:text-lg">填寫人基本資料（完成後將自動寄送個人分析報告至您的信箱）</h3>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-rose-900 mb-1" for="customerNameInput">
-                            <i class="fa-solid fa-user text-rose-600 mr-1"></i>顧客姓名 <span class="text-red-500">*</span>
+                        <label class="block text-sm font-bold text-rose-900 mb-1" for="customerNameInput">
+                            <i class="fa-solid fa-user text-rose-600 mr-1"></i>您的姓名 <span class="text-red-500">*</span>
                         </label>
                         <input type="text" id="customerNameInput" placeholder="請輸入您的姓名" 
-                               class="w-full px-3.5 py-2 text-sm rounded-xl border border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-500 bg-white">
+                               class="w-full px-4 py-3 text-base rounded-xl border border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-500 bg-white">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-rose-900 mb-1" for="customerEmailInput">
-                            <i class="fa-solid fa-envelope text-rose-600 mr-1"></i>電子郵件 (寄送 HTML 報告) <span class="text-red-500">*</span>
+                        <label class="block text-sm font-bold text-rose-900 mb-1" for="customerEmailInput">
+                            <i class="fa-solid fa-envelope text-rose-600 mr-1"></i>電子郵件 (接收個人報告) <span class="text-red-500">*</span>
                         </label>
                         <input type="email" id="customerEmailInput" placeholder="example@gmail.com" 
-                               class="w-full px-3.5 py-2 text-sm rounded-xl border border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-500 bg-white">
+                               class="w-full px-4 py-3 text-base rounded-xl border border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-500 bg-white">
                     </div>
                 </div>
             </div>
 
             <!-- 身份識別與問卷序號資訊欄 -->
-            <div id="userInfoBar" class="bg-amber-50/80 border border-amber-200 text-amber-900 px-4 py-3 rounded-xl text-xs flex flex-wrap items-center justify-between gap-2 shadow-sm">
+            <div id="userInfoBar" class="bg-amber-50/80 border border-amber-200 text-amber-900 px-4 py-3 rounded-xl text-xs sm:text-sm flex flex-wrap items-center justify-between gap-2 shadow-sm">
                 <div class="flex flex-wrap items-center gap-2">
-                    <i class="fa-solid fa-user-check text-amber-600"></i>
+                    <i class="fa-solid fa-user-check text-amber-600 text-base"></i>
                     <span>檢測學員帳號：</span>
-                    <strong id="displayLineId" class="font-mono text-rose-700 bg-rose-100/80 px-2 py-0.5 rounded text-xs">讀取中...</strong>
+                    <strong id="displayLineId" class="font-mono text-rose-700 bg-rose-100/80 px-2.5 py-1 rounded text-xs sm:text-sm">讀取中...</strong>
                     
-                    <span id="surveyBadge" class="hidden font-mono text-purple-700 bg-purple-100 px-2 py-0.5 rounded text-xs font-bold border border-purple-200 ml-2">
+                    <span id="surveyBadge" class="hidden font-mono text-purple-700 bg-purple-100 px-2.5 py-1 rounded text-xs sm:text-sm font-bold border border-purple-200 ml-2">
                         問卷序號：<span id="displaySurveyId">--</span>
                     </span>
-
-                    <button id="manualInputBtn" class="hidden text-[10px] text-amber-700 underline hover:text-amber-900 ml-2">
-                        <i class="fa-solid fa-pen"></i> 手動輸入 LINE ID
-                    </button>
                 </div>
-                <span id="coachBanner" class="text-rose-800 font-bold text-[11px]">小妖專屬健康照護 🌸</span>
+                <span id="coachBanner" class="text-rose-800 font-bold text-xs sm:text-sm">小妖專屬健康照護 🌸</span>
             </div>
 
             <!-- 控制列：搜尋與統計 -->
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-rose-50/30 p-4 rounded-2xl border border-rose-100">
-                <div class="relative w-full sm:w-72">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-rose-400"></i>
-                    <input type="text" id="searchInput" placeholder="搜尋症狀（如：疲倦、胃酸、多夢）..." class="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-rose-200 focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white">
+                <div class="relative w-full sm:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-rose-400 text-base"></i>
+                    <input type="text" id="searchInput" placeholder="搜尋身體狀況（如：疲倦、胃酸、多夢）..." class="w-full pl-10 pr-4 py-2.5 text-base rounded-xl border border-rose-200 focus:outline-none focus:ring-2 focus:ring-rose-400 bg-white">
                 </div>
                 <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-                    <span class="text-sm font-medium text-slate-600">已選擇：<strong id="selectedCount" class="text-rose-600 text-lg">0</strong> 項症狀</span>
-                    <button id="resetBtn" class="px-3 py-1.5 text-xs text-slate-500 hover:text-red-600 border border-slate-300 hover:border-red-300 rounded-lg transition-all bg-white">
+                    <span class="text-base font-medium text-slate-700">已選擇：<strong id="selectedCount" class="text-rose-600 text-xl font-bold">0</strong> 項狀況</span>
+                    <button id="resetBtn" class="px-4 py-2 text-sm text-slate-600 hover:text-red-600 border border-slate-300 hover:border-red-300 rounded-xl transition-all bg-white font-medium">
                         <i class="fa-solid fa-rotate-right mr-1"></i>重置
                     </button>
                 </div>
             </div>
 
             <!-- 分類頁籤 Tabs -->
-            <div class="flex flex-wrap gap-2 border-b border-rose-100 pb-2" id="categoryTabs"></div>
+            <div class="flex flex-wrap gap-2 border-b border-rose-100 pb-2.5" id="categoryTabs"></div>
 
             <!-- 症狀勾選清單網格 -->
-            <div id="symptomsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 min-h-[300px]"></div>
+            <div id="symptomsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 min-h-[300px]"></div>
 
             <!-- 儲存提交按鈕 -->
             <div class="pt-4 flex justify-center">
-                <button id="analyzeBtn" class="bg-gradient-to-r from-rose-600 via-pink-600 to-rose-700 hover:from-rose-700 hover:to-pink-700 text-white font-bold px-10 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all text-base flex items-center gap-2 font-serif-tc tracking-wider">
-                    <i class="fa-solid fa-paper-plane"></i> 完成檢測並寄送 HTML 報告至信箱
+                <button id="analyzeBtn" class="bg-gradient-to-r from-rose-600 via-pink-600 to-rose-700 hover:from-rose-700 hover:to-pink-700 text-white font-bold px-10 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all text-lg flex items-center gap-2 font-serif-tc tracking-wider">
+                    <i class="fa-solid fa-paper-plane"></i> 完成檢測並寄送分析報告至信箱
                 </button>
             </div>
 
@@ -157,44 +163,45 @@
             <section id="reportSection" class="hidden space-y-8 pt-8 border-t-2 border-rose-100 mt-10">
                 
                 <!-- 成功提示 -->
-                <div class="bg-rose-50 border border-rose-200 p-4 rounded-2xl text-center">
-                    <i class="fa-solid fa-circle-check text-rose-600 text-3xl mb-2"></i>
-                    <h3 class="text-lg font-bold text-rose-950 font-serif-tc">檢測報告已成功發送！HTML 格式報告已寄至您的 Email 信箱！</h3>
-                    <p class="text-xs text-rose-700 mt-1">小妖已經將優美的 HTML 格式健康檢測報告發送到您的電子郵件，可以直接在信箱開啟閱讀喔 🌸</p>
+                <div class="bg-rose-50 border border-rose-200 p-5 rounded-2xl text-center">
+                    <i class="fa-solid fa-circle-check text-rose-600 text-4xl mb-2"></i>
+                    <h3 class="text-xl font-bold text-rose-950 font-serif-tc">檢測完成！分析報告已發送至您的信箱！</h3>
+                    <p class="text-sm text-rose-700 mt-1">小妖已經將優美的健康分析報告發送到您的電子郵件，可以直接開啟閱讀喔 🌸</p>
                 </div>
 
-                <!-- 🌸 小妖迎賓與重點宣導區塊 -->
+                <!-- 🌸 小妖迎賓與重點宣導區塊 (優化：圓形大頭貼與對話框) -->
                 <div class="pink-gold-card p-6 sm:p-8 rounded-3xl relative overflow-hidden">
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
-                        <div class="lg:col-span-8 space-y-6">
+                    <div class="space-y-6">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-rose-200 pb-4">
                             <div>
-                                <span class="bg-rose-100 text-rose-800 text-xs px-3 py-1 rounded-full font-bold tracking-wider">
+                                <span class="bg-rose-100 text-rose-800 text-xs sm:text-sm px-3.5 py-1 rounded-full font-bold tracking-wider">
                                     🌸 小妖仙盈版 · 專屬調理方案
                                 </span>
                                 <h2 class="text-2xl sm:text-3xl font-bold font-serif-tc text-rose-950 mt-2">
                                     優先補充：缺乏營養素 Top 3
                                 </h2>
-                                <p class="text-xs text-rose-800/80 mt-1">
-                                    根據您勾選的微小徵兆，小妖為您計算出需求頻率最高的關鍵營養素：
-                                </p>
                             </div>
-
-                            <div class="space-y-4">
-                                <div id="heroTop1Card" class="hero-gold-card p-5 rounded-2xl relative"></div>
-                                <div id="subTop23Container" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+                            <!-- 🌸 精緻圓形大頭貼 -->
+                            <div class="flex items-center gap-3 bg-white/80 p-2 pr-4 rounded-full border border-rose-200 shadow-sm">
+                                <img src="images/xiaoyao-advice.png" alt="小妖" class="w-14 h-14 rounded-full object-cover border-2 border-rose-400 shadow-md" onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/4140/4140047.png';">
+                                <div>
+                                    <div class="font-bold text-rose-900 text-sm">健管小助手 小妖</div>
+                                    <div class="text-[11px] text-rose-600">線上為您健康關懷 🌸</div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="lg:col-span-4 flex flex-col items-center justify-end">
-                            <div class="speech-bubble p-4 mb-3 w-full text-xs text-rose-900 leading-relaxed shadow-sm">
-                                <p id="xiaoyaoSpeech" class="font-medium">
-                                    「太棒了！小妖已經幫您精算好最需要的營養方案囉！優先補充第 1 名營養素，讓您由內而外綻放美麗與健康 🌸」
-                                </p>
-                            </div>
+                        <!-- 小妖建議對話氣泡 -->
+                        <div class="speech-bubble p-4 sm:p-5 w-full text-sm sm:text-base text-rose-900 leading-relaxed shadow-sm">
+                            <p id="xiaoyaoSpeech" class="font-medium">
+                                「太棒了！小妖已經幫您精算好最需要的營養方案囉！優先補充第 1 名營養素，讓您由內而外綻放美麗與健康 🌸」
+                            </p>
+                        </div>
 
-                            <div class="relative w-48 sm:w-56 h-64 sm:h-72 flex items-center justify-center">
-                                <img src="images/xiaoyao-advice.png" alt="小妖advice" class="max-h-full object-contain drop-shadow-md rounded-2xl" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-full h-full bg-rose-100 border-2 border-dashed border-rose-300 rounded-2xl flex flex-col items-center justify-center text-rose-400 text-xs p-4 text-center\'><i class=\'fa-solid fa-image text-3xl mb-2\'></i>[預留小妖圖片區塊<br>xiaoyao-welcome.png]</div>';">
-                            </div>
+                        <!-- Top 3 卡片清單 -->
+                        <div class="space-y-4">
+                            <div id="heroTop1Card" class="hero-gold-card p-6 rounded-2xl relative"></div>
+                            <div id="subTop23Container" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
                         </div>
                     </div>
                 </div>
@@ -202,46 +209,40 @@
                 <!-- 🔽 亞健康症狀對應營養素下拉查詢區塊 -->
                 <div class="pink-gold-card p-6 rounded-3xl space-y-4">
                     <div class="flex items-center gap-2 border-b border-rose-200 pb-3">
-                        <i class="fa-solid fa-sliders text-rose-600 text-lg"></i>
-                        <h3 class="font-bold text-rose-950 font-serif-tc text-base">
-                            個人化亞健康症狀與營養對照查詢
+                        <i class="fa-solid fa-sliders text-rose-600 text-xl"></i>
+                        <h3 class="font-bold text-rose-950 font-serif-tc text-lg">
+                            個人化狀況與營養對照查詢
                         </h3>
                     </div>
                     
-                    <p class="text-xs text-slate-600">
-                        請選擇您本次檢測有勾選的亞健康狀況，小妖將為您詳細說明該狀況所需的對應營養素：
+                    <p class="text-sm text-slate-600">
+                        請選擇您本次檢測有勾選的身體狀況，小妖將為您詳細說明該狀況所需的建議對應營養素：
                     </p>
 
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
                         <div class="md:col-span-5">
-                            <label for="symptomSelect" class="block text-xs font-bold text-rose-900 mb-1">
-                                選擇已勾選的亞健康情況：
+                            <label for="symptomSelect" class="block text-sm font-bold text-rose-900 mb-1">
+                                選擇已勾選的身體狀況：
                             </label>
-                            <select id="symptomSelect" class="w-full px-3 py-2 text-sm rounded-xl border border-rose-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-400 text-rose-950">
-                                <option value="">-- 請選擇症狀 --</option>
+                            <select id="symptomSelect" class="w-full px-3.5 py-2.5 text-base rounded-xl border border-rose-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-400 text-rose-950">
+                                <option value="">-- 請選擇狀況 --</option>
                             </select>
                         </div>
 
                         <div class="md:col-span-7">
-                            <div id="symptomNutrientsResult" class="bg-white/80 border border-rose-200 p-4 rounded-2xl min-h-[70px] flex items-center justify-center text-xs text-slate-400 text-center">
-                                請從左側下拉選單選擇症狀，即可查看建議補充項目
+                            <div id="symptomNutrientsResult" class="bg-white/80 border border-rose-200 p-4 rounded-2xl min-h-[70px] flex items-center justify-center text-sm text-slate-400 text-center">
+                                請從左側下拉選單選擇狀況，即可查看建議補充項目
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- 完整統計資料 -->
-                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                    <h4 class="text-xs font-bold text-slate-700 mb-3"><i class="fa-solid fa-list-check text-rose-600 mr-1"></i> 完整營養素需求頻率統計</h4>
-                    <div id="fullStatContainer" class="flex flex-wrap gap-2"></div>
                 </div>
 
             </section>
 
         </main>
         
-        <footer class="bg-rose-50/50 border-t border-rose-100 p-4 text-center text-xs text-rose-800/70">
-            <p>小妖健管系統 V1.3.1 | 本結果僅供健康管理與膳食補充參考，如有嚴重不適請諮詢專業醫師。</p>
+        <footer class="bg-rose-50/50 border-t border-rose-100 p-4 text-center text-xs sm:text-sm text-rose-800/70">
+            <p>小妖健管系統 | 本結果僅供健康管理與膳食補充參考，如有嚴重不適請諮詢專業醫師。</p>
         </footer>
     </div>
 
@@ -372,7 +373,6 @@
             currentCoachName = urlParams.get('prefill_coach') || "";
 
             const displayEl = document.getElementById('displayLineId');
-            const manualBtn = document.getElementById('manualInputBtn');
             const surveyBadge = document.getElementById('surveyBadge');
             const coachBanner = document.getElementById('coachBanner');
 
@@ -392,13 +392,11 @@
 
             if (currentLineId && currentLineId.trim() !== "") {
                 displayEl.innerText = currentLineId;
-                displayEl.className = "font-mono text-rose-700 bg-rose-100 px-2 py-0.5 rounded text-xs";
-                manualBtn.classList.add('hidden');
+                displayEl.className = "font-mono text-rose-700 bg-rose-100 px-2.5 py-0.5 rounded text-xs sm:text-sm";
             } else {
                 currentLineId = "未綁定LINE帳號";
-                displayEl.innerText = "未檢測到帳號";
-                displayEl.className = "font-mono text-amber-700 bg-amber-100 px-2 py-0.5 rounded text-xs font-bold";
-                manualBtn.classList.remove('hidden');
+                displayEl.innerText = "未連結帳號";
+                displayEl.className = "font-mono text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded text-xs sm:text-sm font-bold";
             }
 
             if (currentSurveyId && currentSurveyId.trim() !== "") {
@@ -418,19 +416,9 @@
 
             document.getElementById("searchInput").addEventListener("input", renderSymptoms);
 
-            document.getElementById("manualInputBtn").onclick = () => {
-                playSound('click');
-                const input = prompt("請輸入您的 LINE 帳號 ID (以 U 開頭):", "U");
-                if (input && input.trim() !== "") {
-                    currentLineId = input.trim();
-                    document.getElementById('displayLineId').innerText = currentLineId;
-                    document.getElementById('manualInputBtn').classList.add('hidden');
-                }
-            };
-
             document.getElementById("resetBtn").onclick = () => {
                 playSound('click');
-                if (selectedSymptomIds.size > 0 && confirm("確定要清空所有已勾選的症狀嗎？")) {
+                if (selectedSymptomIds.size > 0 && confirm("確定要清空所有已勾選的狀況嗎？")) {
                     selectedSymptomIds.clear();
                     document.getElementById("selectedCount").innerText = 0;
                     renderSymptoms();
@@ -445,16 +433,16 @@
                 const resultDiv = document.getElementById("symptomNutrientsResult");
                 
                 if (!symptomId) {
-                    resultDiv.innerHTML = `<span class="text-slate-400">請從左側下拉選單選擇症狀，即可查看建議補充項目</span>`;
+                    resultDiv.innerHTML = `<span class="text-slate-400">請從左側下拉選單選擇狀況，即可查看建議補充項目</span>`;
                     return;
                 }
 
                 const symptomData = dbData.find(d => d.id === symptomId);
                 if (symptomData) {
-                    const mappedNutrients = symptomData.nutrients.map(n => `<span class="inline-block bg-rose-100 text-rose-800 border border-rose-300 font-bold px-2.5 py-1 rounded-lg m-1">${nutrientNameMap[n] || n}</span>`).join('');
+                    const mappedNutrients = symptomData.nutrients.map(n => `<span class="inline-block bg-rose-100 text-rose-800 border border-rose-300 font-bold px-3 py-1 rounded-lg m-1 text-sm sm:text-base">${nutrientNameMap[n] || n}</span>`).join('');
                     resultDiv.innerHTML = `
                         <div class="text-left w-full space-y-1">
-                            <div class="font-bold text-rose-950 text-xs">【${symptomData.symptom}】對應建議補充：</div>
+                            <div class="font-bold text-rose-950 text-sm sm:text-base">【${symptomData.symptom}】對應建議補充：</div>
                             <div class="flex flex-wrap items-center gap-1 mt-1">${mappedNutrients}</div>
                         </div>
                     `;
@@ -468,7 +456,7 @@
             tabsContainer.innerHTML = "";
             categories.forEach(cat => {
                 const btn = document.createElement("button");
-                btn.className = `tab-btn border border-rose-200 px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all hover:bg-rose-100 text-slate-700 ${cat === currentCategory ? 'active' : ''}`;
+                btn.className = `tab-btn border border-rose-200 px-4 py-2 rounded-xl text-sm sm:text-base font-medium transition-all hover:bg-rose-100 text-slate-700 ${cat === currentCategory ? 'active' : ''}`;
                 btn.innerText = cat;
                 btn.onclick = () => {
                     playSound('click');
@@ -479,6 +467,10 @@
                 };
                 tabsContainer.appendChild(btn);
             });
+        }
+
+        function getCategoryTagClass(category) {
+            return `cat-tag-${category}` || 'cat-tag-default';
         }
 
         function renderSymptoms() {
@@ -493,22 +485,24 @@
             });
 
             if (filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400"><p class="text-sm">查無符合條件的症狀</p></div>`;
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400"><p class="text-base">查無符合條件的身體狀況</p></div>`;
                 return;
             }
 
             filtered.forEach(item => {
                 const isChecked = selectedSymptomIds.has(item.id);
                 const card = document.createElement("div");
-                card.className = `checkbox-card cursor-pointer border rounded-2xl p-3 flex items-center justify-between bg-white hover:border-rose-300 transition-all ${isChecked ? 'checked' : 'border-rose-100'}`;
+                const tagClass = getCategoryTagClass(item.category);
+                
+                card.className = `checkbox-card cursor-pointer border rounded-2xl p-4 flex items-center justify-between bg-white hover:border-rose-300 transition-all ${isChecked ? 'checked' : 'border-rose-100'}`;
                 card.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-4 h-4 rounded-md border ${isChecked ? 'bg-rose-600 border-rose-600 text-white' : 'border-rose-300 bg-rose-50'} flex items-center justify-center text-[10px]">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-5 h-5 rounded-md border ${isChecked ? 'bg-rose-600 border-rose-600 text-white' : 'border-rose-300 bg-rose-50'} flex items-center justify-center text-xs font-bold">
                             ${isChecked ? '✓' : ''}
                         </div>
                         <div>
-                            <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-700 font-mono mr-1">${item.category}</span>
-                            <span class="text-xs font-medium text-slate-800">${item.symptom}</span>
+                            <span class="text-xs px-2.5 py-0.5 rounded-full font-bold mr-1.5 ${tagClass}">${item.category}</span>
+                            <span class="text-sm sm:text-base font-bold text-slate-800">${item.symptom}</span>
                         </div>
                     </div>
                 `;
@@ -535,19 +529,19 @@
 
             const emailRule = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!customerEmail || !emailRule.test(customerEmail)) {
-                alert("請填寫正確的電子郵件格式，以便寄送 HTML 檢測報告喔！");
+                alert("請填寫正確的電子郵件格式，以便寄送分析報告喔！");
                 document.getElementById("customerEmailInput").focus();
                 return;
             }
 
             if (selectedSymptomIds.size === 0) { 
-                alert("請至少勾選一項症狀喔！"); 
+                alert("請至少勾選一項身體狀況喔！"); 
                 return; 
             }
 
             const analyzeBtn = document.getElementById("analyzeBtn");
             analyzeBtn.disabled = true;
-            analyzeBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> HTML 報告發送中...`;
+            analyzeBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> 分析報告發送中...`;
 
             playSound('success');
 
@@ -568,7 +562,6 @@
 
             renderTop3EnhancedUI(top3);
             populateSymptomDropdown();
-            renderFullStatUI(sortedNutrients);
 
             if (top3.length > 0) {
                 document.getElementById("xiaoyaoSpeech").innerText = `「太棒了！小妖發現您目前最需要【${top3[0].name}】，優先補充它可以幫助改善 ${top3[0].count} 項相關徵兆喔！🌸」`;
@@ -577,10 +570,9 @@
             document.getElementById("reportSection").classList.remove("hidden");
             document.getElementById("reportSection").scrollIntoView({ behavior: 'smooth' });
 
-            // 🌸 發送資料至 GAS，請 GAS 透過 MailApp / GmailApp 寄送 HTML 格式電子郵件
+            // 🌸 發送資料至 GAS，GAS 將會自動發送報告至學員 Email，並同步寄送副本給教練
             const payloadData = {
                 action: "save_subhealth_survey",
-                send_format: "html", // 指定寄送 HTML 格式郵件
                 LineID: currentLineId,
                 survey_id: currentSurveyId,
                 customer_name: customerName,
@@ -603,7 +595,7 @@
                 console.error("提交至 GAS 出錯:", e);
             } finally {
                 analyzeBtn.disabled = false;
-                analyzeBtn.innerHTML = `<i class="fa-solid fa-paper-plane mr-2"></i> 完成檢測並寄送 HTML 報告至信箱`;
+                analyzeBtn.innerHTML = `<i class="fa-solid fa-paper-plane mr-2"></i> 完成檢測並寄送分析報告至信箱`;
             }
         }
 
@@ -619,13 +611,13 @@
             const top1 = top3[0];
             heroContainer.innerHTML = `
                 <div class="flex items-center justify-between mb-2">
-                    <span id="top1Badge" class="bg-gradient-to-r from-amber-600 to-rose-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm border border-amber-300">
+                    <span id="top1Badge" class="bg-gradient-to-r from-amber-600 to-rose-600 text-white text-xs sm:text-sm font-bold px-3.5 py-1 rounded-full shadow-sm border border-amber-300">
                         👑 核心首選需求 No.1
                     </span>
-                    <span class="text-xs text-rose-800 font-medium">關聯徵兆：<strong class="text-rose-700 font-bold text-lg">${top1.count}</strong> 項</span>
+                    <span class="text-xs sm:text-sm text-rose-800 font-medium">關聯狀況：<strong class="text-rose-700 font-bold text-lg sm:text-xl">${top1.count}</strong> 項</span>
                 </div>
                 <h3 id="top1TitleText" class="text-2xl sm:text-3xl font-bold font-serif-tc text-rose-950 my-2">${top1.name}</h3>
-                <p class="text-xs text-rose-900/80 leading-relaxed">
+                <p class="text-xs sm:text-sm text-rose-900/80 leading-relaxed">
                     這是您目前體內需求頻率最高的關鍵營養素！強烈建議作為第一優先每日重點補充。
                 </p>
             `;
@@ -636,34 +628,31 @@
                 card.className = "bg-white/90 border border-rose-200 p-4 rounded-2xl shadow-sm relative";
                 card.innerHTML = `
                     <div class="flex items-center justify-between mb-1">
-                        <span class="bg-rose-100 text-rose-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                        <span class="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-0.5 rounded-full">
                             優先補充 No.${idx + 2}
                         </span>
-                        <span class="text-xs text-slate-500">關聯：<strong class="text-rose-600 font-bold">${item.count}</strong> 項</span>
+                        <span class="text-xs sm:text-sm text-slate-500">關聯：<strong class="text-rose-600 font-bold text-base">${item.count}</strong> 項</span>
                     </div>
-                    <h4 class="font-bold text-rose-950 text-lg mt-1 font-serif-tc">${item.name}</h4>
-                    <p class="text-[11px] text-slate-500 mt-1">重點加強營養調理</p>
+                    <h4 class="font-bold text-rose-950 text-lg sm:text-xl mt-1 font-serif-tc">${item.name}</h4>
+                    <p class="text-xs text-slate-500 mt-1">重點加強營養調理</p>
                 `;
                 subContainer.appendChild(card);
             });
 
-            // 🌟 GSAP 動畫： No.1 營養素卡片彈跳登場與動態效果
+            // 🌟 GSAP 動畫：No.1 營養素卡片彈跳登場與動態效果
             if (typeof gsap !== 'undefined') {
                 gsap.killTweensOf("#heroTop1Card, #top1TitleText, #top1Badge");
 
-                // 1. 全卡片彈性跳出 (Pop-in)
                 gsap.fromTo("#heroTop1Card", 
                     { scale: 0.6, opacity: 0, y: 40 }, 
                     { scale: 1, opacity: 1, y: 0, duration: 1.2, ease: "elastic.out(1, 0.4)" }
                 );
 
-                // 2. 標籤縮放脈動 (Pulse)
                 gsap.fromTo("#top1Badge", 
                     { scale: 0.8 }, 
                     { scale: 1.1, duration: 0.6, repeat: -1, yoyo: true, ease: "power1.inOut" }
                 );
 
-                // 3. No.1 名稱文字呼吸放大
                 gsap.fromTo("#top1TitleText", 
                     { scale: 0.95 }, 
                     { scale: 1.05, duration: 1.4, repeat: -1, yoyo: true, ease: "sine.inOut" }
@@ -673,7 +662,7 @@
 
         function populateSymptomDropdown() {
             const select = document.getElementById("symptomSelect");
-            select.innerHTML = '<option value="">-- 請選擇您勾選的症狀 --</option>';
+            select.innerHTML = '<option value="">-- 請選擇您勾選的狀況 --</option>';
 
             selectedSymptomIds.forEach(id => {
                 const item = dbData.find(d => d.id === id);
@@ -685,18 +674,7 @@
                 }
             });
             
-            document.getElementById("symptomNutrientsResult").innerHTML = `<span class="text-slate-400">請從左側下拉選單選擇症狀，即可查看建議補充項目</span>`;
-        }
-
-        function renderFullStatUI(sortedNutrients) {
-            const container = document.getElementById("fullStatContainer");
-            container.innerHTML = "";
-            sortedNutrients.forEach(item => {
-                const tag = document.createElement("span");
-                tag.className = "text-[11px] bg-white border border-rose-100 px-2.5 py-1 rounded-xl text-slate-700 shadow-sm";
-                tag.innerHTML = `${item.name} <strong class="text-rose-600">${item.count}次</strong>`;
-                container.appendChild(tag);
-            });
+            document.getElementById("symptomNutrientsResult").innerHTML = `<span class="text-slate-400 text-sm">請從左側下拉選單選擇狀況，即可查看建議補充項目</span>`;
         }
     </script>
 </body>
