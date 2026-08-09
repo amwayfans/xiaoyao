@@ -67,6 +67,12 @@
       border-color: var(--primary-color);
       background-color: #ffffff;
     }
+    input[readonly] {
+      background-color: #f3f4f6 !important;
+      color: #6b7280;
+      border-color: #e5e7eb;
+      cursor: not-allowed;
+    }
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -83,6 +89,16 @@
     .cycle-card div {
       margin-bottom: 4px;
     }
+    .alert-banner {
+      background-color: #fef3c7;
+      border: 1px solid #f59e0b;
+      color: #92400e;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
     .btn-submit {
       width: 100%;
       margin-top: 20px;
@@ -95,10 +111,12 @@
       font-weight: bold;
       cursor: pointer;
       box-shadow: 0 4px 12px rgba(159, 18, 57, 0.25);
+      transition: all 0.2s ease;
     }
     .btn-submit:disabled {
       background: #ccc;
       cursor: not-allowed;
+      box-shadow: none;
     }
     .table-container {
       margin-top: 24px;
@@ -136,7 +154,7 @@
 
   <!-- 學員選擇區 -->
   <div class="form-group">
-    <label for="studentSelect">👤 選擇紀錄學員：</label>
+    <label for="studentSelect">👤 選擇紀錄學員 (僅列出健管中學員)：</label>
     <select id="studentSelect" onchange="onStudentChange()">
       <option value="">載入中...</option>
     </select>
@@ -145,64 +163,89 @@
   <!-- 期程狀態卡片 -->
   <div class="cycle-card" id="cycleCard">
     <div><strong>健管期程：</strong><span id="cycleIdText">載入中...</span></div>
-    <div><strong>當前期數：</strong>第 <span id="cycleNumText">-</span> 期 (第 <span id="currentWeekText">-</span> 週)</div>
+    <div><strong>當前期數：</strong>第 <span id="cycleNumText">-</span> 期 (依記錄日期計算為：第 <span id="currentWeekText">-</span> 週)</div>
+  </div>
+
+  <!-- 覆蓋提示 Banner -->
+  <div class="alert-banner" id="existingAlert">
+    💡 提示：本週（或該日期對應週數）已有量測紀錄，再次儲存將會更新覆蓋既有數據。
   </div>
 
   <!-- 輸入表單 -->
   <form id="healthForm" onsubmit="submitForm(event)">
-    <div class="form-group grid-2">
-      <div>
-        <label for="height">身高 (cm)：</label>
-        <input type="number" id="height" step="0.1" placeholder="例如 165">
-      </div>
-      <div>
-        <label for="weight">體重 (kg) *：</label>
-        <input type="number" id="weight" step="0.1" required placeholder="0.0">
-      </div>
+    
+    <!-- 🌸 IMPROVE: 新增紀錄日期選擇器 -->
+    <div class="form-group">
+      <label for="recordDate">📅 紀錄日期 *：</label>
+      <input type="date" id="recordDate" required onchange="onDateOrValueChange()">
     </div>
 
     <div class="form-group grid-2">
+      <div>
+        <label for="height">身高 (cm) *：</label>
+        <input type="number" id="height" step="0.1" required placeholder="例如 165" oninput="calculateBMI()">
+      </div>
+      <div>
+        <label for="weight">體重 (kg) *：</label>
+        <input type="number" id="weight" step="0.1" required placeholder="0.0" oninput="calculateBMI()">
+      </div>
+    </div>
+
+    <!-- 🌸 IMPROVE: 自動計算 BMI (唯讀) -->
+    <div class="form-group grid-2">
+      <div>
+        <label for="bmi">BMI (自動計算) ：</label>
+        <input type="text" id="bmi" readonly disabled placeholder="填寫身高體重後自動計算">
+      </div>
       <div>
         <label for="bodyFat">體脂率 (%) *：</label>
         <input type="number" id="bodyFat" step="0.1" required placeholder="0.0">
       </div>
+    </div>
+
+    <div class="form-group grid-2">
       <div>
         <label for="skeletalMuscle">骨骼肌率 (%) *：</label>
         <input type="number" id="skeletalMuscle" step="0.1" required placeholder="0.0">
       </div>
-    </div>
-
-    <div class="form-group grid-2">
       <div>
         <label for="visceralFat">內臟脂肪等級 *：</label>
         <input type="number" id="visceralFat" step="0.5" required placeholder="例如 3">
       </div>
+    </div>
+
+    <div class="form-group grid-2">
       <div>
         <label for="bmr">基礎代謝 (kcal) *：</label>
         <input type="number" id="bmr" required placeholder="例如 1200">
       </div>
-    </div>
-
-    <div class="form-group grid-2">
       <div>
         <label for="bodyAge">身體年齡 *：</label>
         <input type="number" id="bodyAge" required placeholder="例如 25">
       </div>
-      <div>
-        <label for="waist">腰圍 (cm)：</label>
-        <input type="number" id="waist" step="0.1" placeholder="可留空">
-      </div>
     </div>
 
     <div class="form-group grid-2">
       <div>
-        <label for="hip">臀圍 (cm)：</label>
-        <input type="number" id="hip" step="0.1" placeholder="可留空">
+        <label for="waist">腰圍 (cm)：</label>
+        <input type="number" id="waist" step="0.1" placeholder="可留空" oninput="calculateWHR()">
       </div>
       <div>
-        <label for="memo">當週身體狀況與備註：</label>
-        <input type="text" id="memo" placeholder="例如 飲食正常/生理期">
+        <label for="hip">臀圍 (cm)：</label>
+        <input type="number" id="hip" step="0.1" placeholder="可留空" oninput="calculateWHR()">
       </div>
+    </div>
+
+    <!-- 🌸 IMPROVE: 自動計算 腰臀比 (唯讀) -->
+    <div class="form-group">
+      <label for="whr">腰臀比 (腰圍 / 臀圍)：</label>
+      <input type="text" id="whr" readonly disabled placeholder="-">
+    </div>
+
+    <!-- 🌸 IMPROVE: 放大備註欄位為 Textarea -->
+    <div class="form-group">
+      <label for="memo">當週身體狀況與備註：</label>
+      <textarea id="memo" rows="4" placeholder="例如：飲食正常、運動狀況、生理期等注意事項..."></textarea>
     </div>
 
     <button type="submit" class="btn-submit" id="btnSubmit">儲存當週數據 🌸</button>
@@ -211,7 +254,7 @@
   <div class="status-msg" id="statusMsg"></div>
 
   <!-- 歷史數據列表 -->
-  <div class="table-container">
+  <div class="table-container" id="historySection">
     <label>📊 本期歷史記錄列表：</label>
     <table>
       <thead>
@@ -222,7 +265,7 @@
           <th>BMI</th>
           <th>體脂</th>
           <th>肌肉</th>
-          <th>內脂</th>
+          <th>腰臀比</th>
         </tr>
       </thead>
       <tbody id="historyTableBody">
@@ -233,18 +276,24 @@
 </div>
 
 <script>
-  // 請填入部署後的 GAS Web App URL
+  // GAS Web App URL
   const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw4SepToEB3DoVPutFIX183Cine0GxYJVquDh8119eRDpPlpXLvFY_cT-DReGA91sxY/exec"; 
 
   const urlParams = new URLSearchParams(window.location.search);
   const operatorId = urlParams.get('operator_id') || "U1234567890"; // 測試用預設 ID
 
-  let currentCycleId = "";
+  let currentCycleData = null;
+  let currentRecords = [];
 
   window.onload = function() {
+    // 🌸 IMPROVE: 預設日期設定為今天 (yyyy-MM-dd)
+    const todayStr = new Date().toISOString().split('T')[0];
+    document.getElementById("recordDate").value = todayStr;
+    
     loadStudentList();
   };
 
+  // 🌸 IMPROVE: 僅讀取健管中學員，無學員時顯示提示並鎖定表單
   function loadStudentList() {
     fetch(GAS_WEB_APP_URL, {
       method: "POST",
@@ -261,23 +310,29 @@
           opt.textContent = s.name;
           select.appendChild(opt);
         });
+        document.getElementById("btnSubmit").disabled = false;
         onStudentChange();
       } else {
-        select.innerHTML = `<option value="${operatorId}">本人紀錄</option>`;
-        onStudentChange();
+        select.innerHTML = `<option value="">無健管中學員</option>`;
+        document.getElementById("cycleIdText").innerText = "無進行中期程";
+        document.getElementById("cycleNumText").innerText = "-";
+        document.getElementById("currentWeekText").innerText = "-";
+        document.getElementById("btnSubmit").disabled = true;
+        document.getElementById("statusMsg").innerText = "目前沒有處於健管期程中的學員可進行登記。";
       }
     })
     .catch(err => {
       console.error(err);
-      alert("載入學員清單失敗");
+      alert("載入學員清單失敗，請稍後重試");
     });
   }
 
+  // 🌸 IMPROVE: 自動帶入身高並載入期程與歷史紀錄
   function onStudentChange() {
     const selectedUserId = document.getElementById("studentSelect").value;
     if (!selectedUserId) return;
 
-    document.getElementById("statusMsg").innerText = "載入學員期程中...";
+    document.getElementById("statusMsg").innerText = "載入學員期程與資料中...";
 
     fetch(GAS_WEB_APP_URL, {
       method: "POST",
@@ -287,20 +342,86 @@
     .then(res => {
       document.getElementById("statusMsg").innerText = "";
       if (res.success) {
-        currentCycleId = res.cycle.cycleId;
+        currentCycleData = res.cycle;
+        currentRecords = res.records || [];
+
         document.getElementById("cycleIdText").innerText = res.cycle.cycleId;
         document.getElementById("cycleNumText").innerText = res.cycle.cycleNumber;
 
-        // 計算當前週數
-        const start = new Date(res.cycle.startDate);
-        const diffDays = Math.floor((new Date() - start) / (24 * 60 * 60 * 1000));
-        let week = Math.floor(diffDays / 7) + 1;
-        if (week < 1) week = 1; if (week > 7) week = 7;
-        document.getElementById("currentWeekText").innerText = week;
+        // 自動帶入身高 (若有)
+        if (res.userHeight) {
+          document.getElementById("height").value = res.userHeight;
+        } else {
+          document.getElementById("height").value = "";
+        }
 
-        renderHistoryTable(res.records);
+        calculateBMI();
+        calculateWHR();
+        checkWeekAndAlert();
+        renderHistoryTable(currentRecords);
       }
     });
+  }
+
+  // 🌸 IMPROVE: 依據選取日期計算週數並檢查是否已有記錄
+  function onDateOrValueChange() {
+    checkWeekAndAlert();
+  }
+
+  function checkWeekAndAlert() {
+    if (!currentCycleData) return;
+
+    const recordDateVal = document.getElementById("recordDate").value;
+    if (!recordDateVal) return;
+
+    const recDate = new Date(recordDateVal.replace(/-/g, '/'));
+    const start = new Date(currentCycleData.startDate);
+    
+    const diffMs = recDate.getTime() - start.getTime();
+    const diffDays = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+    let week = Math.floor(diffDays / 7) + 1;
+    if (week < 1) week = 1; 
+    if (week > 7) week = 7;
+
+    document.getElementById("currentWeekText").innerText = week;
+
+    // 檢查該週是否已存在紀錄
+    const existing = currentRecords.find(r => Number(r.weekNumber) === Number(week));
+    const alertBanner = document.getElementById("existingAlert");
+    if (existing) {
+      alertBanner.style.display = "block";
+    } else {
+      alertBanner.style.display = "none";
+    }
+  }
+
+  // 🌸 IMPROVE: 自動計算 BMI
+  function calculateBMI() {
+    const h = parseFloat(document.getElementById("height").value);
+    const w = parseFloat(document.getElementById("weight").value);
+    const bmiInput = document.getElementById("bmi");
+
+    if (h > 0 && w > 0) {
+      const hM = h / 100;
+      const bmi = (w / (hM * hM)).toFixed(1);
+      bmiInput.value = bmi;
+    } else {
+      bmiInput.value = "";
+    }
+  }
+
+  // 🌸 IMPROVE: 自動計算腰臀比
+  function calculateWHR() {
+    const waist = parseFloat(document.getElementById("waist").value);
+    const hip = parseFloat(document.getElementById("hip").value);
+    const whrInput = document.getElementById("whr");
+
+    if (waist > 0 && hip > 0) {
+      const whr = (waist / hip).toFixed(2);
+      whrInput.value = whr;
+    } else {
+      whrInput.value = "-";
+    }
   }
 
   function renderHistoryTable(records) {
@@ -312,6 +433,7 @@
     }
     records.forEach(r => {
       const tr = document.createElement("tr");
+      const whrDisplay = (r.waist > 0 && r.hip > 0) ? (r.waist / r.hip).toFixed(2) : "-";
       tr.innerHTML = `
         <td>第 ${r.weekNumber} 週</td>
         <td>${r.recordDate}</td>
@@ -319,23 +441,33 @@
         <td>${r.bmi}</td>
         <td>${r.bodyFat}%</td>
         <td>${r.skeletalMuscle}%</td>
-        <td>${r.visceralFat}</td>
+        <td>${whrDisplay}</td>
       `;
       tbody.appendChild(tr);
     });
   }
 
+  // 🌸 IMPROVE: 表單驗證與 UI Loading 狀態
   function submitForm(e) {
     e.preventDefault();
+
+    const heightVal = document.getElementById("height").value;
+    if (!heightVal || parseFloat(heightVal) <= 0) {
+      alert("請輸入有效的身高，才能精確計算 BMI 喔！");
+      return;
+    }
+
     const btn = document.getElementById("btnSubmit");
     btn.disabled = true;
-    document.getElementById("statusMsg").innerText = "資料儲存中...";
+    btn.innerText = "資料儲存中... 🌸";
+    document.getElementById("statusMsg").innerText = "資料傳送中，請稍候...";
 
     const payload = {
       action: "save_health_data",
       operator_id: operatorId,
       user_id: document.getElementById("studentSelect").value,
-      height: document.getElementById("height").value,
+      record_date: document.getElementById("recordDate").value, // 🌸 傳遞自訂紀錄日期
+      height: heightVal,
       weight: document.getElementById("weight").value,
       bodyFat: document.getElementById("bodyFat").value,
       skeletalMuscle: document.getElementById("skeletalMuscle").value,
@@ -354,16 +486,24 @@
     .then(res => res.json())
     .then(res => {
       btn.disabled = false;
+      btn.innerText = "儲存當週數據 🌸";
       if (res.success) {
         document.getElementById("statusMsg").innerText = "✨ " + res.message;
-        onStudentChange(); // 重新載入歷史紀錄
+        
+        // 重新讀取紀錄並捲動至歷史列表
+        onStudentChange();
+        setTimeout(() => {
+          document.getElementById("historySection").scrollIntoView({ behavior: 'smooth' });
+        }, 500);
+
       } else {
         document.getElementById("statusMsg").innerText = "❌ 儲存失敗：" + res.message;
       }
     })
     .catch(err => {
       btn.disabled = false;
-      document.getElementById("statusMsg").innerText = "💥 發生錯誤，請稍後再試";
+      btn.innerText = "儲存當週數據 🌸";
+      document.getElementById("statusMsg").innerText = "💥 發生錯誤，請稍後重試";
     });
   }
 </script>
