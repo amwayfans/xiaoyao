@@ -2,8 +2,12 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-color=1.0">
   <title>小妖健管 - 每週身體數據登記表</title>
+  
+  <!-- 🌸 NEW: 引入 LINE LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
   <style>
     :root {
       --primary-color: #9f1239;
@@ -174,7 +178,7 @@
   <!-- 輸入表單 -->
   <form id="healthForm" onsubmit="submitForm(event)">
     
-    <!-- 🌸 IMPROVE: 新增紀錄日期選擇器 -->
+    <!-- 紀錄日期選擇器 -->
     <div class="form-group">
       <label for="recordDate">📅 紀錄日期 *：</label>
       <input type="date" id="recordDate" required onchange="onDateOrValueChange()">
@@ -191,7 +195,7 @@
       </div>
     </div>
 
-    <!-- 🌸 IMPROVE: 自動計算 BMI (唯讀) -->
+    <!-- 自動計算 BMI (唯讀) -->
     <div class="form-group grid-2">
       <div>
         <label for="bmi">BMI (自動計算) ：</label>
@@ -236,13 +240,13 @@
       </div>
     </div>
 
-    <!-- 🌸 IMPROVE: 自動計算 腰臀比 (唯讀) -->
+    <!-- 自動計算 腰臀比 (唯讀) -->
     <div class="form-group">
       <label for="whr">腰臀比 (腰圍 / 臀圍)：</label>
       <input type="text" id="whr" readonly disabled placeholder="-">
     </div>
 
-    <!-- 🌸 IMPROVE: 放大備註欄位為 Textarea -->
+    <!-- 備註欄位 -->
     <div class="form-group">
       <label for="memo">當週身體狀況與備註：</label>
       <textarea id="memo" rows="4" placeholder="例如：飲食正常、運動狀況、生理期等注意事項..."></textarea>
@@ -276,25 +280,67 @@
 </div>
 
 <script>
+  // 🌸 NEW: 設定您的 LIFF ID
+  const LIFF_ID = "2011036080-f1uDP48f"; // 請在此處填入您的 LIFF ID (例如：2001234567-AbCdEfGh)
+
   // GAS Web App URL
   const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw4SepToEB3DoVPutFIX183Cine0GxYJVquDh8119eRDpPlpXLvFY_cT-DReGA91sxY/exec"; 
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const operatorId = urlParams.get('operator_id') || "U1234567890"; // 測試用預設 ID
-
+  let operatorId = ""; // 🌸改為動態取得的操作者 Line ID
   let currentCycleData = null;
   let currentRecords = [];
 
-  window.onload = function() {
-    // 🌸 IMPROVE: 預設日期設定為今天 (yyyy-MM-dd)
+  window.onload = async function() {
+    // 預設日期設定為今天 (yyyy-MM-dd)
     const todayStr = new Date().toISOString().split('T')[0];
     document.getElementById("recordDate").value = todayStr;
     
+    // 🌸 NEW: 先執行 LIFF 初始化，確認取得 Line User ID
+    await initLiff();
+
+    // 初始化完成後載入學員清單
     loadStudentList();
   };
 
-  // 🌸 IMPROVE: 僅讀取健管中學員，無學員時顯示提示並鎖定表單
+  // 🌸 NEW: LIFF 初始化處理函數
+  async function initLiff() {
+    document.getElementById("statusMsg").innerText = "身分驗證中...";
+    
+    // 1. 優先檢查 URL 參數（便於本機測試或網頁手動輸入）
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramOperatorId = urlParams.get('operator_id');
+    if (paramOperatorId) {
+      operatorId = paramOperatorId;
+      console.log("已從 URL 參數取得 operator_id:", operatorId);
+      document.getElementById("statusMsg").innerText = "";
+      return;
+    }
+
+    // 2. 使用 LIFF SDK 自動取得 LINE User ID
+    try {
+      await liff.init({ liffId: LIFF_ID });
+      
+      if (liff.isLoggedIn()) {
+        const profile = await liff.getProfile();
+        operatorId = profile.userId;
+        console.log("成功從 LIFF 取得 Line ID:", operatorId);
+        document.getElementById("statusMsg").innerText = "";
+      } else {
+        // 未登入狀態下引導用戶登入 LINE
+        liff.login();
+      }
+    } catch (err) {
+      console.warn("LIFF 初始化未成功（可能非 LINE 內建瀏覽器環境）：", err);
+      // 備用預設 ID，防止畫面卡死
+      operatorId = operatorId || "U1234567890";
+      document.getElementById("statusMsg").innerText = "";
+    }
+  }
+
+  // 讀取健管中學員
   function loadStudentList() {
+    if (!operatorId) return;
+
     fetch(GAS_WEB_APP_URL, {
       method: "POST",
       body: JSON.stringify({ action: "get_student_list", operator_id: operatorId })
@@ -327,7 +373,7 @@
     });
   }
 
-  // 🌸 IMPROVE: 自動帶入身高並載入期程與歷史紀錄
+  // 切換學員時自動帶入身高與載入歷史紀錄
   function onStudentChange() {
     const selectedUserId = document.getElementById("studentSelect").value;
     if (!selectedUserId) return;
@@ -348,7 +394,6 @@
         document.getElementById("cycleIdText").innerText = res.cycle.cycleId;
         document.getElementById("cycleNumText").innerText = res.cycle.cycleNumber;
 
-        // 自動帶入身高 (若有)
         if (res.userHeight) {
           document.getElementById("height").value = res.userHeight;
         } else {
@@ -363,7 +408,6 @@
     });
   }
 
-  // 🌸 IMPROVE: 依據選取日期計算週數並檢查是否已有記錄
   function onDateOrValueChange() {
     checkWeekAndAlert();
   }
@@ -385,7 +429,6 @@
 
     document.getElementById("currentWeekText").innerText = week;
 
-    // 檢查該週是否已存在紀錄
     const existing = currentRecords.find(r => Number(r.weekNumber) === Number(week));
     const alertBanner = document.getElementById("existingAlert");
     if (existing) {
@@ -395,7 +438,6 @@
     }
   }
 
-  // 🌸 IMPROVE: 自動計算 BMI
   function calculateBMI() {
     const h = parseFloat(document.getElementById("height").value);
     const w = parseFloat(document.getElementById("weight").value);
@@ -410,7 +452,6 @@
     }
   }
 
-  // 🌸 IMPROVE: 自動計算腰臀比
   function calculateWHR() {
     const waist = parseFloat(document.getElementById("waist").value);
     const hip = parseFloat(document.getElementById("hip").value);
@@ -447,7 +488,6 @@
     });
   }
 
-  // 🌸 IMPROVE: 表單驗證與 UI Loading 狀態
   function submitForm(e) {
     e.preventDefault();
 
@@ -466,7 +506,7 @@
       action: "save_health_data",
       operator_id: operatorId,
       user_id: document.getElementById("studentSelect").value,
-      record_date: document.getElementById("recordDate").value, // 🌸 傳遞自訂紀錄日期
+      record_date: document.getElementById("recordDate").value,
       height: heightVal,
       weight: document.getElementById("weight").value,
       bodyFat: document.getElementById("bodyFat").value,
@@ -490,7 +530,6 @@
       if (res.success) {
         document.getElementById("statusMsg").innerText = "✨ " + res.message;
         
-        // 重新讀取紀錄並捲動至歷史列表
         onStudentChange();
         setTimeout(() => {
           document.getElementById("historySection").scrollIntoView({ behavior: 'smooth' });
