@@ -2,10 +2,10 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-color=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>小妖健管 - 每週身體數據登記表</title>
   
-  <!-- 🌸 NEW: 引入 LINE LIFF SDK -->
+  <!-- 🌸 引入 LINE LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
   <style>
@@ -31,6 +31,7 @@
       border: 2px solid #f3d2d9;
       box-shadow: 0 10px 25px rgba(181, 131, 141, 0.15);
       padding: 24px;
+      position: relative;
     }
     .header {
       text-align: center;
@@ -71,7 +72,7 @@
       border-color: var(--primary-color);
       background-color: #ffffff;
     }
-    input[readonly] {
+    input[readonly], input[disabled], select[disabled], textarea[disabled] {
       background-color: #f3f4f6 !important;
       color: #6b7280;
       border-color: #e5e7eb;
@@ -122,6 +123,67 @@
       cursor: not-allowed;
       box-shadow: none;
     }
+    /* 🌸 IMPROVE: 管理員按鈕樣式 */
+    .admin-bar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 12px;
+    }
+    .btn-admin-add {
+      background: linear-gradient(135deg, #be123c 0%, #fb7185 100%);
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(190, 18, 60, 0.3);
+      display: none; /* 預設隱藏，管理員才顯示 */
+      transition: transform 0.2s;
+    }
+    .btn-admin-add:hover {
+      transform: scale(1.02);
+    }
+    /* 🌸 IMPROVE: Modal 對話框樣式 */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      padding: 16px;
+    }
+    .modal-content {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 24px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      border: 2px solid #f3d2d9;
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1.5px dashed #fecdd3;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-close {
+      cursor: pointer;
+      font-size: 20px;
+      color: #9f1239;
+    }
     .table-container {
       margin-top: 24px;
       overflow-x: auto;
@@ -151,6 +213,12 @@
 <body>
 
 <div class="container">
+  
+  <!-- 🌸 IMPROVE: 管理員專用建立期程按鈕區 -->
+  <div class="admin-bar">
+    <button type="button" class="btn-admin-add" id="btnAdminAdd" onclick="openAdminModal()">➕ 建立新學員健管期程</button>
+  </div>
+
   <div class="header">
     <h1>🌸 小妖健管每週數據登記</h1>
     <p>記錄每週變化，看見更好的自己✨</p>
@@ -158,7 +226,7 @@
 
   <!-- 學員選擇區 -->
   <div class="form-group">
-    <label for="studentSelect">👤 選擇紀錄學員 (僅列出健管中學員)：</label>
+    <label for="studentSelect">👤 選擇紀錄學員：</label>
     <select id="studentSelect" onchange="onStudentChange()">
       <option value="">載入中...</option>
     </select>
@@ -279,34 +347,81 @@
   </div>
 </div>
 
+<!-- 🌸 IMPROVE: 管理員專用建立新學員健管期程 Modal 視窗 -->
+<div class="modal-overlay" id="adminModal" onclick="closeAdminModalOnOverlay(event)">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span>🌸 建立新學員健管期程</span>
+      <span class="modal-close" onclick="closeAdminModal()">✖</span>
+    </div>
+    <form id="adminCycleForm" onsubmit="submitAdminCreateCycle(event)">
+      <div class="form-group">
+        <label for="modalStudentSelect">👤 選擇目標學員 *：</label>
+        <select id="modalStudentSelect" required>
+          <option value="">載入中...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="modalCoachSelect">身分指派：負責教練 *：</label>
+        <select id="modalCoachSelect" required>
+          <option value="">載入中...</option>
+        </select>
+      </div>
+
+      <div class="form-group grid-2">
+        <div>
+          <label for="modalStartDate">開始日期 *：</label>
+          <input type="date" id="modalStartDate" required onchange="autoCalcEndDate()">
+        </div>
+        <div>
+          <label for="modalEndDate">結束日期 (自動+45天) *：</label>
+          <input type="date" id="modalEndDate" required>
+        </div>
+      </div>
+
+      <div class="form-group grid-2">
+        <div>
+          <label for="modalTargetWeight">目標體重 (kg)：</label>
+          <input type="number" id="modalTargetWeight" step="0.1" placeholder="選填">
+        </div>
+        <div>
+          <label for="modalTargetBodyFat">目標體脂率 (%)：</label>
+          <input type="number" id="modalTargetBodyFat" step="0.1" placeholder="選填">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="btnAdminSubmit" style="margin-top: 16px;">開通新健管期程 🌸</button>
+      <div class="status-msg" id="modalStatusMsg"></div>
+    </form>
+  </div>
+</div>
+
 <script>
-  // 🌸 NEW: 設定您的 LIFF ID
-  const LIFF_ID = "2011036080-f1uDP48f"; // 請在此處填入您的 LIFF ID (例如：2001234567-AbCdEfGh)
+  // 🌸 LIFF ID
+  const LIFF_ID = "2011036080-f1uDP48f"; 
 
   // GAS Web App URL
   const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw4SepToEB3DoVPutFIX183Cine0GxYJVquDh8119eRDpPlpXLvFY_cT-DReGA91sxY/exec"; 
 
-  let operatorId = ""; // 🌸改為動態取得的操作者 Line ID
+  let operatorId = ""; // 動態取得的操作者 Line ID
+  let operatorRole = "學員"; // 🌸 IMPROVE: 保存操作者角色 (系統管理員/教練/學員)
   let currentCycleData = null;
   let currentRecords = [];
 
   window.onload = async function() {
-    // 預設日期設定為今天 (yyyy-MM-dd)
     const todayStr = new Date().toISOString().split('T')[0];
     document.getElementById("recordDate").value = todayStr;
     
-    // 🌸 NEW: 先執行 LIFF 初始化，確認取得 Line User ID
+    // 初始化 LIFF 並載入學員清單
     await initLiff();
-
-    // 初始化完成後載入學員清單
     loadStudentList();
   };
 
-  // 🌸 NEW: LIFF 初始化處理函數
+  // 🌸 IMPROVE: LIFF 初始化並辨識管理員權限
   async function initLiff() {
     document.getElementById("statusMsg").innerText = "身分驗證中...";
     
-    // 1. 優先檢查 URL 參數（便於本機測試或網頁手動輸入）
     const urlParams = new URLSearchParams(window.location.search);
     const paramOperatorId = urlParams.get('operator_id');
     if (paramOperatorId) {
@@ -316,7 +431,6 @@
       return;
     }
 
-    // 2. 使用 LIFF SDK 自動取得 LINE User ID
     try {
       await liff.init({ liffId: LIFF_ID });
       
@@ -326,19 +440,17 @@
         console.log("成功從 LIFF 取得 Line ID:", operatorId);
         document.getElementById("statusMsg").innerText = "";
       } else {
-        // 未登入狀態下引導用戶登入 LINE
         liff.login();
       }
     } catch (err) {
-      console.warn("LIFF 初始化未成功（可能非 LINE 內建瀏覽器環境）：", err);
-      // 備用預設 ID，防止畫面卡死
+      console.warn("LIFF 初始化未成功（非 LINE 內建瀏覽器環境）：", err);
       operatorId = operatorId || "U1234567890";
       document.getElementById("statusMsg").innerText = "";
     }
   }
 
-  // 讀取健管中學員
-  function loadStudentList() {
+  // 🌸 IMPROVE: 讀取學員清單並判定操作者角色，若為管理員則顯示建立按鈕
+  function loadStudentList(autoSelectUserId) {
     if (!operatorId) return;
 
     fetch(GAS_WEB_APP_URL, {
@@ -349,22 +461,37 @@
     .then(res => {
       const select = document.getElementById("studentSelect");
       select.innerHTML = "";
-      if (res.success && res.data.length > 0) {
-        res.data.forEach(s => {
-          const opt = document.createElement("option");
-          opt.value = s.LineID;
-          opt.textContent = s.name;
-          select.appendChild(opt);
-        });
-        document.getElementById("btnSubmit").disabled = false;
-        onStudentChange();
-      } else {
-        select.innerHTML = `<option value="">無健管中學員</option>`;
-        document.getElementById("cycleIdText").innerText = "無進行中期程";
-        document.getElementById("cycleNumText").innerText = "-";
-        document.getElementById("currentWeekText").innerText = "-";
-        document.getElementById("btnSubmit").disabled = true;
-        document.getElementById("statusMsg").innerText = "目前沒有處於健管期程中的學員可進行登記。";
+      
+      if (res.success) {
+        // 紀錄角色身分
+        operatorRole = res.role || "學員";
+        
+        // 若為系統管理員，顯示開通按鈕
+        if (operatorRole === "系統管理員") {
+          document.getElementById("btnAdminAdd").style.display = "block";
+        } else {
+          document.getElementById("btnAdminAdd").style.display = "none";
+        }
+
+        if (res.data && res.data.length > 0) {
+          res.data.forEach(s => {
+            const opt = document.createElement("option");
+            opt.value = s.LineID;
+            // 標註狀態顯示
+            opt.textContent = s.statusText ? `${s.name} (${s.statusText})` : s.name;
+            select.appendChild(opt);
+          });
+
+          if (autoSelectUserId) {
+            select.value = autoSelectUserId;
+          }
+
+          onStudentChange();
+        } else {
+          select.innerHTML = `<option value="">無學員資料</option>`;
+          setFormDisabled(true);
+          document.getElementById("statusMsg").innerText = "目前無可選取的學員。";
+        }
       }
     })
     .catch(err => {
@@ -373,21 +500,53 @@
     });
   }
 
-  // 切換學員時自動帶入身高與載入歷史紀錄
+  // 🌸 IMPROVE: 切換學員時檢查「健管狀態」，若非健管中跳出 alert 提示並鎖定表單
   function onStudentChange() {
     const selectedUserId = document.getElementById("studentSelect").value;
     if (!selectedUserId) return;
 
-    document.getElementById("statusMsg").innerText = "載入學員期程與資料中...";
+    document.getElementById("statusMsg").innerText = "驗證學員健管狀態中...";
 
+    // 先調用 API 驗證學員是否有「健管中」狀態
     fetch(GAS_WEB_APP_URL, {
       method: "POST",
-      body: JSON.stringify({ action: "get_cycle_records", user_id: selectedUserId })
+      body: JSON.stringify({ action: "check_health_status", user_id: selectedUserId })
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (res.success && res.isActive) {
+        // 有進行中期程：解鎖表單並載入紀錄
+        setFormDisabled(false);
+        fetchCycleRecords(selectedUserId);
+      } else {
+        // 🌸 無進行中期程：清空資料、跳出明確 Alert 通告並鎖定表單
+        setFormDisabled(true);
+        document.getElementById("cycleIdText").innerText = "非健管中";
+        document.getElementById("cycleNumText").innerText = "-";
+        document.getElementById("currentWeekText").innerText = "-";
+        document.getElementById("historyTableBody").innerHTML = '<tr><td colspan="7">該學員目前非健管中狀態，無進行中期程資料</td></tr>';
+        document.getElementById("statusMsg").innerText = "⚠️ 此學員目前並非健管中狀態，請聯繫教練協助開通健管期程唷！🌸";
+
+        alert("此學員目前並非健管中狀態，請聯繫教練協助開通健管期程唷！🌸");
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById("statusMsg").innerText = "檢查健管狀態失敗";
+    });
+  }
+
+  // 🌸 IMPROVE: 讀取期程紀錄 details
+  function fetchCycleRecords(userId) {
+    document.getElementById("statusMsg").innerText = "載入學員期程與資料中...";
+    fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "get_cycle_records", user_id: userId })
     })
     .then(res => res.json())
     .then(res => {
       document.getElementById("statusMsg").innerText = "";
-      if (res.success) {
+      if (res.success && res.cycle) {
         currentCycleData = res.cycle;
         currentRecords = res.records || [];
 
@@ -406,6 +565,17 @@
         renderHistoryTable(currentRecords);
       }
     });
+  }
+
+  // 🌸 IMPROVE: 控制表單輸入欄位與按鈕啟用/停用
+  function setFormDisabled(disabled) {
+    const formInputs = document.querySelectorAll("#healthForm input, #healthForm textarea");
+    formInputs.forEach(input => {
+      if (input.id !== "bmi" && input.id !== "whr") {
+        input.disabled = disabled;
+      }
+    });
+    document.getElementById("btnSubmit").disabled = disabled;
   }
 
   function onDateOrValueChange() {
@@ -529,12 +699,10 @@
       btn.innerText = "儲存當週數據 🌸";
       if (res.success) {
         document.getElementById("statusMsg").innerText = "✨ " + res.message;
-        
         onStudentChange();
         setTimeout(() => {
           document.getElementById("historySection").scrollIntoView({ behavior: 'smooth' });
         }, 500);
-
       } else {
         document.getElementById("statusMsg").innerText = "❌ 儲存失敗：" + res.message;
       }
@@ -543,6 +711,131 @@
       btn.disabled = false;
       btn.innerText = "儲存當週數據 🌸";
       document.getElementById("statusMsg").innerText = "💥 發生錯誤，請稍後重試";
+    });
+  }
+
+  // ====================================================
+  // 🌸 IMPROVE: 管理員彈出視窗與對應開通期程 API 邏輯
+  // ====================================================
+
+  function openAdminModal() {
+    document.getElementById("adminModal").style.display = "flex";
+    document.getElementById("modalStatusMsg").innerText = "載入選單中...";
+    
+    // 設定開始日期為今天，並預設加 45 天為結束日期
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    document.getElementById("modalStartDate").value = todayStr;
+    autoCalcEndDate();
+
+    // 1. 取得所有學員
+    fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "get_all_students", operator_id: operatorId })
+    })
+    .then(res => res.json())
+    .then(res => {
+      const mSelect = document.getElementById("modalStudentSelect");
+      mSelect.innerHTML = "";
+      if (res.success && res.data.length > 0) {
+        res.data.forEach(s => {
+          const opt = document.createElement("option");
+          opt.value = s.LineID;
+          opt.textContent = `${s.name} (${s.nickname || '無暱稱'})`;
+          mSelect.appendChild(opt);
+        });
+      }
+    });
+
+    // 2. 取得所有教練
+    fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "get_coach_list" })
+    })
+    .then(res => res.json())
+    .then(res => {
+      const cSelect = document.getElementById("modalCoachSelect");
+      cSelect.innerHTML = "";
+      if (res.success && res.data.length > 0) {
+        res.data.forEach(c => {
+          const opt = document.createElement("option");
+          opt.value = c.LineID;
+          opt.textContent = c.name;
+          cSelect.appendChild(opt);
+        });
+        document.getElementById("modalStatusMsg").innerText = "";
+      }
+    });
+  }
+
+  function closeAdminModal() {
+    document.getElementById("adminModal").style.display = "none";
+  }
+
+  function closeAdminModalOnOverlay(e) {
+    if (e.target.id === "adminModal") {
+      closeAdminModal();
+    }
+  }
+
+  function autoCalcEndDate() {
+    const startVal = document.getElementById("modalStartDate").value;
+    if (!startVal) return;
+    const startD = new Date(startVal.replace(/-/g, '/'));
+    const endD = new Date(startD.getTime() + 45 * 24 * 60 * 60 * 1000);
+    document.getElementById("modalEndDate").value = endD.toISOString().split('T')[0];
+  }
+
+  // 🌸 IMPROVE: 提交建立健管期程表單
+  function submitAdminCreateCycle(e) {
+    e.preventDefault();
+
+    const targetUserId = document.getElementById("modalStudentSelect").value;
+    const coachId = document.getElementById("modalCoachSelect").value;
+    const startDate = document.getElementById("modalStartDate").value;
+    const endDate = document.getElementById("modalEndDate").value;
+    const targetWeight = document.getElementById("modalTargetWeight").value;
+    const targetBodyFat = document.getElementById("modalTargetBodyFat").value;
+
+    const btn = document.getElementById("btnAdminSubmit");
+    btn.disabled = true;
+    btn.innerText = "開通處理中... 🌸";
+    document.getElementById("modalStatusMsg").innerText = "建立資料中，請稍候...";
+
+    const payload = {
+      action: "create_cycle_by_admin",
+      operator_id: operatorId,
+      user_id: targetUserId,
+      coach_id: coachId,
+      start_date: startDate,
+      end_date: endDate,
+      target_weight: targetWeight,
+      target_body_fat: targetBodyFat
+    };
+
+    fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(res => {
+      btn.disabled = false;
+      btn.innerText = "開通新健管期程 🌸";
+
+      if (res.success) {
+        alert("🎉 新健管期程已建立！可以開始記錄數據囉！");
+        closeAdminModal();
+        // 重新載入學員清單並自動選取該位新開通學員
+        loadStudentList(targetUserId);
+      } else {
+        alert("⚠️ 建立失敗：" + res.message);
+        document.getElementById("modalStatusMsg").innerText = "❌ " + res.message;
+      }
+    })
+    .catch(err => {
+      btn.disabled = false;
+      btn.innerText = "開通新健管期程 🌸";
+      alert("💥 建立時發生錯誤，請稍後重試");
     });
   }
 </script>
