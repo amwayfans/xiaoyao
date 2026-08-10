@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小妖健管 - 健康關懷小幫手</title>
+  
+  <!-- 🌸 引入 LINE SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <style>
+    :root {
+      --primary-color: #9f1239;
+      --secondary-color: #fecdd3;
+      --bg-color: #fcf6f7;
+      --card-bg: #ffffff;
+      --text-color: #4a282e;
+    }
+    body {
+      margin: 0;
+      padding: 16px;
+      background-color: var(--bg-color);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text-color);
+    }
+    .container {
+      max-width: 650px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 20px;
+      border: 2px solid #f3d2d9;
+      box-shadow: 0 10px 25px rgba(181, 131, 141, 0.15);
+      padding: 24px;
+      position: relative;
+    }
+    .header {
+      text-align: center;
+      padding-bottom: 16px;
+      border-bottom: 2px dashed var(--secondary-color);
+    }
+    .header-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--secondary-color);
+      box-shadow: 0 4px 12px rgba(159, 18, 57, 0.2);
+      margin-bottom: 10px;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 22px;
+      color: var(--primary-color);
+    }
+    .header p {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: #881337;
+    }
+    .form-group {
+      margin-top: 16px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      color: #881337;
+      margin-bottom: 6px;
+    }
+    select, input, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #fecdd3;
+      border-radius: 12px;
+      box-sizing: border-box;
+      font-size: 14px;
+      outline: none;
+      background-color: #fff8f9;
+      color: var(--text-color);
+    }
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--primary-color);
+      background-color: #ffffff;
+    }
+    input[readonly], input[disabled], select[disabled], textarea[disabled] {
+      background-color: #f3f4f6 !important;
+      color: #6b7280;
+      border-color: #e5e7eb;
+      cursor: not-allowed;
+    }
+    .btn-submit {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      background: linear-gradient(135deg, #881337 0%, #9f1239 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(159, 18, 57, 0.25);
+      transition: all 0.2s ease;
+    }
+    .btn-submit:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    
+    /* 🌸 預覽區域樣式 */
+    .preview-card {
+      display: none;
+      margin-top: 24px;
+      background: linear-gradient(135deg, #fff5f7 0%, #ffedf1 100%);
+      border: 1.5px solid #f2b8c6;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(242, 184, 198, 0.2);
+    }
+    .preview-header {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .preview-textarea {
+      min-height: 180px;
+      font-size: 13.5px;
+      line-height: 1.6;
+      background-color: #ffffff;
+      border: 1px solid #fecdd3;
+    }
+    .btn-copy {
+      width: 100%;
+      margin-top: 12px;
+      padding: 10px;
+      background: linear-gradient(135deg, #be123c 0%, #fb7185 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(190, 18, 60, 0.25);
+      transition: background 0.3s ease;
+    }
+
+    /* 🌸 自訂 Alert Modal 樣式 */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      padding: 16px;
+    }
+    .modal-content {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 24px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      border: 2px solid #f3d2d9;
+      position: relative;
+    }
+    .modal-header {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1.5px dashed #fecdd3;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-close {
+      cursor: pointer;
+      font-size: 20px;
+      color: #9f1239;
+    }
+    .custom-alert-content {
+      text-align: center;
+      padding: 10px 5px;
+    }
+    .custom-alert-msg {
+      font-size: 14.5px;
+      color: #881337;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      font-weight: 500;
+      text-align: left;
+    }
+    .btn-alert-confirm {
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(135deg, #be123c 0%, #fb7185 100%);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(190, 18, 60, 0.25);
+    }
+    .status-msg {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #881337;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <img src="https://amwayfans.github.io/xiaoyao/images/xiaoyao-advice.png" alt="小妖" class="header-avatar" onerror="this.style.display='none';">
+    <h1>🌸 小妖健康關懷小幫手</h1>
+    <p>快速產生個人化問候語，傳遞溫暖關懷與檢測問卷✨</p>
+  </div>
+
+  <!-- 主輸入表單 -->
+  <form id="questionnaireForm" onsubmit="handleGenerate(event)">
+    <div class="form-group">
+      <label for="recipientName">👤 這份問候要給誰？ *：</label>
+      <input type="text" id="recipientName" required placeholder="例如：亮亮、小明、張小姐...">
+    </div>
+
+    <div class="form-group">
+      <label for="mainContent">💬 主要想傳達的內容或關懷重點 (選填)：</label>
+      <textarea id="mainContent" rows="3" placeholder="例如：最近換季想關心一下狀況、剛結束健管期程、很久沒聯絡表達關心..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="senderName">🏷️ 傳送者名稱 (自動帶入)：</label>
+      <input type="text" id="senderName" readonly placeholder="驗證身分中...">
+    </div>
+
+    <button type="submit" class="btn-submit" id="btnGenerate">🌸 產生問候語</button>
+  </form>
+
+  <div class="status-msg" id="statusMsg"></div>
+
+  <!-- 預覽與複製區域 -->
+  <div class="preview-card" id="previewCard">
+    <div class="preview-header">
+      <span>✨ 問候語預覽 (適合直接複製至 LINE 聊天室)：</span>
+    </div>
+    <textarea id="previewText" class="preview-textarea" readonly></textarea>
+    <button type="button" class="btn-copy" id="btnCopy" onclick="copyMessage()">📋 一鍵複製</button>
+  </div>
+</div>
+
+<!-- 客製化「小妖貼心提醒」 Modal -->
+<div class="modal-overlay" id="customAlertModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span>🌸 小妖貼心提醒</span>
+      <span class="modal-close" onclick="closeCustomAlert()">✖</span>
+    </div>
+    <div class="custom-alert-content">
+      <div class="custom-alert-msg" id="customAlertText">訊息內容</div>
+      <button type="button" class="btn-alert-confirm" onclick="closeCustomAlert()">確定 🌸</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const LIFF_ID = "2011060767-2UgRtsXI"; 
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw4SepToEB3DoVPutFIX183Cine0GxYJVquDh8119eRDpPlpXLvFY_cT-DReGA91sxY/exec"; 
+
+  let operatorId = "";
+  let isPermissionAllowed = false;
+
+  window.onload = async function() {
+    await initLiff();
+    checkPermission();
+  };
+
+  function showCustomAlert(msg) {
+    document.getElementById("customAlertText").innerHTML = msg;
+    document.getElementById("customAlertModal").style.display = "flex";
+  }
+
+  function closeCustomAlert() {
+    document.getElementById("customAlertModal").style.display = "none";
+  }
+
+  async function initLiff() {
+    document.getElementById("statusMsg").innerText = "身分驗證中...";
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramOperatorId = urlParams.get('operator_id');
+    if (paramOperatorId) {
+      operatorId = paramOperatorId;
+      document.getElementById("statusMsg").innerText = "";
+      return;
+    }
+
+    try {
+      await liff.init({ liffId: LIFF_ID });
+      if (liff.isLoggedIn()) {
+        const profile = await liff.getProfile();
+        operatorId = profile.userId;
+        document.getElementById("statusMsg").innerText = "";
+      } else {
+        liff.login();
+      }
+    } catch (err) {
+      console.warn("LIFF 初始化未成功（非 LINE 內建瀏覽器環境）：", err);
+      operatorId = operatorId || "U1234567890";
+      document.getElementById("statusMsg").innerText = "";
+    }
+  }
+
+  // 🌸 驗證發送者權限
+  function checkPermission() {
+    if (!operatorId) return;
+
+    fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "check_sender_permission", operator_id: operatorId })
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (res.success && res.allowed) {
+        isPermissionAllowed = true;
+        document.getElementById("senderName").value = res.senderName || "教練";
+        document.getElementById("statusMsg").innerText = "";
+      } else {
+        isPermissionAllowed = false;
+        document.getElementById("btnGenerate").disabled = true;
+        document.getElementById("senderName").value = "無權限";
+        document.getElementById("statusMsg").innerText = "⚠️ 存取受限：本功能僅限管理員與教練使用。";
+
+        var alertText = "哎呀～這個功能是專屬教練與管理員的貼心小工具喔！🌸<br><br>如果您有任何健康問題想諮詢，歡迎直接私訊小妖，我會為您安排最適合的教練來協助您～✨";
+        showCustomAlert(alertText);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      showCustomAlert("權限驗證失敗，請重新載入頁面試試喔！🌸");
+    });
+  }
+
+  // 🌸 觸發 AI 問候語生成
+  function handleGenerate(e) {
+    e.preventDefault();
+
+    if (!isPermissionAllowed) {
+      showCustomAlert("哎呀～您目前沒有教練權限，無法使用此功能喔！🌸");
+      return;
+    }
+
+    const recipientName = document.getElementById("recipientName").value.trim();
+    const mainContent = document.getElementById("mainContent").value.trim();
+    const senderName = document.getElementById("senderName").value.trim();
+
+    if (!recipientName) {
+      showCustomAlert("請輸入這份問候要給誰喔！🌸");
+      return;
+    }
+
+    const btn = document.getElementById("btnGenerate");
+    btn.disabled = true;
+    btn.innerText = "小妖正在為您構思問候語... 🌸";
+    document.getElementById("statusMsg").innerText = "AI 正在量身打造問候訊息與產生問卷，請稍候...";
+
+    const payload = {
+      action: "generate_survey_message",
+      operator_id: operatorId,
+      recipient_name: recipientName,
+      main_content: mainContent,
+      sender_name: senderName
+    };
+
+    fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(res => {
+      btn.disabled = false;
+      btn.innerText = "🌸 產生問候語";
+      document.getElementById("statusMsg").innerText = "";
+
+      if (res.success) {
+        const previewCard = document.getElementById("previewCard");
+        const previewText = document.getElementById("previewText");
+        
+        previewText.value = res.message;
+        previewCard.style.display = "block";
+        
+        setTimeout(() => {
+          previewCard.scrollIntoView({ behavior: 'smooth' });
+        }, 300);
+      } else {
+        showCustomAlert("⚠️ 產生失敗：" + res.message);
+      }
+    })
+    .catch(err => {
+      btn.disabled = false;
+      btn.innerText = "🌸 產生問候語";
+      document.getElementById("statusMsg").innerText = "";
+      showCustomAlert("💥 發生系統錯誤，請稍後重試！");
+    });
+  }
+
+  // 🌸 需求四：一鍵複製功能 (技術實作: Clipboard API + execCommand 降級)
+  async function copyMessage() {
+    const text = document.getElementById("previewText").value;
+    if (!text) return;
+
+    const btn = document.getElementById("btnCopy");
+    const originalText = btn.innerHTML;
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        // 降級處理方案
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        if (!successful) throw new Error("execCommand copy failed");
+      }
+
+      btn.innerHTML = "✅ 已複製！";
+      btn.style.background = "linear-gradient(135deg, #15803d 0%, #22c55e 100%)";
+      
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.style.background = "linear-gradient(135deg, #be123c 0%, #fb7185 100%)";
+      }, 2000);
+    } catch (err) {
+      console.warn("自動複製失敗：", err);
+      showCustomAlert("⚠️ 自動複製失敗，請手動長按選擇預覽區內的文字進行複製喔！🌸");
+    }
+  }
+</script>
+
+</body>
+</html>
