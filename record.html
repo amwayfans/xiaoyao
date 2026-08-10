@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>小妖健管 - 每週身體數據登記表</title>
+  <title>小妖健管 - 身體數據登記表</title>
   
   <!-- 🌸 引入 LINE LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -93,16 +93,6 @@
     }
     .cycle-card div {
       margin-bottom: 4px;
-    }
-    .alert-banner {
-      background-color: #fef3c7;
-      border: 1px solid #f59e0b;
-      color: #92400e;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 13px;
-      margin-top: 12px;
-      display: none;
     }
     .btn-submit {
       width: 100%;
@@ -243,9 +233,8 @@
   </div>
 
   <div class="header">
-    <h1>🌸 小妖健管</h1>
-    <h1>每週數據登記</h1>
-    <p>記錄每週變化，看見更好的自己✨</p>
+    <h1>🌸 小妖健管身體數據登記</h1>
+    <p>記錄每次變化，看見更好的自己✨</p>
   </div>
 
   <!-- 學員選擇區 -->
@@ -259,12 +248,7 @@
   <!-- 期程狀態卡片 -->
   <div class="cycle-card" id="cycleCard">
     <div><strong>健管期程：</strong><span id="cycleIdText">載入中...</span></div>
-    <div><strong>當前期數：</strong>第 <span id="cycleNumText">-</span> 期 (依記錄日期計算為：第 <span id="currentWeekText">-</span> 週)</div>
-  </div>
-
-  <!-- 覆蓋提示 Banner -->
-  <div class="alert-banner" id="existingAlert">
-    💡 提示：本週（或該日期對應週數）已有量測紀錄，再次儲存將會更新覆蓋既有數據。
+    <div><strong>當前期數：</strong>第 <span id="cycleNumText">-</span> 期 (現已累積 <span id="recordCountText">0</span> 筆紀錄)</div>
   </div>
 
   <!-- 輸入表單 -->
@@ -272,7 +256,7 @@
     
     <div class="form-group">
       <label for="recordDate">📅 紀錄日期 *：</label>
-      <input type="date" id="recordDate" required onchange="onDateOrValueChange()">
+      <input type="date" id="recordDate" required>
     </div>
 
     <div class="form-group grid-2">
@@ -336,11 +320,11 @@
     </div>
 
     <div class="form-group">
-      <label for="memo">當週身體狀況與備註：</label>
+      <label for="memo">當次身體狀況與備註：</label>
       <textarea id="memo" rows="4" placeholder="例如：飲食正常、運動狀況、生理期等注意事項..."></textarea>
     </div>
 
-    <button type="submit" class="btn-submit" id="btnSubmit">儲存當週數據 🌸</button>
+    <button type="submit" class="btn-submit" id="btnSubmit">儲存本次數據 🌸</button>
   </form>
 
   <div class="status-msg" id="statusMsg"></div>
@@ -351,7 +335,7 @@
     <table>
       <thead>
         <tr>
-          <th>週數</th>
+          <th>第幾筆</th>
           <th>日期</th>
           <th>體重</th>
           <th>BMI</th>
@@ -448,7 +432,6 @@
     loadStudentList();
   };
 
-  // 🌸 顯示客製化提示視窗 (取代原生的 alert)
   function showCustomAlert(msg) {
     document.getElementById("customAlertText").innerHTML = msg;
     document.getElementById("customAlertModal").style.display = "flex";
@@ -533,11 +516,12 @@
     });
   }
 
+  // 🌸 切換學員時同時驗證「權限狀態」與「健管期程」
   function onStudentChange() {
     const selectedUserId = document.getElementById("studentSelect").value;
     if (!selectedUserId) return;
 
-    document.getElementById("statusMsg").innerText = "驗證學員健管狀態中...";
+    document.getElementById("statusMsg").innerText = "驗證學員權限與健管狀態中...";
 
     fetch(GAS_WEB_APP_URL, {
       method: "POST",
@@ -545,6 +529,20 @@
     })
     .then(res => res.json())
     .then(res => {
+      // 🌸 1. 權限狀態檢查 (需求一)
+      if (res.userStatus && res.userStatus !== "有效") {
+        setFormDisabled(true);
+        document.getElementById("cycleIdText").innerText = "無權限";
+        document.getElementById("cycleNumText").innerText = "-";
+        document.getElementById("recordCountText").innerText = "0";
+        document.getElementById("historyTableBody").innerHTML = '<tr><td colspan="7">該學員目前無使用權限</td></tr>';
+        document.getElementById("statusMsg").innerText = `⚠️ 此學員目前無使用權限（權限狀態：${res.userStatus}）`;
+
+        showCustomAlert(`此學員目前無使用權限（權限狀態：${res.userStatus}），請聯繫健管教練協助展延權限唷！🌸`);
+        return;
+      }
+
+      // 🌸 2. 健管期程檢查
       if (res.success && res.isActive) {
         setFormDisabled(false);
         fetchCycleRecords(selectedUserId);
@@ -552,17 +550,16 @@
         setFormDisabled(true);
         document.getElementById("cycleIdText").innerText = "非健管中";
         document.getElementById("cycleNumText").innerText = "-";
-        document.getElementById("currentWeekText").innerText = "-";
+        document.getElementById("recordCountText").innerText = "0";
         document.getElementById("historyTableBody").innerHTML = '<tr><td colspan="7">該學員目前非健管中狀態，無進行中期程資料</td></tr>';
         document.getElementById("statusMsg").innerText = "⚠️ 此學員目前並非健管中狀態，請聯繫教練協助開通健管期程唷！🌸";
 
-        // 🌸 使用「小妖貼心提醒」客製視窗取代原生 alert
         showCustomAlert("此學員目前並非健管中狀態，請聯繫教練協助開通健管期程唷！🌸");
       }
     })
     .catch(err => {
       console.error(err);
-      document.getElementById("statusMsg").innerText = "檢查健管狀態失敗";
+      document.getElementById("statusMsg").innerText = "檢查權限與健管狀態失敗";
     });
   }
 
@@ -581,6 +578,7 @@
 
         document.getElementById("cycleIdText").innerText = res.cycle.cycleId;
         document.getElementById("cycleNumText").innerText = res.cycle.cycleNumber;
+        document.getElementById("recordCountText").innerText = currentRecords.length;
 
         if (res.userHeight) {
           document.getElementById("height").value = res.userHeight;
@@ -590,7 +588,6 @@
 
         calculateBMI();
         calculateWHR();
-        checkWeekAndAlert();
         renderHistoryTable(currentRecords);
       }
     });
@@ -604,36 +601,6 @@
       }
     });
     document.getElementById("btnSubmit").disabled = disabled;
-  }
-
-  function onDateOrValueChange() {
-    checkWeekAndAlert();
-  }
-
-  function checkWeekAndAlert() {
-    if (!currentCycleData) return;
-
-    const recordDateVal = document.getElementById("recordDate").value;
-    if (!recordDateVal) return;
-
-    const recDate = new Date(recordDateVal.replace(/-/g, '/'));
-    const start = new Date(currentCycleData.startDate);
-    
-    const diffMs = recDate.getTime() - start.getTime();
-    const diffDays = Math.floor(diffMs / (24 * 60 * 60 * 1000));
-    let week = Math.floor(diffDays / 7) + 1;
-    if (week < 1) week = 1; 
-    if (week > 7) week = 7;
-
-    document.getElementById("currentWeekText").innerText = week;
-
-    const existing = currentRecords.find(r => Number(r.weekNumber) === Number(week));
-    const alertBanner = document.getElementById("existingAlert");
-    if (existing) {
-      alertBanner.style.display = "block";
-    } else {
-      alertBanner.style.display = "none";
-    }
   }
 
   function calculateBMI() {
@@ -663,6 +630,7 @@
     }
   }
 
+  // 🌸 呈現「第幾筆」紀錄列表
   function renderHistoryTable(records) {
     const tbody = document.getElementById("historyTableBody");
     tbody.innerHTML = "";
@@ -673,8 +641,9 @@
     records.forEach(r => {
       const tr = document.createElement("tr");
       const whrDisplay = (r.waist > 0 && r.hip > 0) ? (r.waist / r.hip).toFixed(2) : "-";
+      const displayIndex = r.entryIndex || r.weekNumber || 1;
       tr.innerHTML = `
-        <td>第 ${r.weekNumber} 週</td>
+        <td>第 ${displayIndex} 筆</td>
         <td>${r.recordDate}</td>
         <td>${r.weight} kg</td>
         <td>${r.bmi}</td>
@@ -724,7 +693,7 @@
     .then(res => res.json())
     .then(res => {
       btn.disabled = false;
-      btn.innerText = "儲存當週數據 🌸";
+      btn.innerText = "儲存本次數據 🌸";
       if (res.success) {
         document.getElementById("statusMsg").innerText = "✨ " + res.message;
         onStudentChange();
@@ -732,12 +701,14 @@
           document.getElementById("historySection").scrollIntoView({ behavior: 'smooth' });
         }, 500);
       } else {
+        // 🌸 後端若退回無權限訊息，跳出警示
+        showCustomAlert(res.message);
         document.getElementById("statusMsg").innerText = "❌ 儲存失敗：" + res.message;
       }
     })
     .catch(err => {
       btn.disabled = false;
-      btn.innerText = "儲存當週數據 🌸";
+      btn.innerText = "儲存本次數據 🌸";
       document.getElementById("statusMsg").innerText = "💥 發生錯誤，請稍後重試";
     });
   }
