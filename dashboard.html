@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌸 小妖健管數據儀表板</title>
+  
+  <!-- LIFF SDK, Chart.js & GSAP CDN -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <style>
+    :root {
+      --primary-color: #9f1239;
+      --secondary-color: #fecdd3;
+      --bg-color: #fcf6f7;
+      --card-bg: #ffffff;
+      --text-color: #4a282e;
+      --green-accent: #10b981;
+      --red-accent: #ef4444;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      background-color: var(--bg-color);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text-color);
+    }
+
+    .container {
+      max-width: 750px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 20px;
+      border: 2px solid #f3d2d9;
+      box-shadow: 0 10px 25px rgba(181, 131, 141, 0.15);
+      padding: 20px;
+      position: relative;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px dashed var(--secondary-color);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-title h1 {
+      margin: 0;
+      font-size: 20px;
+      color: var(--primary-color);
+    }
+
+    .btn-report {
+      background: linear-gradient(135deg, #be123c 0%, #fb7185 100%);
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(190, 18, 60, 0.25);
+      transition: transform 0.2s;
+    }
+
+    .btn-report:hover { transform: scale(1.03); }
+
+    .selector-card {
+      background: #fff0f3;
+      border: 1px solid #fecdd3;
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 500px) {
+      .selector-card { grid-template-columns: 1fr; }
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: bold;
+      color: #881337;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1.5px solid #fecdd3;
+      border-radius: 10px;
+      background: #ffffff;
+      font-size: 13px;
+      color: var(--text-color);
+      outline: none;
+    }
+
+    .section-card {
+      background: #ffffff;
+      border: 1.5px solid #fecdd3;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* InBody 橫條圖樣式 */
+    .inbody-bar-group { margin-bottom: 12px; }
+    .inbody-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+    .inbody-track {
+      height: 18px;
+      background: #f3f4f6;
+      border-radius: 9px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+    }
+    .inbody-zone { height: 100%; font-size: 10px; text-align: center; color: #6b7280; line-height: 18px; }
+    .zone-low { width: 30%; background: #e5e7eb; }
+    .zone-normal { width: 40%; background: #fde8e8; }
+    .zone-high { width: 30%; background: #fee2e2; }
+    .inbody-fill {
+      position: absolute;
+      top: 0; left: 0; height: 100%;
+      background: linear-gradient(90deg, #fb7185, #9f1239);
+      border-radius: 9px;
+      width: 0%;
+      transition: width 1s ease-out;
+    }
+
+    /* 9宮格分布圖樣式 */
+    .matrix-container {
+      position: relative;
+      width: 100%;
+      max-width: 380px;
+      margin: 0 auto;
+    }
+
+    /* 趨勢圖表頁籤 */
+    .tab-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 8px;
+      border: 1.5px solid #fecdd3;
+      background: #fff8f9;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #881337;
+      cursor: pointer;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .tab-btn.active {
+      background: var(--primary-color);
+      color: #ffffff;
+      border-color: var(--primary-color);
+    }
+
+    .chart-container {
+      position: relative;
+      height: 250px;
+      width: 100%;
+    }
+
+    /* 對比數據卡片 */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .compare-item {
+      background: #fff0f3;
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .compare-item-title { font-size: 12px; color: #881337; margin-bottom: 4px; }
+    .compare-values { display: flex; justify-content: space-around; align-items: center; font-size: 13px; font-weight: bold; }
+    .diff-badge { font-size: 11px; padding: 2px 6px; border-radius: 8px; font-weight: bold; }
+    .diff-good { background: #d1fae5; color: #065f46; }
+    .diff-bad { background: #fee2e2; color: #991b1b; }
+
+    /* 客製化 Alert Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      padding: 16px;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 20px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      border: 2px solid #f3d2d9;
+      text-align: center;
+    }
+
+    .btn-modal-close {
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(135deg, #be123c 0%, #fb7185 100%);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" id="mainContainer" style="display: none;">
+  
+  <!-- 頁頭 -->
+  <div class="header">
+    <div class="header-title">
+      <h1>🌸 小妖健管數據儀表板</h1>
+    </div>
+    <button class="btn-report" onclick="sendReportEmail()">📧 傳送報告</button>
+  </div>
+
+  <!-- 學員與期程選擇器區塊 -->
+  <div class="selector-card">
+    <div id="studentSelectWrapper">
+      <label for="studentSelect">👤 選擇學員：</label>
+      <select id="studentSelect" onchange="onStudentSelectChange()">
+        <option value="">載入中...</option>
+      </select>
+    </div>
+    <div>
+      <label for="cycleSelect">📅 健管期程：</label>
+      <select id="cycleSelect" onchange="onCycleSelectChange()">
+        <option value="">載入中...</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 需求四 (A)：InBody 風格肌肉脂肪分析 -->
+  <div class="section-card">
+    <div class="section-title">🏋️‍♂️ 肌肉脂肪分析 (InBody 風格)</div>
+    
+    <div class="inbody-bar-group">
+      <div class="inbody-label">
+        <span>體重 (Weight)</span>
+        <span id="labelWeight">-- kg</span>
+      </div>
+      <div class="inbody-track">
+        <div class="inbody-zone zone-low">低</div>
+        <div class="inbody-zone zone-normal">標準</div>
+        <div class="inbody-zone zone-high">超標</div>
+        <div class="inbody-fill" id="barWeight"></div>
+      </div>
+    </div>
+
+    <div class="inbody-label">
+      <span>骨骼肌量 (Skeletal Muscle)</span>
+      <span id="labelMuscle">-- kg</span>
+    </div>
+    <div class="inbody-bar-group">
+      <div class="inbody-track">
+        <div class="inbody-zone zone-low">低</div>
+        <div class="inbody-zone zone-normal">標準</div>
+        <div class="inbody-zone zone-high">超標</div>
+        <div class="inbody-fill" id="barMuscle"></div>
+      </div>
+    </div>
+
+    <div class="inbody-label">
+      <span>體脂肪量 (Body Fat Mass)</span>
+      <span id="labelFat">-- kg</span>
+    </div>
+    <div class="inbody-bar-group">
+      <div class="inbody-track">
+        <div class="inbody-zone zone-low">低</div>
+        <div class="inbody-zone zone-normal">標準</div>
+        <div class="inbody-zone zone-high">超標</div>
+        <div class="inbody-fill" id="barFat"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 需求四 (B)：體脂率與 BMI 坐標分布圖 -->
+  <div class="section-card">
+    <div class="section-title">📐 體型坐標分布圖 (BMI vs 體脂率)</div>
+    <div class="matrix-container">
+      <canvas id="matrixCanvas" width="350" height="280"></canvas>
+    </div>
+  </div>
+
+  <!-- 需求五：趨勢圖區塊 -->
+  <div class="section-card">
+    <div class="section-title">📈 身體數據變化趨勢</div>
+    <div class="tab-group">
+      <div class="tab-btn active" id="tabWeight" onclick="switchTrend('weight')">體重趨勢</div>
+      <div class="tab-btn" id="tabFat" onclick="switchTrend('fat')">體脂率趨勢</div>
+      <div class="tab-btn" id="tabMuscle" onclick="switchTrend('muscle')">骨骼肌率趨勢</div>
+    </div>
+    <div class="chart-container">
+      <canvas id="trendChart"></canvas>
+    </div>
+  </div>
+
+  <!-- 需求六：數據對比卡片 (首筆 vs 末筆) -->
+  <div class="section-card">
+    <div class="section-title">🔄 本期成效首末對比卡片</div>
+    <div class="compare-grid" id="compareGrid">
+      <!-- 自動動態渲染卡片 -->
+    </div>
+  </div>
+
+  <!-- 需求七：數據來源與期程標示 -->
+  <div style="text-align: center; font-size: 12px; color: #881337; margin-top: 10px;" id="attributionText">
+    📊 資料來源：學員 健管數據
+  </div>
+</div>
+
+<!-- 小妖客製化 Alert Modal -->
+<div class="modal-overlay" id="customAlertModal">
+  <div class="modal-content">
+    <div style="font-size: 16px; font-weight: bold; color: var(--primary-color); margin-bottom: 10px;">🌸 小妖貼心提醒</div>
+    <div style="font-size: 14px; color: #881337; line-height: 1.6;" id="customAlertMsg"></div>
+    <button class="btn-modal-close" onclick="closeCustomAlert()">我知道囉 🌸</button>
+  </div>
+</div>
+
+<script>
+  const LIFF_ID = "2011036080-f1uDP48f"; 
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw4SepToEB3DoVPutFIX183Cine0GxYJVquDh8119eRDpPlpXLvFY_cT-DReGA91sxY/exec"; 
+
+  let operatorId = "";
+  let operatorRole = "學員";
+  let currentStudentId = "";
+  let currentCycleId = "";
+  let dashboardData = null;
+  let chartInstance = null;
+  let currentTrendMetric = 'weight';
+
+  window.onload = async function() {
+    await initLiff();
+    checkPermissionAndInit();
+  };
+
+  function showCustomAlert(msg) {
+    document.getElementById("customAlertMsg").innerText = msg;
+    document.getElementById("customAlertModal").style.display = "flex";
+  }
+
+  function closeCustomAlert() {
+    document.getElementById("customAlertModal").style.display = "none";
+  }
+
+  async function initLiff() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramOpId = urlParams.get('operator_id');
+    if (paramOpId) {
+      operatorId = paramOpId;
+      return;
+    }
+
+    try {
+      await liff.init({ liffId: LIFF_ID });
+      if (liff.isLoggedIn()) {
+        const profile = await liff.getProfile();
+        operatorId = profile.userId;
+      } else {
+        liff.login();
+      }
+    } catch (e) {
+      console.warn("LIFF 初始化異常（非 LINE 內建環境）:", e);
+      operatorId = "U1234567890";
+    }
+  }
+
+  // 1. 權限檢查與學員選單初始化
+  function checkPermissionAndInit() {
+    fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "check_sender_permission", operator_id: operatorId })
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (res.allowed) {
+        operatorRole = res.role || "教練";
+        document.getElementById("mainContainer").style.display = "block";
+        loadStudentSelector();
+      } else {
+        // 一般學員身分或未開通權限
+        operatorRole = "學員";
+        document.getElementById("mainContainer").style.display = "block";
+        document.getElementById("studentSelectWrapper").style.display = "none";
+        currentStudentId = operatorId;
+        loadCyclesForStudent(currentStudentId);
+      }
+    })
+    .catch(err => {
+      showCustomAlert("權限驗證失敗，請重新開啟頁面。");
+    });
+  }
+
+  function loadStudentSelector() {
+    const actionName = (operatorRole.indexOf("系統管理員") !== -1) ? "get_all_students" : "get_student_list";
+    
+    fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: actionName, operator_id: operatorId })
+    })
+    .then(res => res.json())
+    .then(res => {
+      const select = document.getElementById("studentSelect");
+      select.innerHTML = "";
+      if (res.success && res.data && res.data.length > 0) {
+        res.data.forEach(s => {
+          const opt = document.createElement("option");
+          opt.value = s.LineID;
+          opt.textContent = s.name + (s.statusText ? ` (${s.statusText})` : '');
+          select.appendChild(opt);
+        });
+        currentStudentId = select.value;
+        loadCyclesForStudent(currentStudentId);
+      } else {
+        select.innerHTML = `<option value="">無學員資料</option>`;
+      }
+    });
+  }
+
+  function onStudentSelectChange() {
+    currentStudentId = document.getElementById("studentSelect").value;
+    loadCyclesForStudent(currentStudentId);
+  }
+
+  // 2. 載入該學員的健管期程清單
+  function loadCyclesForStudent(userId) {
+    fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "get_user_cycles", user_id: userId })
+    })
+    .then(res => res.json())
+    .then(res => {
+      const cSelect = document.getElementById("cycleSelect");
+      cSelect.innerHTML = "";
+      if (res.success && res.data && res.data.length > 0) {
+        res.data.forEach(c => {
+          const opt = document.createElement("option");
+          opt.value = c.cycleId;
+          opt.textContent = `第 ${c.cycleNumber} 期 (${c.status})`;
+          cSelect.appendChild(opt);
+        });
+        currentCycleId = cSelect.value;
+        fetchDashboardData();
+      } else {
+        cSelect.innerHTML = `<option value="">無期程紀錄</option>`;
+        showCustomAlert("該學員目前尚無健康管理期程資料唷！🌸");
+      }
+    });
+  }
+
+  function onCycleSelectChange() {
+    currentCycleId = document.getElementById("cycleSelect").value;
+    fetchDashboardData();
+  }
+
+  // 3. 取得儀表板數據並更新全頁視覺化
+  function fetchDashboardData() {
+    fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "get_cycle_data_for_dashboard",
+        user_id: currentStudentId,
+        cycle_id: currentCycleId
+      })
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (res.success && res.records && res.records.length > 0) {
+        dashboardData = res;
+        renderAllDashboardComponents();
+      } else {
+        showCustomAlert("該期程尚無身體數據紀錄！");
+      }
+    });
+  }
+
+  function renderAllDashboardComponents() {
+    const student = dashboardData.student;
+    const records = dashboardData.records;
+    const latest = records[records.length - 1];
+
+    // 更新標示
+    document.getElementById("attributionText").innerHTML = 
+      `📊 資料來源：學員 <strong>${student.name}</strong> 的健管數據 (${dashboardData.cycle ? dashboardData.cycle.startDate : ''} ~ ${dashboardData.cycle ? dashboardData.cycle.endDate : ''})`;
+
+    // (A) 渲染 InBody 橫條圖
+    renderInBodyBars(student, latest);
+
+    // (B) 渲染 9 宮格坐標分布圖
+    renderMatrixPlot(student, latest);
+
+    // (C) 渲染趨勢圖
+    renderTrendChart();
+
+    // (D) 渲染首末數據對比卡片
+    renderComparisonCards(records);
+  }
+
+  // Render InBody style bars
+  function renderInBodyBars(student, latest) {
+    const w = latest.weight || 0;
+    const muscleKg = (w * (latest.skeletalMuscle || 0) / 100).toFixed(1);
+    const fatKg = (w * (latest.bodyFat || 0) / 100).toFixed(1);
+
+    document.getElementById("labelWeight").innerText = `${w} kg`;
+    document.getElementById("labelMuscle").innerText = `${muscleKg} kg`;
+    document.getElementById("labelFat").innerText = `${fatKg} kg`;
+
+    // 簡化標準範圍動畫填滿計算
+    const isMale = student.gender === "男";
+    const baseWeightMax = isMale ? 85 : 70;
+    const weightPct = Math.min(Math.max((w / baseWeightMax) * 100, 10), 100);
+    const musclePct = Math.min(Math.max((muscleKg / (baseWeightMax * 0.45)) * 100, 10), 100);
+    const fatPct = Math.min(Math.max((fatKg / (baseWeightMax * 0.3)) * 100, 10), 100);
+
+    gsap.to("#barWeight", { width: weightPct + "%", duration: 1 });
+    gsap.to("#barMuscle", { width: musclePct + "%", duration: 1 });
+    gsap.to("#barFat", { width: fatPct + "%", duration: 1 });
+  }
+
+  // Render 9-Grid Coordinate Distribution Plot (Canvas)
+  function renderMatrixPlot(student, latest) {
+    const canvas = document.getElementById("matrixCanvas");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const isMale = student.gender === "男";
+    const bmi = latest.bmi || 22;
+    const bodyFat = latest.bodyFat || 20;
+
+    // 區域矩陣名稱定義
+    const gridNames = [
+      ["過瘦", "肌肉不足", "嚴重泡芙人"],
+      ["精壯", "黃金標準", "泡芙人"],
+      ["壯碩", "健壯", "健壯肥胖者"]
+    ];
+
+    const w = canvas.width;
+    const h = canvas.height;
+    const cellW = w / 3;
+    const cellH = h / 3;
+
+    // 繪製背景 9 宮格
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) {
+        ctx.fillStyle = (r + c) % 2 === 0 ? "#fff0f3" : "#ffe4e8";
+        ctx.fillRect(c * cellW, r * cellH, cellW, cellH);
+        ctx.strokeStyle = "#fecdd3";
+        ctx.strokeRect(c * cellW, r * cellH, cellW, cellH);
+
+        ctx.fillStyle = "#881337";
+        ctx.font = "11px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(gridNames[r][c], c * cellW + cellW / 2, r * cellH + cellH / 2);
+      }
+    }
+
+    // 計算當前數據於畫布上的座標標示點
+    let col = bmi < 18.5 ? 0 : (bmi <= 24 ? 1 : 2);
+    let fatLow = isMale ? 8 : 14;
+    let fatHigh = isMale ? 23 : 25;
+    let row = bodyFat < fatLow ? 0 : (bodyFat <= fatHigh ? 1 : 2);
+
+    const ptX = col * cellW + cellW / 2;
+    const ptY = row * cellH + cellH / 2;
+
+    // 繪製當前位置紅點標記
+    ctx.beginPath();
+    ctx.arc(ptX, ptY, 8, 0, Math.PI * 2);
+    ctx.fillStyle = "#e11d48";
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#ffffff";
+    ctx.stroke();
+  }
+
+  // Render Trend Line Chart (Chart.js + GSAP)
+  function switchTrend(metric) {
+    currentTrendMetric = metric;
+    document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+    if (metric === 'weight') document.getElementById("tabWeight").classList.add("active");
+    if (metric === 'fat') document.getElementById("tabFat").classList.add("active");
+    if (metric === 'muscle') document.getElementById("tabMuscle").classList.add("active");
+    renderTrendChart();
+  }
+
+  function renderTrendChart() {
+    if (!dashboardData) return;
+    const records = dashboardData.records;
+
+    const labels = records.map(r => `第 ${r.entryIndex || r.weekNumber} 筆`);
+    let dataValues = [];
+    let labelName = "";
+    let unit = "";
+
+    if (currentTrendMetric === 'weight') {
+      dataValues = records.map(r => r.weight);
+      labelName = "體重"; unit = "kg";
+    } else if (currentTrendMetric === 'fat') {
+      dataValues = records.map(r => r.bodyFat);
+      labelName = "體脂率"; unit = "%";
+    } else {
+      dataValues = records.map(r => r.skeletalMuscle);
+      labelName = "骨骼肌率"; unit = "%";
+    }
+
+    const ctx = document.getElementById("trendChart").getContext("2d");
+    if (chartInstance) chartInstance.destroy();
+
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: `${labelName} (${unit})`,
+          data: dataValues,
+          borderColor: '#9f1239',
+          backgroundColor: 'rgba(254, 205, 211, 0.4)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 5,
+          pointBackgroundColor: '#be123c'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true }
+        }
+      }
+    });
+
+    // GSAP 淡入特效
+    gsap.from("#trendChart", { opacity: 0, y: 10, duration: 0.5 });
+  }
+
+  // Render Comparison Cards
+  function renderComparisonCards(records) {
+    const first = records[0];
+    const last = records[records.length - 1];
+
+    const items = [
+      { key: "weight", name: "體重 (kg)", inv: false },
+      { key: "bmi", name: "BMI", inv: false },
+      { key: "bodyFat", name: "體脂率 (%)", inv: false },
+      { key: "skeletalMuscle", name: "骨骼肌率 (%)", inv: true },
+      { key: "bodyAge", name: "身體年齡", inv: false },
+      { key: "visceralFat", name: "內臟脂肪", inv: false }
+    ];
+
+    const grid = document.getElementById("compareGrid");
+    grid.innerHTML = "";
+
+    items.forEach(item => {
+      const fVal = Number(first[item.key] || 0);
+      const lVal = Number(last[item.key] || 0);
+      const diff = (lVal - fVal).toFixed(1);
+      const isGood = item.inv ? (diff > 0) : (diff < 0);
+      const badgeClass = isGood ? "diff-good" : "diff-bad";
+      const sign = diff > 0 ? "+" : "";
+
+      const html = `
+        <div class="compare-item">
+          <div class="compare-item-title">${item.name}</div>
+          <div class="compare-values">
+            <span style="color:#6b7280;">首 ${fVal}</span>
+            <span>➔</span>
+            <span>末 ${lVal}</span>
+          </div>
+          <div style="margin-top: 4px;">
+            <span class="diff-badge ${badgeClass}">${sign}${diff}</span>
+          </div>
+        </div>
+      `;
+      grid.innerHTML += html;
+    });
+  }
+
+  // 4. 發送 HTML Email 報告
+  function sendReportEmail() {
+    if (!currentStudentId || !currentCycleId) {
+      showCustomAlert("請先選取有效的學員與期程！");
+      return;
+    }
+
+    showCustomAlert("正在為您產生並寄送健康報告，請稍候... 🌸");
+
+    fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "send_dashboard_report",
+        user_id: currentStudentId,
+        cycle_id: currentCycleId,
+        operator_id: operatorId
+      })
+    })
+    .then(res => res.json())
+    .then(res => {
+      closeCustomAlert();
+      if (res.success) {
+        showCustomAlert(res.message);
+      } else {
+        showCustomAlert("⚠️ 寄送失敗：" + res.message);
+      }
+    })
+    .catch(err => {
+      closeCustomAlert();
+      showCustomAlert("💥 發生系統異常，請稍後重試。");
+    });
+  }
+</script>
+
+</body>
+</html>
