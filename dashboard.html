@@ -119,7 +119,7 @@
       box-sizing: border-box;
     }
 
-    /* 健管週期日曆 UI 樣式 (極致 RWD 自適應) */
+    /* 健管週期日曆 UI 樣式 */
     .calendar-card {
       background: #ffffff;
       border: 1.5px solid #fecdd3;
@@ -193,7 +193,6 @@
       font-weight: 600;
     }
 
-    /* 已有數據標記 */
     .has-data-badge {
       position: absolute;
       top: 1px;
@@ -202,7 +201,6 @@
       line-height: 1;
     }
 
-    /* 今天標記 */
     .calendar-cell.is-today {
       border: 2px solid #e11d48 !important;
       box-shadow: 0 0 8px rgba(225, 29, 72, 0.4);
@@ -215,7 +213,6 @@
       100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
     }
 
-    /* 日曆圖例 */
     .calendar-legend {
       display: flex;
       justify-content: center;
@@ -237,7 +234,6 @@
       border-radius: 3px;
     }
 
-    /* 小妖提示語 */
     .xiaoyao-tip-box {
       background: #fff0f3;
       border: 1px dashed #fecdd3;
@@ -280,7 +276,7 @@
       gap: 6px;
     }
 
-    /* InBody 橫條圖樣式 */
+    /* InBody 風格肌肉脂肪分析 */
     .inbody-bar-group { margin-bottom: 12px; }
     .inbody-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; font-weight: 600; }
     .inbody-track {
@@ -304,7 +300,7 @@
       transition: width 1s ease-out;
     }
 
-    /* 9宮格分布圖樣式 */
+    /* 9宮格分布圖樣式 (已校正排版) */
     .matrix-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -325,22 +321,23 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: bold;
       color: #881337;
       text-align: center;
       position: relative;
       padding: 2px;
+      line-height: 1.2;
     }
 
     .matrix-dot {
       position: absolute;
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       background-color: #e11d48;
       border: 2px solid #ffffff;
       border-radius: 50%;
-      box-shadow: 0 0 10px rgba(225, 29, 72, 0.8);
+      box-shadow: 0 0 12px rgba(225, 29, 72, 0.9);
       z-index: 10;
       transform: translate(-50%, -50%);
       display: none;
@@ -381,7 +378,6 @@
       width: 100%;
     }
 
-    /* 對比表格 RWD 滿版防止溢出 */
     .compare-table-wrapper {
       width: 100%;
       overflow-x: auto;
@@ -390,7 +386,7 @@
 
     .compare-table {
       width: 100%;
-      table-layout: fixed; /* 固定寬度，不破版 */
+      table-layout: fixed;
       border-collapse: collapse;
       font-size: 12px;
       text-align: center;
@@ -425,6 +421,44 @@
       font-size: 11px;
       margin: 2px;
       font-weight: 500;
+    }
+
+    /* GSAP 突出顯示 Top 1 營養素卡片樣式 */
+    .top-nutrient-hero-card {
+      background: linear-gradient(135deg, #fff9f5 0%, #ffeef2 100%);
+      border: 2px solid #d97706;
+      border-radius: 16px;
+      padding: 14px;
+      text-align: center;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 15px rgba(217, 119, 6, 0.2);
+      transform-origin: center center;
+    }
+
+    .top-nutrient-badge {
+      display: inline-block;
+      background: linear-gradient(90deg, #d97706 0%, #e11d48 100%);
+      color: #ffffff;
+      font-size: 11.5px;
+      font-weight: bold;
+      padding: 3px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 6px rgba(225, 29, 72, 0.3);
+    }
+
+    .top-nutrient-name {
+      font-size: 22px;
+      font-weight: 900;
+      color: #881337;
+      margin: 8px 0 4px 0;
+      letter-spacing: 1px;
+    }
+
+    .top-nutrient-desc {
+      font-size: 11.5px;
+      color: #9f1239;
+      margin: 0;
     }
 
     /* Modal 通用樣式 */
@@ -506,7 +540,7 @@
   <!-- 學員與期程選擇器區塊 -->
   <div class="selector-card">
     <div id="studentSelectWrapper">
-      <label for="studentSelect">👤 選擇學員：</label>
+      <label for="studentSelect">👤 選擇查看對象：</label>
       <select id="studentSelect" onchange="onStudentSelectChange()">
         <option value="">載入中...</option>
       </select>
@@ -519,16 +553,14 @@
     </div>
   </div>
 
-  <!-- 健管週期日曆區塊 (修訂為簡稱表頭) -->
+  <!-- 健管週期日曆區塊 -->
   <div class="calendar-card" id="calendarSection">
     <div class="section-title">📅 健管週期日曆 (45 天總歷程)</div>
     
-    <!-- 今日狀態 -->
     <div class="today-status-banner" id="todayStatusBanner">
       載入健管天數狀態中...
     </div>
 
-    <!-- 日曆網格 (表頭改為簡稱：一~日) -->
     <div class="calendar-grid">
       <div class="calendar-header-day">一</div>
       <div class="calendar-header-day">二</div>
@@ -540,10 +572,9 @@
     </div>
     
     <div class="calendar-grid" id="calendarDaysGrid">
-      <!-- 動態產生 45/42 天日期格子 -->
+      <!-- 動態產生日期格子 -->
     </div>
 
-    <!-- 日曆配色圖例 -->
     <div class="calendar-legend">
       <div class="legend-item"><div class="legend-box" style="background-color: var(--color-prep);"></div>準備日</div>
       <div class="legend-item"><div class="legend-box" style="background-color: var(--color-protein);"></div>蛋白日</div>
@@ -552,7 +583,6 @@
       <div class="legend-item">🌸 已有數據</div>
     </div>
 
-    <!-- 小妖提示語 -->
     <div class="xiaoyao-tip-box" id="xiaoyaoTipBox">
       🌸 小妖隨時提醒您維持充足水分與規律飲食喔！
     </div>
@@ -607,20 +637,23 @@
     </div>
   </div>
 
-  <!-- 9 宮格體型坐標分布圖 -->
+  <!-- 9 宮格體型坐標分布圖 (修正排版與邏輯對映) -->
   <div class="section-card">
     <div class="section-title">📐 體型坐標分布圖 (BMI vs 體脂率)</div>
     <div style="position: relative; max-width: 420px; margin: 0 auto;">
       <div class="matrix-grid" id="matrixGrid">
-        <div class="matrix-cell">過瘦</div>
-        <div class="matrix-cell">肌肉不足</div>
-        <div class="matrix-cell">嚴重泡芙人</div>
-        <div class="matrix-cell">精壯</div>
-        <div class="matrix-cell" style="background:#fff0f3;">黃金標準</div>
-        <div class="matrix-cell">泡芙人</div>
-        <div class="matrix-cell">壯碩</div>
-        <div class="matrix-cell">健壯</div>
-        <div class="matrix-cell">健壯肥胖者</div>
+        <!-- Row 0: 高體脂 -->
+        <div class="matrix-cell">嚴重泡芙人<br><span style="font-size:9px; color:#6b7280; font-weight:normal;">(過輕+高脂)</span></div>
+        <div class="matrix-cell">泡芙型<br><span style="font-size:9px; color:#6b7280; font-weight:normal;">(標準+高脂)</span></div>
+        <div class="matrix-cell">健壯肥胖者<br><span style="font-size:9px; color:#6b7280; font-weight:normal;">(過重+高脂)</span></div>
+        <!-- Row 1: 標準體脂 -->
+        <div class="matrix-cell">過瘦型<br><span style="font-size:9px; color:#6b7280; font-weight:normal;">(過輕+適脂)</span></div>
+        <div class="matrix-cell" style="background:#fff0f3;">黃金標準 ✨<br><span style="font-size:9px; color:#be123c; font-weight:normal;">(標準+適脂)</span></div>
+        <div class="matrix-cell">壯碩型<br><span style="font-size:9px; color:#6b7280; font-weight:normal;">(過重+適脂)</span></div>
+        <!-- Row 2: 低體脂 -->
+        <div class="matrix-cell">肌肉不足<br><span style="font-size:9px; color:#6b7280; font-weight:normal;">(過輕+低脂)</span></div>
+        <div class="matrix-cell">精壯型<br><span style="font-size:9px; color:#6b7280; font-weight:normal;">(標準+低脂)</span></div>
+        <div class="matrix-cell">運動員型<br><span style="font-size:9px; color:#6b7280; font-weight:normal;">(過重+低脂)</span></div>
       </div>
       <div class="matrix-dot" id="matrixDot"></div>
     </div>
@@ -641,7 +674,7 @@
     </div>
   </div>
 
-  <!-- 數據成效對比 (修正溢出並加上 GSAP 動畫) -->
+  <!-- 數據成效對比 -->
   <div class="section-card" id="compareCardSection">
     <div class="section-title">🔄 數據成效對比 (任意兩期比較)</div>
     
@@ -791,6 +824,7 @@
 
   let operatorId = "";
   let operatorRole = "學員";
+  let senderDisplayName = "";
   let currentStudentId = "";
   let currentCycleId = "";
   let dashboardData = null;
@@ -843,6 +877,7 @@
     .then(res => {
       if (res.allowed) {
         operatorRole = res.role || "教練";
+        senderDisplayName = res.senderName || "教練";
         document.getElementById("mainContainer").style.display = "block";
         loadStudentSelector();
       } else {
@@ -855,6 +890,7 @@
     });
   }
 
+  /* 載入學員選單：確保教練本身與旗下所有學員（無論是否健管中）皆可選擇 */
   function loadStudentSelector() {
     const actionName = (operatorRole.indexOf("系統管理員") !== -1) ? "get_all_students" : "get_student_list";
     
@@ -866,16 +902,29 @@
     .then(res => {
       const select = document.getElementById("studentSelect");
       select.innerHTML = "";
+
+      let hasSelfInList = false;
+
       if (res.success && res.data && res.data.length > 0) {
         res.data.forEach(s => {
+          if (s.LineID === operatorId) hasSelfInList = true;
           const opt = document.createElement("option");
           opt.value = s.LineID;
-          opt.textContent = s.name + (s.statusText ? ` (${s.statusText})` : '');
+          opt.textContent = (s.LineID === operatorId ? "⭐ " : "") + s.name + (s.statusText ? ` (${s.statusText})` : '');
           select.appendChild(opt);
         });
-        currentStudentId = select.value;
-        loadCyclesForStudent(currentStudentId);
       }
+
+      // 若後端返回列表中未涵蓋教練本人，主動將教練本人選項插入第一位
+      if (!hasSelfInList && operatorId) {
+        const selfOpt = document.createElement("option");
+        selfOpt.value = operatorId;
+        selfOpt.textContent = `⭐ ${senderDisplayName || '教練自己'} (我的個人資料)`;
+        select.insertBefore(selfOpt, select.firstChild);
+      }
+
+      currentStudentId = select.value || operatorId;
+      loadCyclesForStudent(currentStudentId);
     });
   }
 
@@ -904,7 +953,12 @@
         fetchAllDashboardData();
       } else {
         cSelect.innerHTML = `<option value="">無期程紀錄</option>`;
-        showCustomAlert("該學員目前尚無健康管理期程資料唷！🌸");
+        // 即使無期程，仍嘗試載入亞健康問卷報告
+        dashboardData = null;
+        calendarData = null;
+        document.getElementById("calendarSection").style.display = "none";
+        fetchSubhealthReport();
+        showCustomAlert("該學員/教練目前尚無健管期程資料，已為您展現亞健康檢測紀錄！🌸");
       }
     });
   }
@@ -915,6 +969,7 @@
   }
 
   function fetchAllDashboardData() {
+    document.getElementById("calendarSection").style.display = "block";
     fetchDashboardData();
     fetchCalendarData();
     fetchSubhealthReport();
@@ -979,7 +1034,7 @@
     const latest = records.length > 0 ? records[records.length - 1] : null;
 
     document.getElementById("attributionText").innerHTML = 
-      `📊 資料來源：學員 <strong>${student.name}</strong> 的健管數據 (${dashboardData.cycle ? dashboardData.cycle.startDateDisplay : ''} ~ ${dashboardData.cycle ? dashboardData.cycle.endDateDisplay : ''})`;
+      `📊 資料來源：<strong>${student.name}</strong> 的健管數據 (${dashboardData.cycle ? dashboardData.cycle.startDateDisplay : ''} ~ ${dashboardData.cycle ? dashboardData.cycle.endDateDisplay : ''})`;
 
     checkDataAnomalies(records);
     if (latest) {
@@ -990,7 +1045,6 @@
     populateCompareDropdowns(records);
   }
 
-  /* 渲染健管週期日曆與 GSAP 微動畫 */
   function renderCalendarUI() {
     if (!calendarData) return;
 
@@ -1091,7 +1145,6 @@
       currD.setDate(currD.getDate() + 1);
     }
 
-    // GSAP 日曆格子登場動畫
     gsap.from("#calendarDaysGrid .calendar-cell", {
       duration: 0.4,
       opacity: 0,
@@ -1240,7 +1293,6 @@
     renderCompareTableFromSelection();
   }
 
-  /* 渲染對比表格與 GSAP 逐欄登場動畫 */
   function renderCompareTableFromSelection() {
     if (!dashboardData || !dashboardData.records) return;
     const records = dashboardData.records;
@@ -1284,7 +1336,6 @@
       tbody.appendChild(tr);
     });
 
-    // GSAP 表格行進場動畫
     gsap.from("#compareTableBody tr", {
       duration: 0.35,
       opacity: 0,
@@ -1294,6 +1345,7 @@
     });
   }
 
+  /* 亞健康報告渲染：結合 GSAP 突出動態呈現最缺乏營養素 Top 1 */
   function renderSubhealthReportUI() {
     const container = document.getElementById("subhealthContent");
 
@@ -1308,6 +1360,14 @@
     }
 
     const report = subhealthReportData;
+    
+    // 解析最缺乏的前 3 名營養素
+    let top3Array = [];
+    if (report.top3Nutrients) {
+      top3Array = report.top3Nutrients.split(',').map(s => s.trim()).filter(s => s.length > 0);
+    }
+    const top1Nutrient = top3Array[0] || "關鍵綜合營養素";
+
     let tagsHtml = "";
     if (report.symptomsDetail && report.symptomsDetail.length > 0) {
       tagsHtml = report.symptomsDetail.map(s => `<span class="tag-symptom">✓ ${s}</span>`).join('');
@@ -1323,14 +1383,21 @@
     }
 
     container.innerHTML = `
+      <!-- GSAP 動畫特別突顯最缺乏的營養素 卡片 -->
+      <div class="top-nutrient-hero-card" id="topNutrientHighlightBox">
+        <span class="top-nutrient-badge">👑 最優先補充核心營養素 No.1</span>
+        <div class="top-nutrient-name">${top1Nutrient}</div>
+        <p class="top-nutrient-desc">根據近期身體檢測狀況，這是您目前體內需求頻率最高的核心營養素！</p>
+      </div>
+
       <div style="background:#fff8f9; border:1px solid #fecdd3; border-radius:12px; padding:12px; font-size:12.5px; color:#881337; line-height:1.6;">
-        <div><strong>📅 檢測日期：</strong>${report.surveyDate}</div>
+        <div><strong>📅 最新檢測日期：</strong>${report.surveyDate}</div>
         <div style="margin-top:4px;"><strong>👑 缺乏營養素 Top 3：</strong><span style="color:#e11d48; font-weight:bold;">${report.top3Nutrients || '無'}</span></div>
-        <div style="margin-top:8px;"><strong>📋 本次勾選狀況：</strong></div>
+        <div style="margin-top:8px;"><strong>📋 本次勾選健康狀況：</strong></div>
         <div style="margin-top:4px;">${tagsHtml}</div>
 
         <div style="margin-top:12px; border-top:1px dashed #fecdd3; padding-top:8px;">
-          <label for="subhealthSymptomSelect">🔎 症狀對應營養素查詢：</label>
+          <label for="subhealthSymptomSelect">🔎 症狀對應營養素快速查詢：</label>
           <select id="subhealthSymptomSelect" onchange="onSubhealthSymptomChange()" style="margin-top:4px;">
             ${selectOptionsHtml}
           </select>
@@ -1340,6 +1407,21 @@
         </div>
       </div>
     `;
+
+    // 觸發 GSAP 登場與呼吸脈衝動畫
+    gsap.fromTo("#topNutrientHighlightBox", 
+      { scale: 0.6, opacity: 0, y: 25 },
+      { scale: 1, opacity: 1, y: 0, duration: 0.7, ease: "back.out(1.8)", onComplete: () => {
+          gsap.to("#topNutrientHighlightBox", {
+            scale: 1.03,
+            repeat: -1,
+            yoyo: true,
+            duration: 1.2,
+            ease: "sine.inOut"
+          });
+        } 
+      }
+    );
   }
 
   function onSubhealthSymptomChange() {
@@ -1381,7 +1463,7 @@
     }
 
     if (warnings.length > 0) {
-      document.getElementById("anomalyText").innerText = warnings.join("；") + "，請留意學員近期飲食與運動狀況！";
+      document.getElementById("anomalyText").innerText = warnings.join("；") + "，請留意近期飲食與運動狀況！";
       box.style.display = "block";
     } else {
       box.style.display = "none";
@@ -1417,18 +1499,24 @@
     gsap.to("#barFat", { width: fatPct + "%", duration: 1 });
   }
 
+  /* 9 宮格體型坐標分布圖 (精密對映計算) */
   function renderMatrixPlotDOM(student, latest) {
     const isMale = student.gender === "男";
     const bmi = latest.bmi || 22;
     const bodyFat = latest.bodyFat || 20;
 
-    let col = bmi < 18.5 ? 0 : (bmi < 24 ? 1 : 2);
-    let fatLow = isMale ? 8 : 14;
-    let fatHigh = isMale ? 23 : 25;
-    let row = bodyFat < fatLow ? 0 : (bodyFat <= fatHigh ? 1 : 2);
+    // 1. 計算 X 軸 (Columns: 0=過輕 <18.5, 1=標準 18.5~23.9, 2=過重 ≥24.0)
+    let col = bmi < 18.5 ? 0 : (bmi < 24.0 ? 1 : 2);
 
+    // 2. 計算 Y 軸 (Rows: 0=高體脂, 1=標準體脂, 2=低體脂)
+    let fatLow = isMale ? 10 : 18;
+    let fatHigh = isMale ? 20 : 28;
+    let row = bodyFat > fatHigh ? 0 : (bodyFat >= fatLow ? 1 : 2);
+
+    // 3. 取得網格 Cell 索引 (0 ~ 8)
+    const cellIndex = row * 3 + col;
     const cells = document.querySelectorAll(".matrix-cell");
-    const targetCell = cells[row * 3 + col];
+    const targetCell = cells[cellIndex];
     const dot = document.getElementById("matrixDot");
 
     if (targetCell) {
