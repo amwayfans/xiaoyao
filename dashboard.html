@@ -300,7 +300,7 @@
       transition: width 1s ease-out;
     }
 
-    /* 9宮格分布圖樣式 (已校正排版) */
+    /* 9宮格分布圖樣式 */
     .matrix-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -637,7 +637,7 @@
     </div>
   </div>
 
-  <!-- 9 宮格體型坐標分布圖 (修正排版與邏輯對映) -->
+  <!-- 9 宮格體型坐標分布圖 -->
   <div class="section-card">
     <div class="section-title">📐 體型坐標分布圖 (BMI vs 體脂率)</div>
     <div style="position: relative; max-width: 420px; margin: 0 auto;">
@@ -890,7 +890,6 @@
     });
   }
 
-  /* 載入學員選單：確保教練本身與旗下所有學員（無論是否健管中）皆可選擇 */
   function loadStudentSelector() {
     const actionName = (operatorRole.indexOf("系統管理員") !== -1) ? "get_all_students" : "get_student_list";
     
@@ -915,7 +914,6 @@
         });
       }
 
-      // 若後端返回列表中未涵蓋教練本人，主動將教練本人選項插入第一位
       if (!hasSelfInList && operatorId) {
         const selfOpt = document.createElement("option");
         selfOpt.value = operatorId;
@@ -953,7 +951,6 @@
         fetchAllDashboardData();
       } else {
         cSelect.innerHTML = `<option value="">無期程紀錄</option>`;
-        // 即使無期程，仍嘗試載入亞健康問卷報告
         dashboardData = null;
         calendarData = null;
         document.getElementById("calendarSection").style.display = "none";
@@ -1045,6 +1042,7 @@
     populateCompareDropdowns(records);
   }
 
+  /* 渲染健管週期日曆與 GSAP 微動畫 (精確採用本地時區 Local YYYY-MM-DD，徹底解決 1 天偏差) */
   function renderCalendarUI() {
     if (!calendarData) return;
 
@@ -1093,7 +1091,12 @@
     }
 
     for (let d = 1; d <= totalDays; d++) {
-      const cellDStr = currD.toISOString().split('T')[0];
+      // ✅ 使用本地時間格式化 YYYY-MM-DD，防止 ISO/UTC 時間轉換造成日期推後一天
+      const yyyy = currD.getFullYear();
+      const mm = String(currD.getMonth() + 1).padStart(2, '0');
+      const dd = String(currD.getDate()).padStart(2, '0');
+      const cellDStr = `${yyyy}-${mm}-${dd}`;
+
       const monthDayStr = `${currD.getMonth() + 1}/${currD.getDate()}`;
 
       let dayTypeShort = "";
@@ -1345,7 +1348,6 @@
     });
   }
 
-  /* 亞健康報告渲染：結合 GSAP 突出動態呈現最缺乏營養素 Top 1 */
   function renderSubhealthReportUI() {
     const container = document.getElementById("subhealthContent");
 
@@ -1361,7 +1363,6 @@
 
     const report = subhealthReportData;
     
-    // 解析最缺乏的前 3 名營養素
     let top3Array = [];
     if (report.top3Nutrients) {
       top3Array = report.top3Nutrients.split(',').map(s => s.trim()).filter(s => s.length > 0);
@@ -1383,7 +1384,6 @@
     }
 
     container.innerHTML = `
-      <!-- GSAP 動畫特別突顯最缺乏的營養素 卡片 -->
       <div class="top-nutrient-hero-card" id="topNutrientHighlightBox">
         <span class="top-nutrient-badge">👑 最優先補充核心營養素 No.1</span>
         <div class="top-nutrient-name">${top1Nutrient}</div>
@@ -1408,7 +1408,6 @@
       </div>
     `;
 
-    // 觸發 GSAP 登場與呼吸脈衝動畫
     gsap.fromTo("#topNutrientHighlightBox", 
       { scale: 0.6, opacity: 0, y: 25 },
       { scale: 1, opacity: 1, y: 0, duration: 0.7, ease: "back.out(1.8)", onComplete: () => {
@@ -1499,21 +1498,17 @@
     gsap.to("#barFat", { width: fatPct + "%", duration: 1 });
   }
 
-  /* 9 宮格體型坐標分布圖 (精密對映計算) */
   function renderMatrixPlotDOM(student, latest) {
     const isMale = student.gender === "男";
     const bmi = latest.bmi || 22;
     const bodyFat = latest.bodyFat || 20;
 
-    // 1. 計算 X 軸 (Columns: 0=過輕 <18.5, 1=標準 18.5~23.9, 2=過重 ≥24.0)
     let col = bmi < 18.5 ? 0 : (bmi < 24.0 ? 1 : 2);
 
-    // 2. 計算 Y 軸 (Rows: 0=高體脂, 1=標準體脂, 2=低體脂)
     let fatLow = isMale ? 10 : 18;
     let fatHigh = isMale ? 20 : 28;
     let row = bodyFat > fatHigh ? 0 : (bodyFat >= fatLow ? 1 : 2);
 
-    // 3. 取得網格 Cell 索引 (0 ~ 8)
     const cellIndex = row * 3 + col;
     const cells = document.querySelectorAll(".matrix-cell");
     const targetCell = cells[cellIndex];
