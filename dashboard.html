@@ -19,6 +19,12 @@
       --text-color: #4a282e;
       --green-accent: #10b981;
       --red-accent: #ef4444;
+
+      /* 日曆色彩 */
+      --color-prep: #93c5fd;     /* 準備日 淡藍色 */
+      --color-protein: #fcd34d;  /* 蛋白日 暖黃色 */
+      --color-slim: #86efac;     /* 纖體日 淡綠色 */
+      --color-metabolic: #d8b4fe;/* 新陳代謝日 淡紫色 */
     }
 
     body {
@@ -99,7 +105,7 @@
       display: block;
     }
 
-    select {
+    select, input, textarea {
       width: 100%;
       padding: 8px 10px;
       border: 1.5px solid #fecdd3;
@@ -108,9 +114,135 @@
       font-size: 13px;
       color: var(--text-color);
       outline: none;
+      box-sizing: border-box;
     }
 
-    /* 異常提醒 Alert Box */
+    /* 需求一、四、五、六：健管週期日曆 UI 樣式 */
+    .calendar-card {
+      background: #ffffff;
+      border: 1.5px solid #fecdd3;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .today-status-banner {
+      background: linear-gradient(135deg, #fff0f3 0%, #ffeef2 100%);
+      border: 1.5px solid #fecdd3;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #881337;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 6px rgba(159, 18, 57, 0.08);
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .calendar-header-day {
+      background-color: #881337;
+      color: #ffffff;
+      text-align: center;
+      padding: 6px 2px;
+      font-size: 12px;
+      font-weight: bold;
+      border-radius: 6px;
+    }
+
+    .calendar-cell {
+      border-radius: 8px;
+      padding: 6px 4px;
+      min-height: 52px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.15s, box-shadow 0.15s;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .calendar-cell:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+    }
+
+    .calendar-cell-date {
+      font-size: 12px;
+      font-weight: bold;
+      color: #1f2937;
+    }
+    .calendar-cell-type {
+      font-size: 10px;
+      color: #374151;
+      margin-top: 2px;
+      font-weight: 600;
+    }
+
+    /* 需求三：已有數據標記 */
+    .has-data-badge {
+      position: absolute;
+      top: 2px;
+      right: 3px;
+      font-size: 10px;
+      line-height: 1;
+    }
+
+    /* 需求四：今天標記 */
+    .calendar-cell.is-today {
+      border: 2.5px solid #e11d48 !important;
+      box-shadow: 0 0 10px rgba(225, 29, 72, 0.4);
+      animation: pulse-border 2s infinite;
+    }
+
+    @keyframes pulse-border {
+      0% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.6); }
+      70% { box-shadow: 0 0 0 6px rgba(225, 29, 72, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
+    }
+
+    /* 日曆圖例 */
+    .calendar-legend {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      font-size: 11px;
+      font-weight: bold;
+      color: #4b5563;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .legend-box {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+    }
+
+    /* 需求六：小妖提示語 */
+    .xiaoyao-tip-box {
+      background: #fff0f3;
+      border: 1px dashed #fecdd3;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 12.5px;
+      color: #881337;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
     .anomaly-box {
       background-color: #fff1f2;
       border: 1.5px solid #fecdd3;
@@ -207,7 +339,7 @@
       display: none;
     }
 
-    /* 趨勢圖表頁籤 (滑動式) */
+    /* 趨勢圖表頁籤 */
     .tab-group-scroll {
       display: flex;
       gap: 8px;
@@ -244,7 +376,7 @@
       width: 100%;
     }
 
-    /* 單一統一對比表格 */
+    /* 對比表格 */
     .compare-table {
       width: 100%;
       border-collapse: collapse;
@@ -266,7 +398,20 @@
     .diff-good { color: var(--green-accent); font-weight: bold; }
     .diff-bad { color: var(--red-accent); font-weight: bold; }
 
-    /* 客製化 Alert Modal */
+    /* 需求八：亞健康報告標籤 Tag 樣式 */
+    .tag-symptom {
+      display: inline-block;
+      background-color: #fff0f3;
+      color: #9f1239;
+      border: 1px solid #fecdd3;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      margin: 3px;
+      font-weight: 500;
+    }
+
+    /* Modal 通用樣式 */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -283,10 +428,23 @@
       border-radius: 20px;
       padding: 20px;
       width: 100%;
-      max-width: 360px;
+      max-width: 460px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
       border: 2px solid #f3d2d9;
-      text-align: center;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1.5px dashed #fecdd3;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .btn-modal-close {
@@ -300,6 +458,16 @@
       font-weight: bold;
       cursor: pointer;
       margin-top: 14px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .form-group-modal {
+      margin-bottom: 10px;
+      text-align: left;
     }
   </style>
 </head>
@@ -334,12 +502,51 @@
     </div>
   </div>
 
-  <!-- 數據異常提醒區域 (需求六擴充) -->
+  <!-- 需求一至需求六：健管週期日曆區塊 -->
+  <div class="calendar-card" id="calendarSection">
+    <div class="section-title">📅 健管週期日曆 (45 天總歷程)</div>
+    
+    <!-- 需求五：今日狀態 -->
+    <div class="today-status-banner" id="todayStatusBanner">
+      載入健管天數狀態中...
+    </div>
+
+    <!-- 日曆網格 (每週 7 天，星期一~星期日) -->
+    <div class="calendar-grid">
+      <div class="calendar-header-day">星期一</div>
+      <div class="calendar-header-day">星期二</div>
+      <div class="calendar-header-day">星期三</div>
+      <div class="calendar-header-day">星期四</div>
+      <div class="calendar-header-day">星期五</div>
+      <div class="calendar-header-day">星期六</div>
+      <div class="calendar-header-day">星期日</div>
+    </div>
+    
+    <div class="calendar-grid" id="calendarDaysGrid">
+      <!-- 動態產生 45/42 天日期格子 -->
+    </div>
+
+    <!-- 日曆配色圖例 -->
+    <div class="calendar-legend">
+      <div class="legend-item"><div class="legend-box" style="background-color: var(--color-prep);"></div>準備日</div>
+      <div class="legend-item"><div class="legend-box" style="background-color: var(--color-protein);"></div>蛋白日</div>
+      <div class="legend-item"><div class="legend-box" style="background-color: var(--color-slim);"></div>纖體日</div>
+      <div class="legend-item"><div class="legend-box" style="background-color: var(--color-metabolic);"></div>新陳代謝日</div>
+      <div class="legend-item">🌸 已有數據標記</div>
+    </div>
+
+    <!-- 需求六：小妖提示語 -->
+    <div class="xiaoyao-tip-box" id="xiaoyaoTipBox">
+      🌸 小妖隨時提醒您維持充足水分與規律飲食喔！
+    </div>
+  </div>
+
+  <!-- 數據異常提醒區域 -->
   <div class="anomaly-box" id="anomalyAlertBox">
     <strong>⚠️ 小妖數據提醒：</strong><span id="anomalyText"></span>
   </div>
 
-  <!-- 需求一：InBody 風格肌肉脂肪分析 (BMI 判定) -->
+  <!-- InBody 風格肌肉脂肪分析 -->
   <div class="section-card">
     <div class="section-title">🏋️‍♂️ 肌肉脂肪分析 (InBody 風格)</div>
     
@@ -383,7 +590,7 @@
     </div>
   </div>
 
-  <!-- 需求二：9 宮格體型坐標分布圖 (DOM/SVG 響應式) -->
+  <!-- 9 宮格體型坐標分布圖 -->
   <div class="section-card">
     <div class="section-title">📐 體型坐標分布圖 (BMI vs 體脂率)</div>
     <div style="position: relative; max-width: 420px; margin: 0 auto;">
@@ -398,12 +605,11 @@
         <div class="matrix-cell">健壯</div>
         <div class="matrix-cell">健壯肥胖者</div>
       </div>
-      <!-- 動態位移光暈紅點 -->
       <div class="matrix-dot" id="matrixDot"></div>
     </div>
   </div>
 
-  <!-- 需求三：身體數據變化趨勢 (擴充 5 標籤) -->
+  <!-- 身體數據變化趨勢 -->
   <div class="section-card">
     <div class="section-title">📈 身體數據變化趨勢</div>
     <div class="tab-group-scroll">
@@ -418,16 +624,32 @@
     </div>
   </div>
 
-  <!-- 需求四：單一成效對比區塊 -->
+  <!-- 需求七：任意兩期數據對比 -->
   <div class="section-card">
-    <div class="section-title">🔄 本期成效首末對比</div>
+    <div class="section-title">🔄 數據成效對比 (任意兩期比較)</div>
+    
+    <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 140px;">
+        <label for="baseRecordSelect">📌 對比基準期：</label>
+        <select id="baseRecordSelect" onchange="renderCompareTableFromSelection()">
+          <option value="0">載入中...</option>
+        </select>
+      </div>
+      <div style="flex: 1; min-width: 140px;">
+        <label for="targetRecordSelect">🎯 對比標的期：</label>
+        <select id="targetRecordSelect" onchange="renderCompareTableFromSelection()">
+          <option value="0">載入中...</option>
+        </select>
+      </div>
+    </div>
+
     <table class="compare-table">
       <thead>
         <tr>
           <th>項目</th>
-          <th>首筆數據</th>
+          <th id="thBaseHeader">基準值</th>
           <th>差異變化</th>
-          <th>最新數據</th>
+          <th id="thTargetHeader">標的值</th>
         </tr>
       </thead>
       <tbody id="compareTableBody">
@@ -436,15 +658,108 @@
     </table>
   </div>
 
+  <!-- 需求八：亞健康自我檢測報告區塊 -->
+  <div class="section-card" id="subhealthSection">
+    <div class="section-title">🌸 亞健康自我檢測報告</div>
+    
+    <div id="subhealthContent">
+      <p style="font-size: 13px; color: #6b7280;">載入亞健康問卷紀錄中...</p>
+    </div>
+  </div>
+
   <!-- 頁尾標示 -->
   <div style="text-align: center; font-size: 12px; color: #881337; margin-top: 10px;" id="attributionText">
     📊 資料來源：小妖健管系統
   </div>
 </div>
 
+<!-- 需求二：點擊日期彈出數據輸入 Modal -->
+<div class="modal-overlay" id="recordDataModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span>🌸 登記身體數據</span>
+      <span style="cursor:pointer;" onclick="closeRecordModal()">✖</span>
+    </div>
+    
+    <form id="modalDataForm" onsubmit="submitModalHealthData(event)">
+      <div class="form-group-modal">
+        <label>📅 紀錄日期：</label>
+        <input type="text" id="modalRecordDate" readonly style="background-color: #f3f4f6;">
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group-modal">
+          <label>身高 (cm)：</label>
+          <input type="number" id="modalHeight" readonly style="background-color: #f3f4f6;">
+        </div>
+        <div class="form-group-modal">
+          <label>體重 (kg) *：</label>
+          <input type="number" id="modalWeight" step="0.1" required placeholder="0.0" oninput="calcModalBMI()">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group-modal">
+          <label>BMI (自動計算)：</label>
+          <input type="text" id="modalBmi" readonly style="background-color: #f3f4f6;">
+        </div>
+        <div class="form-group-modal">
+          <label>體脂率 (%) *：</label>
+          <input type="number" id="modalBodyFat" step="0.1" required placeholder="0.0">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group-modal">
+          <label>骨骼肌率 (%) *：</label>
+          <input type="number" id="modalSkeletalMuscle" step="0.1" required placeholder="0.0">
+        </div>
+        <div class="form-group-modal">
+          <label>內臟脂肪等級 *：</label>
+          <input type="number" id="modalVisceralFat" step="0.5" required placeholder="例如 3">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group-modal">
+          <label>基礎代謝 (kcal) *：</label>
+          <input type="number" id="modalBmr" required placeholder="例如 1200">
+        </div>
+        <div class="form-group-modal">
+          <label>身體年齡 *：</label>
+          <input type="number" id="modalBodyAge" required placeholder="例如 25">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group-modal">
+          <label>腰圍 (cm)：</label>
+          <input type="number" id="modalWaist" step="0.1" placeholder="選填" oninput="calcModalWHR()">
+        </div>
+        <div class="form-group-modal">
+          <label>臀圍 (cm)：</label>
+          <input type="number" id="modalHip" step="0.1" placeholder="選填" oninput="calcModalWHR()">
+        </div>
+      </div>
+
+      <div class="form-group-modal">
+        <label>腰臀比：</label>
+        <input type="text" id="modalWhr" readonly style="background-color: #f3f4f6;" placeholder="-">
+      </div>
+
+      <div class="form-group-modal">
+        <label>備註：</label>
+        <textarea id="modalMemo" rows="2" placeholder="當天身體狀況、運動、生理期等注意事項..."></textarea>
+      </div>
+
+      <button type="submit" class="btn-action" id="btnModalSave" style="width: 100%; padding: 12px; margin-top: 10px;">儲存當天數據 🌸</button>
+    </form>
+  </div>
+</div>
+
 <!-- 小妖客製化 Alert Modal -->
 <div class="modal-overlay" id="customAlertModal">
-  <div class="modal-content">
+  <div class="modal-content" style="max-width: 360px; text-align: center;">
     <div style="font-size: 16px; font-weight: bold; color: var(--primary-color); margin-bottom: 10px;">🌸 小妖貼心提醒</div>
     <div style="font-size: 14px; color: #881337; line-height: 1.6;" id="customAlertMsg"></div>
     <button class="btn-modal-close" onclick="closeCustomAlert()">我知道囉 🌸</button>
@@ -460,6 +775,8 @@
   let currentStudentId = "";
   let currentCycleId = "";
   let dashboardData = null;
+  let calendarData = null;
+  let subhealthReportData = null;
   let chartInstance = null;
   let currentTrendMetric = 'weight';
 
@@ -565,7 +882,7 @@
           cSelect.appendChild(opt);
         });
         currentCycleId = cSelect.value;
-        fetchDashboardData();
+        fetchAllDashboardData();
       } else {
         cSelect.innerHTML = `<option value="">無期程紀錄</option>`;
         showCustomAlert("該學員目前尚無健康管理期程資料唷！🌸");
@@ -575,7 +892,13 @@
 
   function onCycleSelectChange() {
     currentCycleId = document.getElementById("cycleSelect").value;
+    fetchAllDashboardData();
+  }
+
+  function fetchAllDashboardData() {
     fetchDashboardData();
+    fetchCalendarData();
+    fetchSubhealthReport();
   }
 
   function fetchDashboardData() {
@@ -589,34 +912,435 @@
     })
     .then(res => res.json())
     .then(res => {
-      if (res.success && res.records && res.records.length > 0) {
+      if (res.success && res.records) {
         dashboardData = res;
-        renderAllDashboardComponents();
-      } else {
-        showCustomAlert("該期程尚無身體數據紀錄！");
+        renderCoreDashboardComponents();
       }
     });
   }
 
-  function renderAllDashboardComponents() {
-    const student = dashboardData.student;
-    const records = dashboardData.records;
-    const latest = records[records.length - 1];
-
-    document.getElementById("attributionText").innerHTML = 
-      `📊 資料來源：學員 <strong>${student.name}</strong> 的健管數據 (${dashboardData.cycle ? dashboardData.cycle.startDate : ''} ~ ${dashboardData.cycle ? dashboardData.cycle.endDate : ''})`;
-
-    checkDataAnomalies(records);
-    renderInBodyBarsBMI(student, latest);
-    renderMatrixPlotDOM(student, latest);
-    renderTrendChart();
-    renderUnifiedCompareTable(records);
+  /* 需求一~六：日曆資料取得與渲染 */
+  function fetchCalendarData() {
+    fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "get_cycle_calendar_data",
+        user_id: currentStudentId,
+        cycle_id: currentCycleId
+      })
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (res.success) {
+        calendarData = res;
+        renderCalendarUI();
+      }
+    });
   }
 
-  /* 需求六擴充：異常數據偵測 */
+  /* 需求八：亞健康報告資料取得 */
+  function fetchSubhealthReport() {
+    fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "get_latest_subhealth_report",
+        user_id: currentStudentId
+      })
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (res.success) {
+        subhealthReportData = res;
+        renderSubhealthReportUI();
+      }
+    });
+  }
+
+  function renderCoreDashboardComponents() {
+    const student = dashboardData.student;
+    const records = dashboardData.records;
+    const latest = records.length > 0 ? records[records.length - 1] : null;
+
+    document.getElementById("attributionText").innerHTML = 
+      `📊 資料來源：學員 <strong>${student.name}</strong> 的健管數據 (${dashboardData.cycle ? dashboardData.cycle.startDateDisplay : ''} ~ ${dashboardData.cycle ? dashboardData.cycle.endDateDisplay : ''})`;
+
+    checkDataAnomalies(records);
+    if (latest) {
+      renderInBodyBarsBMI(student, latest);
+      renderMatrixPlotDOM(student, latest);
+    }
+    renderTrendChart();
+    populateCompareDropdowns(records);
+  }
+
+  /* 渲染健管週期日曆 (需求一~需求六) */
+  function renderCalendarUI() {
+    if (!calendarData) return;
+
+    const startD = new Date(calendarData.startDate.replace(/-/g, '/'));
+    const hasPrep = calendarData.hasPrepDays;
+    const recordsSet = new Set(calendarData.records || []);
+    const todayStr = calendarData.today;
+
+    // 1. 渲染今日狀態 Banner (需求五)
+    const banner = document.getElementById("todayStatusBanner");
+    if (calendarData.isPrepDayPeriod) {
+      banner.innerHTML = `🌸 今天是準備日第 <strong>${calendarData.todayDayNumber}</strong> 天，好好放鬆身體，為健管旅程做好準備喔！`;
+    } else if (calendarData.todayDayNumber > 42) {
+      banner.innerHTML = `🌸 健管 42 天已圓滿完成！表現非常棒喔！🎉💪`;
+    } else if (calendarData.todayDayNumber >= 1) {
+      banner.innerHTML = `🌸 今天是健管第 <strong>${calendarData.todayDayNumber}</strong> 天（<strong>${calendarData.todayType}</strong>），距離結束還有 <strong>${calendarData.daysRemaining}</strong> 天，繼續加油喔！💪`;
+    } else {
+      banner.innerHTML = `🌸 健管期程準備開始，加油喔！✨`;
+    }
+
+    // 2. 渲染小妖動態提示語 (需求六)
+    const tipBox = document.getElementById("xiaoyaoTipBox");
+    if (calendarData.todayType === "準備日") {
+      tipBox.innerText = "🌸 準備日：讓身體好好適應，喝足水份，為接下來的健管旅程做好準備喔！";
+    } else if (calendarData.todayType === "蛋白日") {
+      tipBox.innerText = "💪 蛋白日：今天要攝取足夠的優質蛋白質，幫助肌肉修復與代謝提升！";
+    } else if (calendarData.todayType === "纖體日") {
+      tipBox.innerText = "🌿 纖體日：多吃蔬菜與膳食纖維，幫助腸道順暢，輕盈有感！";
+    } else if (calendarData.todayType === "新陳代謝日") {
+      tipBox.innerText = "🔥 新陳代謝日：提升代謝的關鍵時刻，適度運動＋充足睡眠，讓燃脂效果加倍！";
+    } else {
+      tipBox.innerText = "🌸 保持好心情與足量喝水，看見更好的自己！✨";
+    }
+
+    // 3. 排版建構 45/42 天網格日曆 (需求一)
+    const grid = document.getElementById("calendarDaysGrid");
+    grid.innerHTML = "";
+
+    const totalDays = hasPrep ? 45 : 42;
+    let currD = new Date(startD.getTime());
+
+    // 計算第 1 天的星期 (0=Sun, 1=Mon, ..., 6=Sat) 轉為 Monday-based
+    var dayOfWeek = currD.getDay(); 
+    var offset = (dayOfWeek === 0) ? 6 : dayOfWeek - 1; // 星期一為 offset 0
+
+    // 填充第一週前面的空白格子
+    for (let i = 0; i < offset; i++) {
+      const emptyCell = document.createElement("div");
+      emptyCell.style.background = "transparent";
+      grid.appendChild(emptyCell);
+    }
+
+    for (let d = 1; d <= totalDays; d++) {
+      const cellDStr = currD.toISOString().split('T')[0];
+      const monthDayStr = `${currD.getMonth() + 1}/${currD.getDate()}`;
+
+      // 判斷日類型與背景顏色
+      let dayTypeShort = "";
+      let bgColor = "var(--color-protein)";
+
+      if (hasPrep && d <= 3) {
+        dayTypeShort = "準備";
+        bgColor = "var(--color-prep)";
+      } else {
+        // 健管天數從 1 起算
+        const cycleDayNum = hasPrep ? (d - 3) : d;
+        if (cycleDayNum >= 1 && cycleDayNum <= 3) { dayTypeShort = "蛋白"; bgColor = "var(--color-protein)"; }
+        else if (cycleDayNum >= 4 && cycleDayNum <= 7) { dayTypeShort = "纖體"; bgColor = "var(--color-slim)"; }
+        else if (cycleDayNum === 8) { dayTypeShort = "蛋白"; bgColor = "var(--color-protein)"; }
+        else if (cycleDayNum >= 9 && cycleDayNum <= 14) { dayTypeShort = "纖體"; bgColor = "var(--color-slim)"; }
+        else if (cycleDayNum === 15) { dayTypeShort = "蛋白"; bgColor = "var(--color-protein)"; }
+        else if (cycleDayNum >= 16 && cycleDayNum <= 21) { dayTypeShort = "纖體"; bgColor = "var(--color-slim)"; }
+        else if (cycleDayNum === 22) { dayTypeShort = "蛋白"; bgColor = "var(--color-protein)"; }
+        else if (cycleDayNum >= 23 && cycleDayNum <= 28) { dayTypeShort = "纖體"; bgColor = "var(--color-slim)"; }
+        else if (cycleDayNum === 29) { dayTypeShort = "蛋白"; bgColor = "var(--color-protein)"; }
+        else if (cycleDayNum >= 30 && cycleDayNum <= 35) { dayTypeShort = "代謝"; bgColor = "var(--color-metabolic)"; }
+        else if (cycleDayNum === 36) { dayTypeShort = "蛋白"; bgColor = "var(--color-protein)"; }
+        else if (cycleDayNum >= 37 && cycleDayNum <= 42) { dayTypeShort = "代謝"; bgColor = "var(--color-metabolic)"; }
+      }
+
+      const cell = document.createElement("div");
+      cell.className = "calendar-cell";
+      cell.style.backgroundColor = bgColor;
+
+      // 需求四：今天標記
+      if (cellDStr === todayStr) {
+        cell.classList.add("is-today");
+      }
+
+      // 需求三：已有數據標記
+      let hasDataHtml = "";
+      if (recordsSet.has(cellDStr)) {
+        hasDataHtml = `<span class="has-data-badge">🌸</span>`;
+      }
+
+      cell.innerHTML = `
+        ${hasDataHtml}
+        <div class="calendar-cell-date">${monthDayStr}</div>
+        <div class="calendar-cell-type">${dayTypeShort}</div>
+      `;
+
+      // 需求二：點擊日期彈出 Modal 輸入視窗
+      cell.onclick = function() {
+        openRecordModal(cellDStr);
+      };
+
+      grid.appendChild(cell);
+      currD.setDate(currD.getDate() + 1);
+    }
+  }
+
+  /* 需求二：開啟彈出輸入視窗 */
+  function openRecordModal(targetDateStr) {
+    document.getElementById("modalRecordDate").value = targetDateStr;
+    document.getElementById("modalHeight").value = dashboardData && dashboardData.student ? dashboardData.student.height : 165;
+    
+    // 若當天已有數據，自動預載
+    if (dashboardData && dashboardData.records) {
+      const existing = dashboardData.records.find(r => r.recordDate === targetDateStr);
+      if (existing) {
+        document.getElementById("modalWeight").value = existing.weight;
+        document.getElementById("modalBmi").value = existing.bmi;
+        document.getElementById("modalBodyFat").value = existing.bodyFat;
+        document.getElementById("modalSkeletalMuscle").value = existing.skeletalMuscle;
+        document.getElementById("modalVisceralFat").value = existing.visceralFat;
+        document.getElementById("modalBmr").value = existing.bmr;
+        document.getElementById("modalBodyAge").value = existing.bodyAge;
+        document.getElementById("modalWaist").value = existing.waist || "";
+        document.getElementById("modalHip").value = existing.hip || "";
+        document.getElementById("modalWhr").value = existing.whr || "-";
+        document.getElementById("modalMemo").value = existing.memo || "";
+      } else {
+        document.getElementById("modalWeight").value = "";
+        document.getElementById("modalBmi").value = "";
+        document.getElementById("modalBodyFat").value = "";
+        document.getElementById("modalSkeletalMuscle").value = "";
+        document.getElementById("modalVisceralFat").value = "";
+        document.getElementById("modalBmr").value = "";
+        document.getElementById("modalBodyAge").value = "";
+        document.getElementById("modalWaist").value = "";
+        document.getElementById("modalHip").value = "";
+        document.getElementById("modalWhr").value = "-";
+        document.getElementById("modalMemo").value = "";
+      }
+    }
+
+    document.getElementById("recordDataModal").style.display = "flex";
+  }
+
+  function closeRecordModal() {
+    document.getElementById("recordDataModal").style.display = "none";
+  }
+
+  function calcModalBMI() {
+    const h = parseFloat(document.getElementById("modalHeight").value);
+    const w = parseFloat(document.getElementById("modalWeight").value);
+    if (h > 0 && w > 0) {
+      document.getElementById("modalBmi").value = (w / ((h / 100) * (h / 100))).toFixed(1);
+    }
+  }
+
+  function calcModalWHR() {
+    const waist = parseFloat(document.getElementById("modalWaist").value);
+    const hip = parseFloat(document.getElementById("modalHip").value);
+    if (waist > 0 && hip > 0) {
+      document.getElementById("modalWhr").value = (waist / hip).toFixed(2);
+    } else {
+      document.getElementById("modalWhr").value = "-";
+    }
+  }
+
+  function submitModalHealthData(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById("btnModalSave");
+    btn.disabled = true;
+    btn.innerText = "儲存中... 🌸";
+
+    const payload = {
+      action: "save_health_data",
+      operator_id: operatorId,
+      user_id: currentStudentId,
+      record_date: document.getElementById("modalRecordDate").value,
+      height: document.getElementById("modalHeight").value,
+      weight: document.getElementById("modalWeight").value,
+      bodyFat: document.getElementById("modalBodyFat").value,
+      skeletalMuscle: document.getElementById("modalSkeletalMuscle").value,
+      visceralFat: document.getElementById("modalVisceralFat").value,
+      bmr: document.getElementById("modalBmr").value,
+      bodyAge: document.getElementById("modalBodyAge").value,
+      waist: document.getElementById("modalWaist").value,
+      hip: document.getElementById("modalHip").value,
+      memo: document.getElementById("modalMemo").value
+    };
+
+    fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(res => {
+      btn.disabled = false;
+      btn.innerText = "儲存當天數據 🌸";
+      if (res.success) {
+        closeRecordModal();
+        showCustomAlert("🎉 數據已成功儲存！");
+        fetchAllDashboardData();
+      } else {
+        showCustomAlert("⚠️ 儲存失敗：" + res.message);
+      }
+    })
+    .catch(err => {
+      btn.disabled = false;
+      btn.innerText = "儲存當天數據 🌸";
+      showCustomAlert("💥 傳送時發生錯誤");
+    });
+  }
+
+  /* 需求七：任意兩期數據對比下拉選單處理 */
+  function populateCompareDropdowns(records) {
+    const baseSel = document.getElementById("baseRecordSelect");
+    const targetSel = document.getElementById("targetRecordSelect");
+
+    baseSel.innerHTML = "";
+    targetSel.innerHTML = "";
+
+    if (!records || records.length === 0) {
+      baseSel.innerHTML = '<option value="0">無紀錄</option>';
+      targetSel.innerHTML = '<option value="0">無紀錄</option>';
+      return;
+    }
+
+    records.forEach((r, idx) => {
+      const optText = `第 ${r.entryIndex || (idx + 1)} 筆 (${r.recordDateDisplay})`;
+      
+      const bOpt = document.createElement("option");
+      bOpt.value = idx;
+      bOpt.textContent = optText;
+      baseSel.appendChild(bOpt);
+
+      const tOpt = document.createElement("option");
+      tOpt.value = idx;
+      tOpt.textContent = optText;
+      targetSel.appendChild(tOpt);
+    });
+
+    // 預設值：基準期為第 1 筆 (index 0)，標的期為最後一筆
+    baseSel.value = 0;
+    targetSel.value = records.length - 1;
+
+    renderCompareTableFromSelection();
+  }
+
+  function renderCompareTableFromSelection() {
+    if (!dashboardData || !dashboardData.records) return;
+    const records = dashboardData.records;
+
+    const baseIdx = parseInt(document.getElementById("baseRecordSelect").value) || 0;
+    const targetIdx = parseInt(document.getElementById("targetRecordSelect").value) || 0;
+
+    const baseRec = records[baseIdx] || records[0];
+    const targetRec = records[targetIdx] || records[records.length - 1];
+
+    document.getElementById("thBaseHeader").innerText = `基準值 (${baseRec.recordDateDisplay})`;
+    document.getElementById("thTargetHeader").innerText = `標的值 (${targetRec.recordDateDisplay})`;
+
+    const items = [
+      { key: "weight", name: "體重 (kg)", inv: false },
+      { key: "bmi", name: "BMI", inv: false },
+      { key: "bodyFat", name: "體脂率 (%)", inv: false },
+      { key: "skeletalMuscle", name: "骨骼肌率 (%)", inv: true },
+      { key: "bodyAge", name: "身體年齡", inv: false },
+      { key: "visceralFat", name: "內臟脂肪", inv: false }
+    ];
+
+    const tbody = document.getElementById("compareTableBody");
+    tbody.innerHTML = "";
+
+    items.forEach(item => {
+      const bVal = Number(baseRec[item.key] || 0);
+      const tVal = Number(targetRec[item.key] || 0);
+      const diff = (tVal - bVal).toFixed(1);
+      const isGood = item.inv ? (diff > 0) : (diff < 0);
+      const diffClass = isGood ? "diff-good" : (diff == 0 ? "" : "diff-bad");
+      const sign = diff > 0 ? "▲ +" : (diff < 0 ? "▼ " : "");
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${item.name}</td>
+        <td>${bVal}</td>
+        <td class="${diffClass}">${sign}${diff}</td>
+        <td>${tVal}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  /* 需求八：渲染亞健康自我檢測報告區塊 */
+  function renderSubhealthReportUI() {
+    const container = document.getElementById("subhealthContent");
+
+    if (!subhealthReportData || !subhealthReportData.hasReport) {
+      container.innerHTML = `
+        <div style="background-color:#fff0f3; border:1px dashed #fecdd3; border-radius:12px; padding:16px; text-align:center;">
+          <p style="font-size:14px; color:#881337; margin-bottom:12px;">🌸 小妖發現您還沒做過亞健康自我檢測喔！點擊下方按鈕，花 3 分鐘了解自己的身體狀態吧！✨</p>
+          <a href="https://amwayfans.github.io/xiaoyao/index.html?prefill_LineID=${encodeURIComponent(currentStudentId)}" target="_blank" style="display:inline-block; background:linear-gradient(135deg, #be123c 0%, #fb7185 100%); color:#fff; padding:8px 18px; border-radius:20px; font-weight:bold; text-decoration:none; font-size:13px;">📝 前往做亞健康自我檢測</a>
+        </div>
+      `;
+      return;
+    }
+
+    const report = subhealthReportData;
+    let tagsHtml = "";
+    if (report.symptomsDetail && report.symptomsDetail.length > 0) {
+      tagsHtml = report.symptomsDetail.map(s => `<span class="tag-symptom">✓ ${s}</span>`).join('');
+    } else {
+      tagsHtml = `<span style="font-size:12px; color:#6b7280;">無勾選特殊狀況</span>`;
+    }
+
+    let selectOptionsHtml = '<option value="">-- 請選擇已勾選狀況查詢 --</option>';
+    if (report.symptomsDetail && report.symptomsDetail.length > 0) {
+      report.symptomsDetail.forEach(s => {
+        selectOptionsHtml += `<option value="${s}">${s}</option>`;
+      });
+    }
+
+    container.innerHTML = `
+      <div style="background:#fff8f9; border:1px solid #fecdd3; border-radius:12px; padding:14px; font-size:13px; color:#881337; line-height:1.6;">
+        <div><strong>📅 檢測日期：</strong>${report.surveyDate}</div>
+        <div style="margin-top:6px;"><strong>👑 缺乏營養素 Top 3：</strong><span style="color:#e11d48; font-weight:bold;">${report.top3Nutrients || '無'}</span></div>
+        <div style="margin-top:10px;"><strong>📋 本次勾選狀況：</strong></div>
+        <div style="margin-top:4px;">${tagsHtml}</div>
+
+        <div style="margin-top:14px; border-top:1px dashed #fecdd3; padding-top:10px;">
+          <label for="subhealthSymptomSelect">🔎 症狀對應營養素查詢：</label>
+          <select id="subhealthSymptomSelect" onchange="onSubhealthSymptomChange()" style="margin-top:4px;">
+            ${selectOptionsHtml}
+          </select>
+          <div id="subhealthNutrientResult" style="margin-top:8px; background:#ffffff; border:1px solid #fecdd3; border-radius:8px; padding:8px 12px; font-size:12px; color:#9f1239; min-height:36px; display:flex; align-items:center;">
+            請從上方選單選擇狀況以查詢建議補充營養素
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function onSubhealthSymptomChange() {
+    const sym = document.getElementById("subhealthSymptomSelect").value;
+    const resBox = document.getElementById("subhealthNutrientResult");
+
+    if (!sym || !subhealthReportData || !subhealthReportData.symptomNutrientMap) {
+      resBox.innerText = "請從上方選單選擇狀況以查詢建議補充營養素";
+      return;
+    }
+
+    const nutList = subhealthReportData.symptomNutrientMap[sym];
+    if (nutList && nutList.length > 0) {
+      resBox.innerHTML = `<strong>【${sym}】建議補充：</strong> ${nutList.join('、')}`;
+    } else {
+      resBox.innerText = `【${sym}】建議補充綜合維生素與均衡營養調理`;
+    }
+  }
+
+  /* 異常數據偵測 */
   function checkDataAnomalies(records) {
     const box = document.getElementById("anomalyAlertBox");
-    if (records.length < 2) {
+    if (!records || records.length < 2) {
       box.style.display = "none";
       return;
     }
@@ -643,7 +1367,7 @@
     }
   }
 
-  /* 需求一：InBody 條形圖 (BMI 判定) */
+  /* InBody 條形圖 */
   function renderInBodyBarsBMI(student, latest) {
     const w = latest.weight || 0;
     const bmi = latest.bmi || 22;
@@ -654,7 +1378,6 @@
     document.getElementById("labelMuscle").innerText = `${muscleKg} kg`;
     document.getElementById("labelFat").innerText = `${fatKg} kg`;
 
-    // BMI 映射計算：<18.5 (0-30%), 18.5-24 (30-70%), >=24 (70-100%)
     let weightPct = 50;
     if (bmi < 18.5) {
       weightPct = Math.max(10, (bmi / 18.5) * 30);
@@ -674,7 +1397,7 @@
     gsap.to("#barFat", { width: fatPct + "%", duration: 1 });
   }
 
-  /* 需求二：9 宮格體型圖 (DOM/SVG 響應式) */
+  /* 9 宮格體型圖 */
   function renderMatrixPlotDOM(student, latest) {
     const isMale = student.gender === "男";
     const bmi = latest.bmi || 22;
@@ -707,7 +1430,7 @@
     }
   }
 
-  /* 需求三：趨勢圖 (5 標籤擴充) */
+  /* 趨勢圖 */
   function switchTrend(metric) {
     currentTrendMetric = metric;
     document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
@@ -722,7 +1445,7 @@
   }
 
   function renderTrendChart() {
-    if (!dashboardData) return;
+    if (!dashboardData || !dashboardData.records) return;
     const records = dashboardData.records;
     const labels = records.map(r => `第 ${r.entryIndex || r.weekNumber} 筆`);
 
@@ -776,43 +1499,7 @@
     gsap.from("#trendChart", { opacity: 0, y: 10, duration: 0.4 });
   }
 
-  /* 需求四：統一對比表格 */
-  function renderUnifiedCompareTable(records) {
-    const first = records[0];
-    const last = records[records.length - 1];
-
-    const items = [
-      { key: "weight", name: "體重 (kg)", inv: false },
-      { key: "bmi", name: "BMI", inv: false },
-      { key: "bodyFat", name: "體脂率 (%)", inv: false },
-      { key: "skeletalMuscle", name: "骨骼肌率 (%)", inv: true },
-      { key: "bodyAge", name: "身體年齡", inv: false },
-      { key: "visceralFat", name: "內臟脂肪", inv: false }
-    ];
-
-    const tbody = document.getElementById("compareTableBody");
-    tbody.innerHTML = "";
-
-    items.forEach(item => {
-      const fVal = Number(first[item.key] || 0);
-      const lVal = Number(last[item.key] || 0);
-      const diff = (lVal - fVal).toFixed(1);
-      const isGood = item.inv ? (diff > 0) : (diff < 0);
-      const diffClass = isGood ? "diff-good" : (diff == 0 ? "" : "diff-bad");
-      const sign = diff > 0 ? "▲ +" : (diff < 0 ? "▼ " : "");
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${item.name}</td>
-        <td>${fVal}</td>
-        <td class="${diffClass}">${sign}${diff}</td>
-        <td>${lVal}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  /* 需求六擴充：CSV 數據匯出 */
+  /* CSV 匯出 */
   function exportToCSV() {
     if (!dashboardData || !dashboardData.records) {
       showCustomAlert("無數據可供匯出！");
@@ -823,7 +1510,7 @@
     csvContent += "筆次,記錄日期,體重(kg),BMI,體脂率(%),骨骼肌率(%),內臟脂肪,身體年齡\n";
 
     dashboardData.records.forEach(r => {
-      csvContent += `${r.entryIndex || 1},${r.recordDate},${r.weight},${r.bmi},${r.bodyFat},${r.skeletalMuscle},${r.visceralFat},${r.bodyAge}\n`;
+      csvContent += `${r.entryIndex || 1},${r.recordDateDisplay || r.recordDate},${r.weight},${r.bmi},${r.bodyFat},${r.skeletalMuscle},${r.visceralFat},${r.bodyAge}\n`;
     });
 
     const encodedUri = encodeURI(csvContent);
@@ -835,7 +1522,7 @@
     document.body.removeChild(link);
   }
 
-  /* 需求五：傳送 HTML 報告 Email */
+  /* 傳送 HTML 報告 Email */
   function sendReportEmail() {
     if (!currentStudentId || !currentCycleId) {
       showCustomAlert("請先選取有效的學員與期程！");
