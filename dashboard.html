@@ -20,19 +20,20 @@
       --green-accent: #10b981;
       --red-accent: #ef4444;
 
-      /* 日曆色彩 */
-      --color-prep: #93c5fd;     /* 準備日 淡藍色 */
-      --color-protein: #fcd34d;  /* 蛋白日 暖黃色 */
-      --color-slim: #86efac;     /* 纖體日 淡綠色 */
-      --color-metabolic: #d8b4fe;/* 新陳代謝日 淡紫色 */
+      /* 調淡後的柔和馬卡龍系色彩 */
+      --color-prep: #e0f2fe;     /* 準備日 柔藍色 */
+      --color-protein: #fef08a;  /* 蛋白日 柔黃色 */
+      --color-slim: #bbf7d0;     /* 纖體日 柔綠色 */
+      --color-metabolic: #f5d0fe;/* 新陳代謝日 柔紫色 */
     }
 
     body {
       margin: 0;
-      padding: 16px;
+      padding: 12px;
       background-color: var(--bg-color);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       color: var(--text-color);
+      box-sizing: border-box;
     }
 
     .container {
@@ -42,8 +43,9 @@
       border-radius: 20px;
       border: 2px solid #f3d2d9;
       box-shadow: 0 10px 25px rgba(181, 131, 141, 0.15);
-      padding: 20px;
+      padding: 14px;
       position: relative;
+      box-sizing: border-box;
     }
 
     .header {
@@ -59,7 +61,7 @@
 
     .header-title h1 {
       margin: 0;
-      font-size: 20px;
+      font-size: 18px;
       color: var(--primary-color);
     }
 
@@ -73,8 +75,8 @@
       color: #fff;
       border: none;
       border-radius: 20px;
-      padding: 8px 14px;
-      font-size: 13px;
+      padding: 8px 12px;
+      font-size: 12px;
       font-weight: bold;
       cursor: pointer;
       box-shadow: 0 3px 8px rgba(190, 18, 60, 0.25);
@@ -86,11 +88,11 @@
       background: #fff0f3;
       border: 1px solid #fecdd3;
       border-radius: 14px;
-      padding: 12px 16px;
+      padding: 12px 14px;
       margin-bottom: 16px;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
     }
 
     @media (max-width: 500px) {
@@ -111,27 +113,28 @@
       border: 1.5px solid #fecdd3;
       border-radius: 10px;
       background: #ffffff;
-      font-size: 13px;
+      font-size: 12px;
       color: var(--text-color);
       outline: none;
       box-sizing: border-box;
     }
 
-    /* 需求一、四、五、六：健管週期日曆 UI 樣式 */
+    /* 健管週期日曆 UI 樣式 (極致 RWD 自適應) */
     .calendar-card {
       background: #ffffff;
       border: 1.5px solid #fecdd3;
       border-radius: 16px;
-      padding: 16px;
+      padding: 12px 8px;
       margin-bottom: 16px;
+      box-sizing: border-box;
     }
 
     .today-status-banner {
       background: linear-gradient(135deg, #fff0f3 0%, #ffeef2 100%);
       border: 1.5px solid #fecdd3;
       border-radius: 12px;
-      padding: 10px 14px;
-      font-size: 13px;
+      padding: 10px 12px;
+      font-size: 12.5px;
       color: #881337;
       font-weight: bold;
       text-align: center;
@@ -142,24 +145,26 @@
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
-      margin-bottom: 12px;
+      gap: 4px;
+      margin-bottom: 8px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .calendar-header-day {
       background-color: #881337;
       color: #ffffff;
       text-align: center;
-      padding: 6px 2px;
+      padding: 5px 0;
       font-size: 12px;
       font-weight: bold;
-      border-radius: 6px;
+      border-radius: 5px;
     }
 
     .calendar-cell {
-      border-radius: 8px;
-      padding: 6px 4px;
-      min-height: 52px;
+      border-radius: 6px;
+      padding: 4px 1px;
+      min-height: 46px;
       text-align: center;
       cursor: pointer;
       position: relative;
@@ -168,7 +173,8 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      box-sizing: border-box;
     }
     .calendar-cell:hover {
       transform: translateY(-2px);
@@ -176,7 +182,7 @@
     }
 
     .calendar-cell-date {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: bold;
       color: #1f2937;
     }
@@ -187,25 +193,25 @@
       font-weight: 600;
     }
 
-    /* 需求三：已有數據標記 */
+    /* 已有數據標記 */
     .has-data-badge {
       position: absolute;
-      top: 2px;
-      right: 3px;
-      font-size: 10px;
+      top: 1px;
+      right: 2px;
+      font-size: 9px;
       line-height: 1;
     }
 
-    /* 需求四：今天標記 */
+    /* 今天標記 */
     .calendar-cell.is-today {
-      border: 2.5px solid #e11d48 !important;
-      box-shadow: 0 0 10px rgba(225, 29, 72, 0.4);
+      border: 2px solid #e11d48 !important;
+      box-shadow: 0 0 8px rgba(225, 29, 72, 0.4);
       animation: pulse-border 2s infinite;
     }
 
     @keyframes pulse-border {
       0% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.6); }
-      70% { box-shadow: 0 0 0 6px rgba(225, 29, 72, 0); }
+      70% { box-shadow: 0 0 0 5px rgba(225, 29, 72, 0); }
       100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
     }
 
@@ -213,7 +219,7 @@
     .calendar-legend {
       display: flex;
       justify-content: center;
-      gap: 12px;
+      gap: 8px;
       flex-wrap: wrap;
       margin-top: 10px;
       font-size: 11px;
@@ -223,23 +229,23 @@
     .legend-item {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
     }
     .legend-box {
-      width: 14px;
-      height: 14px;
-      border-radius: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
     }
 
-    /* 需求六：小妖提示語 */
+    /* 小妖提示語 */
     .xiaoyao-tip-box {
       background: #fff0f3;
       border: 1px dashed #fecdd3;
       border-radius: 12px;
-      padding: 10px 14px;
-      font-size: 12.5px;
+      padding: 10px 12px;
+      font-size: 12px;
       color: #881337;
-      margin-top: 12px;
+      margin-top: 10px;
       line-height: 1.5;
     }
 
@@ -248,10 +254,10 @@
       border: 1.5px solid #fecdd3;
       border-left: 5px solid #e11d48;
       border-radius: 12px;
-      padding: 10px 14px;
+      padding: 10px 12px;
       margin-bottom: 16px;
       display: none;
-      font-size: 13px;
+      font-size: 12.5px;
       color: #9f1239;
     }
 
@@ -259,12 +265,13 @@
       background: #ffffff;
       border: 1.5px solid #fecdd3;
       border-radius: 16px;
-      padding: 16px;
+      padding: 14px 10px;
       margin-bottom: 16px;
+      box-sizing: border-box;
     }
 
     .section-title {
-      font-size: 15px;
+      font-size: 14.5px;
       font-weight: bold;
       color: var(--primary-color);
       margin-bottom: 12px;
@@ -274,17 +281,17 @@
     }
 
     /* InBody 橫條圖樣式 */
-    .inbody-bar-group { margin-bottom: 14px; }
-    .inbody-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; font-weight: 600; }
+    .inbody-bar-group { margin-bottom: 12px; }
+    .inbody-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; font-weight: 600; }
     .inbody-track {
-      height: 20px;
+      height: 18px;
       background: #f3f4f6;
       border-radius: 10px;
       overflow: hidden;
       position: relative;
       display: flex;
     }
-    .inbody-zone { height: 100%; font-size: 11px; text-align: center; color: #6b7280; line-height: 20px; }
+    .inbody-zone { height: 100%; font-size: 10px; text-align: center; color: #6b7280; line-height: 18px; }
     .zone-low { width: 30%; background: #e5e7eb; }
     .zone-normal { width: 40%; background: #fde8e8; }
     .zone-high { width: 30%; background: #fee2e2; }
@@ -297,43 +304,43 @@
       transition: width 1s ease-out;
     }
 
-    /* SVG/DOM 9宮格分布圖樣式 */
+    /* 9宮格分布圖樣式 */
     .matrix-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(3, 1fr);
-      gap: 6px;
+      gap: 5px;
       width: 100%;
       aspect-ratio: 1.2 / 1;
       position: relative;
       background: #fecdd3;
-      padding: 6px;
-      border-radius: 14px;
+      padding: 5px;
+      border-radius: 12px;
       box-sizing: border-box;
     }
 
     .matrix-cell {
       background: #ffffff;
-      border-radius: 8px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: bold;
       color: #881337;
       text-align: center;
       position: relative;
-      padding: 4px;
+      padding: 2px;
     }
 
     .matrix-dot {
       position: absolute;
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       background-color: #e11d48;
-      border: 3px solid #ffffff;
+      border: 2px solid #ffffff;
       border-radius: 50%;
-      box-shadow: 0 0 12px rgba(225, 29, 72, 0.8);
+      box-shadow: 0 0 10px rgba(225, 29, 72, 0.8);
       z-index: 10;
       transform: translate(-50%, -50%);
       display: none;
@@ -342,22 +349,20 @@
     /* 趨勢圖表頁籤 */
     .tab-group-scroll {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       overflow-x: auto;
-      padding-bottom: 8px;
-      margin-bottom: 12px;
+      padding-bottom: 6px;
+      margin-bottom: 10px;
       scrollbar-width: thin;
     }
-    .tab-group-scroll::-webkit-scrollbar { height: 4px; }
-    .tab-group-scroll::-webkit-scrollbar-thumb { background: #fecdd3; border-radius: 4px; }
 
     .tab-btn {
       flex: 0 0 auto;
-      padding: 8px 14px;
+      padding: 6px 10px;
       border: 1.5px solid #fecdd3;
       background: #fff8f9;
-      border-radius: 10px;
-      font-size: 13px;
+      border-radius: 8px;
+      font-size: 12px;
       color: #881337;
       cursor: pointer;
       font-weight: 600;
@@ -372,42 +377,53 @@
 
     .chart-container {
       position: relative;
-      height: 260px;
+      height: 240px;
       width: 100%;
     }
 
-    /* 對比表格 */
+    /* 對比表格 RWD 滿版防止溢出 */
+    .compare-table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      box-sizing: border-box;
+    }
+
     .compare-table {
       width: 100%;
+      table-layout: fixed; /* 固定寬度，不破版 */
       border-collapse: collapse;
-      font-size: 13px;
+      font-size: 12px;
       text-align: center;
     }
+
     .compare-table th {
       background-color: #fff0f3;
       color: var(--primary-color);
       border: 1px solid #fecdd3;
-      padding: 8px;
+      padding: 6px 2px;
       font-weight: bold;
+      word-break: break-word;
     }
+
     .compare-table td {
       border: 1px solid #fecdd3;
-      padding: 8px;
+      padding: 6px 2px;
       font-weight: 500;
+      word-break: break-word;
     }
+
     .diff-good { color: var(--green-accent); font-weight: bold; }
     .diff-bad { color: var(--red-accent); font-weight: bold; }
 
-    /* 需求八：亞健康報告標籤 Tag 樣式 */
     .tag-symptom {
       display: inline-block;
       background-color: #fff0f3;
       color: #9f1239;
       border: 1px solid #fecdd3;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      margin: 3px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      margin: 2px;
       font-weight: 500;
     }
 
@@ -426,21 +442,22 @@
     .modal-content {
       background: #ffffff;
       border-radius: 20px;
-      padding: 20px;
+      padding: 18px;
       width: 100%;
-      max-width: 460px;
+      max-width: 440px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
       border: 2px solid #f3d2d9;
       max-height: 90vh;
       overflow-y: auto;
+      box-sizing: border-box;
     }
 
     .modal-header {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: bold;
       color: var(--primary-color);
       margin-bottom: 12px;
-      padding-bottom: 8px;
+      padding-bottom: 6px;
       border-bottom: 1.5px dashed #fecdd3;
       display: flex;
       justify-content: space-between;
@@ -454,19 +471,19 @@
       color: #fff;
       border: none;
       border-radius: 12px;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: bold;
       cursor: pointer;
-      margin-top: 14px;
+      margin-top: 12px;
     }
 
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 8px;
     }
     .form-group-modal {
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       text-align: left;
     }
   </style>
@@ -502,24 +519,24 @@
     </div>
   </div>
 
-  <!-- 需求一至需求六：健管週期日曆區塊 -->
+  <!-- 健管週期日曆區塊 (修訂為簡稱表頭) -->
   <div class="calendar-card" id="calendarSection">
     <div class="section-title">📅 健管週期日曆 (45 天總歷程)</div>
     
-    <!-- 需求五：今日狀態 -->
+    <!-- 今日狀態 -->
     <div class="today-status-banner" id="todayStatusBanner">
       載入健管天數狀態中...
     </div>
 
-    <!-- 日曆網格 (每週 7 天，星期一~星期日) -->
+    <!-- 日曆網格 (表頭改為簡稱：一~日) -->
     <div class="calendar-grid">
-      <div class="calendar-header-day">星期一</div>
-      <div class="calendar-header-day">星期二</div>
-      <div class="calendar-header-day">星期三</div>
-      <div class="calendar-header-day">星期四</div>
-      <div class="calendar-header-day">星期五</div>
-      <div class="calendar-header-day">星期六</div>
-      <div class="calendar-header-day">星期日</div>
+      <div class="calendar-header-day">一</div>
+      <div class="calendar-header-day">二</div>
+      <div class="calendar-header-day">三</div>
+      <div class="calendar-header-day">四</div>
+      <div class="calendar-header-day">五</div>
+      <div class="calendar-header-day">六</div>
+      <div class="calendar-header-day">日</div>
     </div>
     
     <div class="calendar-grid" id="calendarDaysGrid">
@@ -532,10 +549,10 @@
       <div class="legend-item"><div class="legend-box" style="background-color: var(--color-protein);"></div>蛋白日</div>
       <div class="legend-item"><div class="legend-box" style="background-color: var(--color-slim);"></div>纖體日</div>
       <div class="legend-item"><div class="legend-box" style="background-color: var(--color-metabolic);"></div>新陳代謝日</div>
-      <div class="legend-item">🌸 已有數據標記</div>
+      <div class="legend-item">🌸 已有數據</div>
     </div>
 
-    <!-- 需求六：小妖提示語 -->
+    <!-- 小妖提示語 -->
     <div class="xiaoyao-tip-box" id="xiaoyaoTipBox">
       🌸 小妖隨時提醒您維持充足水分與規律飲食喔！
     </div>
@@ -624,18 +641,18 @@
     </div>
   </div>
 
-  <!-- 需求七：任意兩期數據對比 -->
-  <div class="section-card">
+  <!-- 數據成效對比 (修正溢出並加上 GSAP 動畫) -->
+  <div class="section-card" id="compareCardSection">
     <div class="section-title">🔄 數據成效對比 (任意兩期比較)</div>
     
-    <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
-      <div style="flex: 1; min-width: 140px;">
+    <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 130px;">
         <label for="baseRecordSelect">📌 對比基準期：</label>
         <select id="baseRecordSelect" onchange="renderCompareTableFromSelection()">
           <option value="0">載入中...</option>
         </select>
       </div>
-      <div style="flex: 1; min-width: 140px;">
+      <div style="flex: 1; min-width: 130px;">
         <label for="targetRecordSelect">🎯 對比標的期：</label>
         <select id="targetRecordSelect" onchange="renderCompareTableFromSelection()">
           <option value="0">載入中...</option>
@@ -643,37 +660,39 @@
       </div>
     </div>
 
-    <table class="compare-table">
-      <thead>
-        <tr>
-          <th>項目</th>
-          <th id="thBaseHeader">基準值</th>
-          <th>差異變化</th>
-          <th id="thTargetHeader">標的值</th>
-        </tr>
-      </thead>
-      <tbody id="compareTableBody">
-        <!-- 動態渲染對比項目 -->
-      </tbody>
-    </table>
+    <div class="compare-table-wrapper">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th style="width: 25%;">項目</th>
+            <th style="width: 30%;" id="thBaseHeader">基準值</th>
+            <th style="width: 15%;">差異</th>
+            <th style="width: 30%;" id="thTargetHeader">標的值</th>
+          </tr>
+        </thead>
+        <tbody id="compareTableBody">
+          <!-- 動態渲染對比項目 -->
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <!-- 需求八：亞健康自我檢測報告區塊 -->
+  <!-- 亞健康自我檢測報告區塊 -->
   <div class="section-card" id="subhealthSection">
     <div class="section-title">🌸 亞健康自我檢測報告</div>
     
     <div id="subhealthContent">
-      <p style="font-size: 13px; color: #6b7280;">載入亞健康問卷紀錄中...</p>
+      <p style="font-size: 12.5px; color: #6b7280;">載入亞健康問卷紀錄中...</p>
     </div>
   </div>
 
   <!-- 頁尾標示 -->
-  <div style="text-align: center; font-size: 12px; color: #881337; margin-top: 10px;" id="attributionText">
+  <div style="text-align: center; font-size: 11.5px; color: #881337; margin-top: 10px;" id="attributionText">
     📊 資料來源：小妖健管系統
   </div>
 </div>
 
-<!-- 需求二：點擊日期彈出數據輸入 Modal -->
+<!-- 點擊日期彈出數據輸入 Modal -->
 <div class="modal-overlay" id="recordDataModal">
   <div class="modal-content">
     <div class="modal-header">
@@ -752,16 +771,16 @@
         <textarea id="modalMemo" rows="2" placeholder="當天身體狀況、運動、生理期等注意事項..."></textarea>
       </div>
 
-      <button type="submit" class="btn-action" id="btnModalSave" style="width: 100%; padding: 12px; margin-top: 10px;">儲存當天數據 🌸</button>
+      <button type="submit" class="btn-action" id="btnModalSave" style="width: 100%; padding: 10px; margin-top: 8px;">儲存當天數據 🌸</button>
     </form>
   </div>
 </div>
 
 <!-- 小妖客製化 Alert Modal -->
 <div class="modal-overlay" id="customAlertModal">
-  <div class="modal-content" style="max-width: 360px; text-align: center;">
-    <div style="font-size: 16px; font-weight: bold; color: var(--primary-color); margin-bottom: 10px;">🌸 小妖貼心提醒</div>
-    <div style="font-size: 14px; color: #881337; line-height: 1.6;" id="customAlertMsg"></div>
+  <div class="modal-content" style="max-width: 340px; text-align: center;">
+    <div style="font-size: 15px; font-weight: bold; color: var(--primary-color); margin-bottom: 8px;">🌸 小妖貼心提醒</div>
+    <div style="font-size: 13px; color: #881337; line-height: 1.6;" id="customAlertMsg"></div>
     <button class="btn-modal-close" onclick="closeCustomAlert()">我知道囉 🌸</button>
   </div>
 </div>
@@ -919,7 +938,6 @@
     });
   }
 
-  /* 需求一~六：日曆資料取得與渲染 */
   function fetchCalendarData() {
     fetch(GAS_WEB_APP_URL, {
       method: "POST",
@@ -938,7 +956,6 @@
     });
   }
 
-  /* 需求八：亞健康報告資料取得 */
   function fetchSubhealthReport() {
     fetch(GAS_WEB_APP_URL, {
       method: "POST",
@@ -973,7 +990,7 @@
     populateCompareDropdowns(records);
   }
 
-  /* 渲染健管週期日曆 (需求一~需求六) */
+  /* 渲染健管週期日曆與 GSAP 微動畫 */
   function renderCalendarUI() {
     if (!calendarData) return;
 
@@ -982,7 +999,6 @@
     const recordsSet = new Set(calendarData.records || []);
     const todayStr = calendarData.today;
 
-    // 1. 渲染今日狀態 Banner (需求五)
     const banner = document.getElementById("todayStatusBanner");
     if (calendarData.isPrepDayPeriod) {
       banner.innerHTML = `🌸 今天是準備日第 <strong>${calendarData.todayDayNumber}</strong> 天，好好放鬆身體，為健管旅程做好準備喔！`;
@@ -994,7 +1010,6 @@
       banner.innerHTML = `🌸 健管期程準備開始，加油喔！✨`;
     }
 
-    // 2. 渲染小妖動態提示語 (需求六)
     const tipBox = document.getElementById("xiaoyaoTipBox");
     if (calendarData.todayType === "準備日") {
       tipBox.innerText = "🌸 準備日：讓身體好好適應，喝足水份，為接下來的健管旅程做好準備喔！";
@@ -1008,18 +1023,15 @@
       tipBox.innerText = "🌸 保持好心情與足量喝水，看見更好的自己！✨";
     }
 
-    // 3. 排版建構 45/42 天網格日曆 (需求一)
     const grid = document.getElementById("calendarDaysGrid");
     grid.innerHTML = "";
 
     const totalDays = hasPrep ? 45 : 42;
     let currD = new Date(startD.getTime());
 
-    // 計算第 1 天的星期 (0=Sun, 1=Mon, ..., 6=Sat) 轉為 Monday-based
     var dayOfWeek = currD.getDay(); 
-    var offset = (dayOfWeek === 0) ? 6 : dayOfWeek - 1; // 星期一為 offset 0
+    var offset = (dayOfWeek === 0) ? 6 : dayOfWeek - 1; 
 
-    // 填充第一週前面的空白格子
     for (let i = 0; i < offset; i++) {
       const emptyCell = document.createElement("div");
       emptyCell.style.background = "transparent";
@@ -1030,7 +1042,6 @@
       const cellDStr = currD.toISOString().split('T')[0];
       const monthDayStr = `${currD.getMonth() + 1}/${currD.getDate()}`;
 
-      // 判斷日類型與背景顏色
       let dayTypeShort = "";
       let bgColor = "var(--color-protein)";
 
@@ -1038,7 +1049,6 @@
         dayTypeShort = "準備";
         bgColor = "var(--color-prep)";
       } else {
-        // 健管天數從 1 起算
         const cycleDayNum = hasPrep ? (d - 3) : d;
         if (cycleDayNum >= 1 && cycleDayNum <= 3) { dayTypeShort = "蛋白"; bgColor = "var(--color-protein)"; }
         else if (cycleDayNum >= 4 && cycleDayNum <= 7) { dayTypeShort = "纖體"; bgColor = "var(--color-slim)"; }
@@ -1058,12 +1068,10 @@
       cell.className = "calendar-cell";
       cell.style.backgroundColor = bgColor;
 
-      // 需求四：今天標記
       if (cellDStr === todayStr) {
         cell.classList.add("is-today");
       }
 
-      // 需求三：已有數據標記
       let hasDataHtml = "";
       if (recordsSet.has(cellDStr)) {
         hasDataHtml = `<span class="has-data-badge">🌸</span>`;
@@ -1075,7 +1083,6 @@
         <div class="calendar-cell-type">${dayTypeShort}</div>
       `;
 
-      // 需求二：點擊日期彈出 Modal 輸入視窗
       cell.onclick = function() {
         openRecordModal(cellDStr);
       };
@@ -1083,14 +1090,22 @@
       grid.appendChild(cell);
       currD.setDate(currD.getDate() + 1);
     }
+
+    // GSAP 日曆格子登場動畫
+    gsap.from("#calendarDaysGrid .calendar-cell", {
+      duration: 0.4,
+      opacity: 0,
+      scale: 0.8,
+      y: 8,
+      stagger: 0.012,
+      ease: "power1.out"
+    });
   }
 
-  /* 需求二：開啟彈出輸入視窗 */
   function openRecordModal(targetDateStr) {
     document.getElementById("modalRecordDate").value = targetDateStr;
     document.getElementById("modalHeight").value = dashboardData && dashboardData.student ? dashboardData.student.height : 165;
     
-    // 若當天已有數據，自動預載
     if (dashboardData && dashboardData.records) {
       const existing = dashboardData.records.find(r => r.recordDate === targetDateStr);
       if (existing) {
@@ -1192,7 +1207,6 @@
     });
   }
 
-  /* 需求七：任意兩期數據對比下拉選單處理 */
   function populateCompareDropdowns(records) {
     const baseSel = document.getElementById("baseRecordSelect");
     const targetSel = document.getElementById("targetRecordSelect");
@@ -1220,13 +1234,13 @@
       targetSel.appendChild(tOpt);
     });
 
-    // 預設值：基準期為第 1 筆 (index 0)，標的期為最後一筆
     baseSel.value = 0;
     targetSel.value = records.length - 1;
 
     renderCompareTableFromSelection();
   }
 
+  /* 渲染對比表格與 GSAP 逐欄登場動畫 */
   function renderCompareTableFromSelection() {
     if (!dashboardData || !dashboardData.records) return;
     const records = dashboardData.records;
@@ -1269,17 +1283,25 @@
       `;
       tbody.appendChild(tr);
     });
+
+    // GSAP 表格行進場動畫
+    gsap.from("#compareTableBody tr", {
+      duration: 0.35,
+      opacity: 0,
+      x: -12,
+      stagger: 0.05,
+      ease: "power2.out"
+    });
   }
 
-  /* 需求八：渲染亞健康自我檢測報告區塊 */
   function renderSubhealthReportUI() {
     const container = document.getElementById("subhealthContent");
 
     if (!subhealthReportData || !subhealthReportData.hasReport) {
       container.innerHTML = `
-        <div style="background-color:#fff0f3; border:1px dashed #fecdd3; border-radius:12px; padding:16px; text-align:center;">
-          <p style="font-size:14px; color:#881337; margin-bottom:12px;">🌸 小妖發現您還沒做過亞健康自我檢測喔！點擊下方按鈕，花 3 分鐘了解自己的身體狀態吧！✨</p>
-          <a href="https://amwayfans.github.io/xiaoyao/index.html?prefill_LineID=${encodeURIComponent(currentStudentId)}" target="_blank" style="display:inline-block; background:linear-gradient(135deg, #be123c 0%, #fb7185 100%); color:#fff; padding:8px 18px; border-radius:20px; font-weight:bold; text-decoration:none; font-size:13px;">📝 前往做亞健康自我檢測</a>
+        <div style="background-color:#fff0f3; border:1px dashed #fecdd3; border-radius:12px; padding:14px; text-align:center;">
+          <p style="font-size:13px; color:#881337; margin-bottom:10px;">🌸 小妖發現您還沒做過亞健康自我檢測喔！點擊下方按鈕，花 3 分鐘了解自己的身體狀態吧！✨</p>
+          <a href="https://amwayfans.github.io/xiaoyao/index.html?prefill_LineID=${encodeURIComponent(currentStudentId)}" target="_blank" style="display:inline-block; background:linear-gradient(135deg, #be123c 0%, #fb7185 100%); color:#fff; padding:7px 16px; border-radius:18px; font-weight:bold; text-decoration:none; font-size:12.5px;">📝 前往做亞健康自我檢測</a>
         </div>
       `;
       return;
@@ -1301,18 +1323,18 @@
     }
 
     container.innerHTML = `
-      <div style="background:#fff8f9; border:1px solid #fecdd3; border-radius:12px; padding:14px; font-size:13px; color:#881337; line-height:1.6;">
+      <div style="background:#fff8f9; border:1px solid #fecdd3; border-radius:12px; padding:12px; font-size:12.5px; color:#881337; line-height:1.6;">
         <div><strong>📅 檢測日期：</strong>${report.surveyDate}</div>
-        <div style="margin-top:6px;"><strong>👑 缺乏營養素 Top 3：</strong><span style="color:#e11d48; font-weight:bold;">${report.top3Nutrients || '無'}</span></div>
-        <div style="margin-top:10px;"><strong>📋 本次勾選狀況：</strong></div>
+        <div style="margin-top:4px;"><strong>👑 缺乏營養素 Top 3：</strong><span style="color:#e11d48; font-weight:bold;">${report.top3Nutrients || '無'}</span></div>
+        <div style="margin-top:8px;"><strong>📋 本次勾選狀況：</strong></div>
         <div style="margin-top:4px;">${tagsHtml}</div>
 
-        <div style="margin-top:14px; border-top:1px dashed #fecdd3; padding-top:10px;">
+        <div style="margin-top:12px; border-top:1px dashed #fecdd3; padding-top:8px;">
           <label for="subhealthSymptomSelect">🔎 症狀對應營養素查詢：</label>
           <select id="subhealthSymptomSelect" onchange="onSubhealthSymptomChange()" style="margin-top:4px;">
             ${selectOptionsHtml}
           </select>
-          <div id="subhealthNutrientResult" style="margin-top:8px; background:#ffffff; border:1px solid #fecdd3; border-radius:8px; padding:8px 12px; font-size:12px; color:#9f1239; min-height:36px; display:flex; align-items:center;">
+          <div id="subhealthNutrientResult" style="margin-top:8px; background:#ffffff; border:1px solid #fecdd3; border-radius:8px; padding:8px 10px; font-size:11.5px; color:#9f1239; min-height:36px; display:flex; align-items:center;">
             請從上方選單選擇狀況以查詢建議補充營養素
           </div>
         </div>
@@ -1337,7 +1359,6 @@
     }
   }
 
-  /* 異常數據偵測 */
   function checkDataAnomalies(records) {
     const box = document.getElementById("anomalyAlertBox");
     if (!records || records.length < 2) {
@@ -1367,7 +1388,6 @@
     }
   }
 
-  /* InBody 條形圖 */
   function renderInBodyBarsBMI(student, latest) {
     const w = latest.weight || 0;
     const bmi = latest.bmi || 22;
@@ -1397,7 +1417,6 @@
     gsap.to("#barFat", { width: fatPct + "%", duration: 1 });
   }
 
-  /* 9 宮格體型圖 */
   function renderMatrixPlotDOM(student, latest) {
     const isMale = student.gender === "男";
     const bmi = latest.bmi || 22;
@@ -1430,7 +1449,6 @@
     }
   }
 
-  /* 趨勢圖 */
   function switchTrend(metric) {
     currentTrendMetric = metric;
     document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
@@ -1485,7 +1503,7 @@
           backgroundColor: 'rgba(254, 205, 211, 0.3)',
           fill: true,
           tension: 0.3,
-          pointRadius: 5,
+          pointRadius: 4,
           pointBackgroundColor: color
         }]
       },
@@ -1499,7 +1517,6 @@
     gsap.from("#trendChart", { opacity: 0, y: 10, duration: 0.4 });
   }
 
-  /* CSV 匯出 */
   function exportToCSV() {
     if (!dashboardData || !dashboardData.records) {
       showCustomAlert("無數據可供匯出！");
@@ -1522,7 +1539,6 @@
     document.body.removeChild(link);
   }
 
-  /* 傳送 HTML 報告 Email */
   function sendReportEmail() {
     if (!currentStudentId || !currentCycleId) {
       showCustomAlert("請先選取有效的學員與期程！");
