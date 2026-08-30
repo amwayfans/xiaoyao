@@ -20,6 +20,7 @@
         
         .tab-btn.active { background-color: #e5989b; color: white; border-color: #e5989b; }
         .checkbox-card.checked { border-color: #b5838d; background-color: #fff0f3; box-shadow: 0 4px 8px -1px rgba(181, 131, 141, 0.25); }
+        .checkbox-card.disabled { opacity: 0.6; cursor: not-allowed !important; pointer-events: none; }
         
         .pink-gold-card {
             background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
@@ -132,6 +133,17 @@
                 <span id="coachBanner" class="text-rose-800 font-bold text-xs sm:text-sm">小妖專屬健康照護 🌸</span>
             </div>
 
+            <!-- 🌸 [新增] 問卷狀態無效時顯示的醒目提示區塊 (預設隱藏) -->
+            <div id="validationNoticeBlock" class="hidden bg-rose-100/90 border-2 border-rose-400 p-5 rounded-2xl shadow-md text-rose-950 space-y-2">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-circle-xmark text-rose-600 text-2xl"></i>
+                    <h3 class="font-bold text-lg font-serif-tc text-rose-900">問卷無法填寫與提交</h3>
+                </div>
+                <p id="validationNoticeMessage" class="text-sm sm:text-base text-rose-800 font-medium pl-9">
+                    此問卷目前無法使用。
+                </p>
+            </div>
+
             <!-- 控制列：搜尋與統計 -->
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-rose-50/30 p-4 rounded-2xl border border-rose-100">
                 <div class="relative w-full sm:w-80">
@@ -161,15 +173,12 @@
 
             <!-- 📊 統計報表與小妖建議區塊 (預設隱藏) -->
             <section id="reportSection" class="hidden space-y-8 pt-8 border-t-2 border-rose-100 mt-10">
-                
-                <!-- 成功提示 -->
                 <div class="bg-rose-50 border border-rose-200 p-5 rounded-2xl text-center">
                     <i class="fa-solid fa-circle-check text-rose-600 text-4xl mb-2"></i>
                     <h3 class="text-xl font-bold text-rose-950 font-serif-tc">檢測完成！分析報告已發送至您的信箱！</h3>
                     <p class="text-sm text-rose-700 mt-1">小妖已經將優美的健康分析報告發送到您的電子郵件，可以直接開啟閱讀喔 🌸</p>
                 </div>
 
-                <!-- 🌸 小妖迎賓與重點宣導區塊 (優化：圓形大頭貼與對話框) -->
                 <div class="pink-gold-card p-6 sm:p-8 rounded-3xl relative overflow-hidden">
                     <div class="space-y-6">
                         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-rose-200 pb-4">
@@ -181,7 +190,6 @@
                                     優先補充：缺乏營養素 Top 3
                                 </h2>
                             </div>
-                            <!-- 🌸 精緻圓形大頭貼 -->
                             <div class="flex items-center gap-3 bg-white/80 p-2 pr-4 rounded-full border border-rose-200 shadow-sm">
                                 <img src="images/xiaoyao-advice.png" alt="小妖" class="w-14 h-14 rounded-full object-cover border-2 border-rose-400 shadow-md" onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/4140/4140047.png';">
                                 <div>
@@ -191,14 +199,12 @@
                             </div>
                         </div>
 
-                        <!-- 小妖建議對話氣泡 -->
                         <div class="speech-bubble p-4 sm:p-5 w-full text-sm sm:text-base text-rose-900 leading-relaxed shadow-sm">
                             <p id="xiaoyaoSpeech" class="font-medium">
                                 「太棒了！小妖已經幫您精算好最需要的營養方案囉！優先補充第 1 名營養素，讓您由內而外綻放美麗與健康 🌸」
                             </p>
                         </div>
 
-                        <!-- Top 3 卡片清單 -->
                         <div class="space-y-4">
                             <div id="heroTop1Card" class="hero-gold-card p-6 rounded-2xl relative"></div>
                             <div id="subTop23Container" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
@@ -206,7 +212,6 @@
                     </div>
                 </div>
 
-                <!-- 🔽 亞健康症狀對應營養素下拉查詢區塊 -->
                 <div class="pink-gold-card p-6 rounded-3xl space-y-4">
                     <div class="flex items-center gap-2 border-b border-rose-200 pb-3">
                         <i class="fa-solid fa-sliders text-rose-600 text-xl"></i>
@@ -339,6 +344,7 @@
         let currentCoachName = "";
         let selectedSymptomIds = new Set();
         let currentCategory = "全部分類";
+        let isFormDisabled = false; // 🌸 控制表單欄位唯讀/阻擋狀態
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(type) {
@@ -378,7 +384,7 @@
 
             if (typeof liff !== 'undefined') {
                 try {
-                    await liff.init({ liffId: "YOUR_LIFF_ID" });
+                    await liff.init({ liffId: "2011060767-2UgRtsXI" });
                     if (liff.isLoggedIn()) {
                         const profile = await liff.getProfile();
                         if (profile && profile.userId) {
@@ -409,14 +415,81 @@
             }
         }
 
+        // 🌸 核心新增功能：頁面載入時驗證問卷狀態 (verifySurveyStatus)
+        async function verifySurveyStatusOnLoad() {
+            if (!currentSurveyId || currentSurveyId.trim() === "") {
+                return; // 若沒有 survey_id 參數，代表為通用網址，維持正常可填寫狀態
+            }
+
+            try {
+                const response = await fetch(gasWebhookUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({
+                        action: "verify_survey",
+                        survey_id: currentSurveyId.trim()
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result && result.valid === false) {
+                    // 驗證失敗：觸發唯讀與阻擋模式
+                    disableSurveyForm(result.msg || "此問卷已經填寫完畢或已過期作廢囉！");
+                }
+            } catch (err) {
+                console.error("預檢問卷狀態出錯:", err);
+            }
+        }
+
+        // 🌸 核心新增功能：阻擋問卷填寫並顯示醒目提示
+        function disableSurveyForm(msg) {
+            isFormDisabled = true;
+
+            // 1. 顯示醒目警告訊息區塊
+            const noticeBlock = document.getElementById("validationNoticeBlock");
+            const noticeMessage = document.getElementById("validationNoticeMessage");
+            if (noticeBlock && noticeMessage) {
+                noticeMessage.innerText = msg;
+                noticeBlock.classList.remove("hidden");
+            }
+
+            // 2. 鎖定基本資料輸入框
+            const nameInput = document.getElementById("customerNameInput");
+            const emailInput = document.getElementById("customerEmailInput");
+            if (nameInput) nameInput.disabled = true;
+            if (emailInput) emailInput.disabled = true;
+
+            // 3. 鎖定控制列（搜尋與重置按鈕）
+            const searchInput = document.getElementById("searchInput");
+            const resetBtn = document.getElementById("resetBtn");
+            if (searchInput) searchInput.disabled = true;
+            if (resetBtn) resetBtn.disabled = true;
+
+            // 4. 鎖定完成提交按鈕
+            const analyzeBtn = document.getElementById("analyzeBtn");
+            if (analyzeBtn) {
+                analyzeBtn.disabled = true;
+                analyzeBtn.className = "bg-gray-400 text-white font-bold px-10 py-4 rounded-2xl shadow cursor-not-allowed text-lg font-serif-tc opacity-70";
+                analyzeBtn.innerHTML = `<i class="fa-solid fa-lock mr-2"></i> 問卷已填寫完畢或已失效`;
+            }
+
+            // 5. 重新渲染症狀區塊以套用禁用狀態
+            renderSymptoms();
+        }
+
         document.addEventListener("DOMContentLoaded", async () => {
             await resolveSurveyParams();
             initTabs();
             renderSymptoms();
 
+            // 🌸 頁面初始化載入時立即進行後端問卷狀態驗證
+            await verifySurveyStatusOnLoad();
+
             document.getElementById("searchInput").addEventListener("input", renderSymptoms);
 
             document.getElementById("resetBtn").onclick = () => {
+                if (isFormDisabled) return; // 若已被阻擋則不回應點擊
                 playSound('click');
                 if (selectedSymptomIds.size > 0 && confirm("確定要清空所有已勾選的狀況嗎？")) {
                     selectedSymptomIds.clear();
@@ -494,7 +567,9 @@
                 const card = document.createElement("div");
                 const tagClass = getCategoryTagClass(item.category);
                 
-                card.className = `checkbox-card cursor-pointer border rounded-2xl p-4 flex items-center justify-between bg-white hover:border-rose-300 transition-all ${isChecked ? 'checked' : 'border-rose-100'}`;
+                // 🌸 若問卷失效，套用 disabled 樣式
+                const cursorStyle = isFormDisabled ? 'disabled' : 'cursor-pointer hover:border-rose-300';
+                card.className = `checkbox-card ${cursorStyle} border rounded-2xl p-4 flex items-center justify-between bg-white transition-all ${isChecked ? 'checked' : 'border-rose-100'}`;
                 card.innerHTML = `
                     <div class="flex items-center gap-3.5">
                         <div class="w-5 h-5 rounded-md border ${isChecked ? 'bg-rose-600 border-rose-600 text-white' : 'border-rose-300 bg-rose-50'} flex items-center justify-center text-xs font-bold">
@@ -507,6 +582,7 @@
                     </div>
                 `;
                 card.onclick = () => {
+                    if (isFormDisabled) return; // 🌸 阻擋填寫狀態下禁止選取
                     playSound('click');
                     if (selectedSymptomIds.has(item.id)) selectedSymptomIds.delete(item.id);
                     else selectedSymptomIds.add(item.id);
@@ -518,6 +594,11 @@
         }
 
         async function submitAndAnalyze() {
+            if (isFormDisabled) {
+                alert("此問卷已經無法提交囉！");
+                return;
+            }
+
             const customerName = document.getElementById("customerNameInput").value.trim();
             const customerEmail = document.getElementById("customerEmailInput").value.trim();
 
@@ -570,7 +651,6 @@
             document.getElementById("reportSection").classList.remove("hidden");
             document.getElementById("reportSection").scrollIntoView({ behavior: 'smooth' });
 
-            // 🌸 發送資料至 GAS，GAS 將會自動發送報告至學員 Email，並同步寄送副本給教練
             const payloadData = {
                 action: "save_subhealth_survey",
                 LineID: currentLineId,
@@ -639,7 +719,6 @@
                 subContainer.appendChild(card);
             });
 
-            // 🌟 GSAP 動畫：No.1 營養素卡片彈跳登場與動態效果
             if (typeof gsap !== 'undefined') {
                 gsap.killTweensOf("#heroTop1Card, #top1TitleText, #top1Badge");
 
