@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KWGT 訓練 Widget 設定指南</title>
+<style>
+  :root { --bg:#12141A; --card:#1B1E26; --fg:#E8EAED; --dim:#9CA3AF; --accent:#7C3AED; --code:#0E1015; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:18px 16px 60px; background:var(--bg); color:var(--fg);
+         font-family:-apple-system,"Noto Sans TC","PingFang TC",sans-serif;
+         font-size:16px; line-height:1.75; max-width:820px; margin:0 auto; }
+  h1 { font-size:24px; margin:6px 0 18px; color:var(--fg); }
+  h2 { font-size:20px; margin:30px 0 10px; padding-top:14px; border-top:1px solid #242833; color:var(--accent); }
+  h3 { font-size:17px; margin:22px 0 8px; color:#C4B5FD; }
+  p, li { color:var(--fg); }
+  strong { color:#fff; }
+  code { background:var(--code); padding:2px 6px; border-radius:5px; font-size:14px;
+          color:#A5B4FC; font-family:ui-monospace,Menlo,monospace; word-break:break-all; }
+  pre { background:var(--code); border:1px solid #242833; border-radius:10px; padding:12px 14px;
+         overflow-x:auto; position:relative; margin:10px 0; }
+  pre code { background:none; padding:0; color:#93C5FD; font-size:13px; line-height:1.6; white-space:pre-wrap; word-break:break-all; }
+  table { border-collapse:collapse; width:100%; margin:12px 0; font-size:15px; display:block; overflow-x:auto; }
+  th, td { border:1px solid #2A2F3A; padding:8px 10px; text-align:left; vertical-align:top; }
+  th { background:#1B1E26; color:var(--fg); font-weight:600; }
+  td { color:var(--dim); }
+  blockquote { border-left:3px solid var(--accent); margin:12px 0; padding:8px 14px;
+                background:var(--card); color:var(--dim); border-radius:0 8px 8px 0; }
+  hr { border:none; border-top:1px solid #242833; margin:26px 0; }
+  a { color:var(--accent); }
+  ul, ol { padding-left:22px; }
+  .copy { position:absolute; top:8px; right:8px; background:#242833; color:var(--dim);
+           border:none; border-radius:6px; padding:4px 9px; font-size:12px; cursor:pointer; }
+  .copy:active { background:var(--accent); color:#fff; }
+</style>
+</head>
+<body>
+<h1 id="kwgt-widget">KWGT 訓練 Widget 設定指南</h1>
+<ul>
+<li>目標裝置：vivo X100 Pro（OriginOS）</li>
+<li>資料源：https://amwayfans.github.io/xiaoyao/week.json（已上線，2026-10-27 驗證 HTTP 200）</li>
+<li>頭像：https://amwayfans.github.io/xiaoyao/images/xiaoyao-avatar-square-256.png</li>
+<li>設計規格：<code>reports/SPEC-訓練Widget-2026-10-27.md</code></li>
+</ul>
+<hr />
+<h2 id="0">0. 前置</h2>
+<ol>
+<li>安裝 <strong>KWGT</strong>（Kustom Widget Maker，免費）</li>
+<li>購買 <strong>KWGT Pro</strong>（約 NT$100–200）—— Flows、匯入、部分功能需要</li>
+<li>確認版本 ≥ <strong>3.77b435216</strong>（Android 15 有舊版停更 bug）</li>
+</ol>
+<p><strong>天數對照（重要，後面公式全靠它）</strong></p>
+<p>KWGT 的 <code>df(E)</code> 回傳 ISO 星期：<strong>1＝週一、2＝週二 … 7＝週日</strong>。</p>
+<hr />
+<h2 id="1-widget">1. 建立 Widget</h2>
+<ol>
+<li>長按桌面空白處 → 「小工具」→ 找 KWGT → 選 <strong>4×3</strong></li>
+<li>放上桌面後點它 → 進入 KWGT 編輯器</li>
+<li>右上角「預設」→ 新建 → 命名 <code>訓練週表</code></li>
+</ol>
+<hr />
+<h2 id="2">2. 元素清單（依序加入）</h2>
+<blockquote>
+<p>座標是相對值（0–1），數值只是起點，之後拖曳微調。
+每個「文字」元素的文字內容，把公式貼進 <strong>Text → 公式（計算機圖示）</strong> 欄位。</p>
+</blockquote>
+<h3 id="2-1">2-1 背景</h3>
+<ul>
+<li>元素：<strong>形狀（Shape）</strong></li>
+<li>尺寸：填滿整個 widget（W 1.00 / H 1.00）</li>
+<li>顏色：<code>#12141A</code></li>
+<li>圓角（Corner）：<code>20</code></li>
+</ul>
+<h3 id="2-2">2-2 頭像</h3>
+<ul>
+<li>元素：<strong>圖片（Image）</strong></li>
+<li>位置：X <code>0.03</code>、Y <code>0.10</code>、寬 <code>0.16</code>、高（自動等比）</li>
+<li>圖片來源 → 選 <strong>URL / Bitmap formula</strong>，貼：</li>
+</ul>
+<pre><code>https://amwayfans.github.io/xiaoyao/images/xiaoyao-avatar-square-256.png
+</code></pre>
+<ul>
+<li>圓角：<code>24</code>（讓它與卡片一致）</li>
+<li><strong>點擊動作</strong>：見 §4</li>
+</ul>
+<h3 id="2-3">2-3 標題「本週訓練」</h3>
+<ul>
+<li>元素：<strong>文字</strong></li>
+<li>位置：X <code>0.22</code>、Y <code>0.10</code></li>
+<li>字級：<code>15</code></li>
+<li>顏色：<code>#E8EAED</code></li>
+<li>內容：<code>本週訓練</code></li>
+</ul>
+<h3 id="2-4">2-4 週次（右上）</h3>
+<ul>
+<li>元素：<strong>文字</strong></li>
+<li>位置：X <code>0.72</code>、Y <code>0.10</code></li>
+<li>字級：<code>13</code></li>
+<li>顏色：<code>#8A8F98</code></li>
+<li>內容（取 <code>2026-W44</code> 的後 3 碼 → <code>W44</code>）：</li>
+</ul>
+<pre><code>$tc(reg, wg(&quot;https://amwayfans.github.io/xiaoyao/week.json&quot;, json, .week), &quot;.*-&quot;, &quot;&quot;)$
+</code></pre>
+<h3 id="2-5-7">2-5 星期列（7 個小字）</h3>
+<ul>
+<li>元素：<strong>文字</strong> ×7</li>
+<li>Y 統一 <code>0.40</code>、字級 <code>12</code>、顏色 <code>#8A8F98</code></li>
+<li>X 位置：<code>0.06 / 0.19 / 0.32 / 0.45 / 0.58 / 0.71 / 0.84</code></li>
+<li>內容：<code>一</code> <code>二</code> <code>三</code> <code>四</code> <code>五</code> <code>六</code> <code>日</code></li>
+</ul>
+<h3 id="2-6-7">2-6 訓練列（7 個，會變色）</h3>
+<ul>
+<li>元素：<strong>文字</strong> ×7</li>
+<li>Y 統一 <code>0.52</code>、字級 <code>14</code>、<strong>粗體</strong></li>
+<li>X 位置同上</li>
+<li>★ 顏色用公式（今天紫色、訓練日白色、休息日暗灰）：</li>
+</ul>
+<p>週一那格：</p>
+<pre><code>$if(df(E)=1, &quot;#7C3AED&quot;, if(wg(&quot;https://amwayfans.github.io/xiaoyao/week.json&quot;, json, .mon)=&quot;休息&quot;, &quot;#4A4F58&quot;, &quot;#E8EAED&quot;))$
+</code></pre>
+<p>週二那格（把 <code>df(E)=1</code> 改成 <code>df(E)=2</code>、<code>.mon</code> 改成 <code>.tue</code>）：</p>
+<pre><code>$if(df(E)=2, &quot;#7C3AED&quot;, if(wg(&quot;https://amwayfans.github.io/xiaoyao/week.json&quot;, json, .tue)=&quot;休息&quot;, &quot;#4A4F58&quot;, &quot;#E8EAED&quot;))$
+</code></pre>
+<p>依此類推：週三 <code>df(E)=3</code> + <code>.wed</code>、週四 <code>df(E)=4</code> + <code>.thu</code>、週五 <code>df(E)=5</code> + <code>.fri</code>、週六 <code>df(E)=6</code> + <code>.sat</code>、週日 <code>df(E)=7</code> + <code>.sun</code></p>
+<ul>
+<li>★ 文字內容（顯示「胸」就夠，太長會擠）：用 <code>tc(reg)</code> 截短</li>
+</ul>
+<p>週二那格內容：</p>
+<pre><code>$tc(reg, wg(&quot;https://amwayfans.github.io/xiaoyao/week.json&quot;, json, .tue), &quot;＋.*&quot;, &quot;&quot;)$
+</code></pre>
+<p>（<code>胸＋三頭</code> → <code>胸</code>；<code>休息</code> 保持 <code>休息</code>；<code>背＋肩</code> → <code>背</code>）</p>
+<h3 id="2-7">2-7 今日大字（底部）</h3>
+<ul>
+<li>元素：<strong>文字</strong></li>
+<li>位置：X <code>0.06</code>、Y <code>0.76</code></li>
+<li>字級：<code>18</code>、粗體、顏色 <code>#E8EAED</code></li>
+<li>內容：</li>
+</ul>
+<pre><code>今天 · $if(df(E)=1, wg(&quot;https://amwayfans.github.io/xiaoyao/week.json&quot;, json, .mon), if(df(E)=2, wg(&quot;https://amwayfans.github.io/xiaoyao/week.json&quot;, json, .tue), if(df(E)=3, wg(&quot;https://amwayfans.github.io/xiaoyao/week.json&quot;, json, .wed), if(df(E)=4, wg(&quot;https://amwayfans.github.io/xiaoyao/week.json&quot;, json, .thu), if(df(E)=5, wg(&quot;https://amwayfans.github.io/xiaoyao/week.json&quot;, json, .fri), if(df(E)=6, wg(&quot;https://amwayfans.github.io/xiaoyao/week.json&quot;, json, .sat), wg(&quot;https://amwayfans.github.io/xiaoyao/week.json&quot;, json, .sun)))))))$
+</code></pre>
+<h3 id="2-8">2-8 更新狀態（極小字，右下）</h3>
+<ul>
+<li>元素：<strong>文字</strong></li>
+<li>位置：X <code>0.72</code>、Y <code>0.88</code></li>
+<li>字級：<code>9</code>、顏色 <code>#4A4F58</code></li>
+<li>內容（顯示資料時間的日期）：</li>
+</ul>
+<pre><code>$df(&quot;MM/dd&quot;, tc(reg, wg(&quot;https://amwayfans.github.io/xiaoyao/week.json&quot;, json, .updated), &quot;T.*&quot;, &quot;&quot;))$
+</code></pre>
+<hr />
+<h2 id="3">3. 刷新設定（關鍵）</h2>
+<p>KWGT 編輯器 → 右上「設定」→ <strong>更新模式</strong>：</p>
+<ul>
+<li>選 <strong>自動</strong></li>
+<li>間隔：<code>60</code> 分鐘</li>
+<li>勾選「<strong>允許通知</strong>」（背景更新必要）</li>
+</ul>
+<blockquote>
+<p>資料一天只變一次，60 分鐘足夠。想更省電可設 180 分鐘，跨日時 Widget 會晚一點切換。</p>
+</blockquote>
+<hr />
+<h2 id="4">4. 點擊動作</h2>
+<h3 id="4-1-telegram">4-1 頭像 → 開 Telegram</h3>
+<ol>
+<li>選中頭像 → <strong>觸控（Touch）</strong></li>
+<li>動作類型：<strong>開啟連結</strong></li>
+<li>URL：<code>https://t.me/</code>（或你自己的 Telegram 使用者名稱連結，例如 <code>https://t.me/你的帳號</code>）</li>
+</ol>
+<h3 id="4-2">4-2 每一天的格子 → 開該日處方</h3>
+<p>需要 7 個<strong>透明矩形</strong>蓋在每天的格子上（W <code>0.12</code> / H <code>0.18</code>，填色透明度 0）：</p>
+<p>以週二為例：</p>
+<ol>
+<li>加一個形狀，顏色透明（Alpha 0）</li>
+<li>位置對齊週二那一欄</li>
+<li>觸控 → 開啟連結 → URL 填公式：</li>
+</ol>
+<pre><code>$wg(&quot;https://amwayfans.github.io/xiaoyao/week.json&quot;, json, .tue_url)$
+</code></pre>
+<p>其餘六天把 <code>.tue_url</code> 換成 <code>.mon_url</code> / <code>.wed_url</code> / <code>.thu_url</code> / <code>.fri_url</code> / <code>.sat_url</code> / <code>.sun_url</code></p>
+<h3 id="4-3">4-3 其餘空白處</h3>
+<p>不設動作（避免誤觸）。</p>
+<hr />
+<h2 id="5-vivo-x100-pro">5. vivo X100 Pro 必做四步</h2>
+<p>OriginOS 會殺背景，<strong>四步缺一不可</strong>：</p>
+<ol>
+<li>設定 → 電池 → <strong>背景耗電管理</strong> → KWGT → 允許背景高耗電</li>
+<li>設定 → 應用程式 → 應用程式管理 → KWGT → <strong>權限 → 自啟動</strong>（開）</li>
+<li>開最近任務 → 長按 KWGT 卡片 → <strong>鎖定</strong>（出現鎖頭）</li>
+<li>KWGT 內 → 設定 → 更新模式「自動」＋ 允許通知</li>
+</ol>
+<p>若仍停更：KWGT → 設定 → 強制刷新；再不行就重裝最新版。</p>
+<hr />
+<h2 id="6">6. 驗收</h2>
+<ul>
+<li>[ ] 桌面 4×3 Widget 顯示 7 天</li>
+<li>[ ] 休息日為暗灰、訓練日白色、<strong>今天紫色</strong></li>
+<li>[ ] 底部「今天 · 胸＋三頭」（或當天內容）</li>
+<li>[ ] 頭像正常顯示、點它開 Telegram</li>
+<li>[ ] 點週五格子 → 開 <code>day/fri.html</code>（腿的處方）</li>
+<li>[ ] 隔天早上自動切換（跨日測試）</li>
+</ul>
+<hr />
+<h2 id="7">7. 已知限制</h2>
+<ol>
+<li>每次刷新會打一次網路（657 bytes），斷網時顯示上一次的結果</li>
+<li>臨時改期要告訴小妖改計畫檔，隔天 00:05 自動反映；當天改需手動觸發 <code>gen_widget.py</code> 再 push</li>
+<li>KWGT 免費版限制部分功能，Flows 與匯入需 Pro</li>
+</ol>
+<hr />
+<h2 id="8">8. 疑難排解</h2>
+<table>
+<thead>
+<tr>
+<th>症狀</th>
+<th>處理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>顯示空白或 <code>undefined</code></td>
+<td>檢查 URL 能否在手機瀏覽器打開 <code>week.json</code></td>
+</tr>
+<tr>
+<td>資料停在舊的</td>
+<td>關閉電池優化、鎖定背景（§5）</td>
+</tr>
+<tr>
+<td>中文沒顯示</td>
+<td>元素字型改用系統字型，或設 <code>Noto Sans TC</code></td>
+</tr>
+<tr>
+<td>頭像不顯示</td>
+<td>用瀏覽器開圖片 URL 確認；KWGT 圖片公式不要加引號</td>
+</tr>
+<tr>
+<td>今天高亮錯位</td>
+<td>確認用 <code>df(E)</code>（ISO 1=週一），不是 <code>df(u)</code></td>
+</tr>
+</tbody>
+</table>
+<script>
+document.querySelectorAll('pre').forEach(function(pre){
+  var b=document.createElement('button');
+  b.className='copy'; b.textContent='複製';
+  b.onclick=function(){
+    var t=pre.querySelector('code')?pre.querySelector('code').innerText:pre.innerText;
+    navigator.clipboard.writeText(t).then(function(){
+      b.textContent='已複製'; setTimeout(function(){b.textContent='複製';},1500);
+    });
+  };
+  pre.appendChild(b);
+});
+</script>
+</body>
+</html>
